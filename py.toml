@@ -1,0 +1,58 @@
+[tool.poetry]
+name = ""
+version = ""
+description = ""
+authors = ["StakeWise Labs <info@stakewise.io>"]
+
+[tool.poetry.dependencies]
+python = ">=3.7,<3.10"
+
+[tool.poetry.group.dev.dependencies]
+pylint = "==3.0.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.bandit]
+exclude_dirs = ["*/tests/*", "src/config/networks.py", "conftest.py"]
+skips = ["B608"]
+
+[tool.flake8]
+extend-ignore = ["E203", "E501"]  # line length will be checked by pylint
+exclude = ["conftest.py"]
+
+[tool.mypy]
+exclude = ["test"]
+ignore_missing_imports = true
+python_version = "3.10"
+disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+module = 'web3.*'
+no_implicit_optional = false
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 100
+skip-string-normalization = true
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.coverage.report]
+fail_under = 73
