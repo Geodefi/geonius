@@ -47,9 +47,9 @@ class StakeTrigger(Trigger):
                     SELECT pubkey FROM {pools_table} 
                     WHERE internal_state = {VALIDATOR_STATE.PROPOSED}  
                     AND portal_index < {verification_index}
+                    ORDER BY id
                 """
             )
-            # TODO: group and sort pks according to pool id
             approved_pks: list[str] = db.fetchall()
 
         # TODO: call check_and_stake() function where call_stake is called after:
