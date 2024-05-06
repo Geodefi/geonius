@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Callable
 from threading import Thread, Event
 from src.classes.trigger import Trigger
@@ -29,6 +30,7 @@ class Daemon(Loggable):
         interval: int,
         task: Callable,
         triggers: list[Trigger],
+        initial_delay: int = 0,
     ):
         """Initializes a Daemon object.
 
@@ -37,15 +39,20 @@ class Daemon(Loggable):
             interval (int): Time duration between 2 tasks.
             task (Callable): Work to be done after every iteration
             triggers (list[Trigger]): List of initialized Trigger instances
+            initial_delay (int, optional): Initial delay before starting the loop. Defaults to 0.
         """
 
         Loggable.__init__(self, name=name)
 
         self.__set_task(task)
         self.__set_interval(interval)
+        self.__set_initial_delay(initial_delay)
         self.__set_triggers(triggers)
 
-        self.__worker = Thread(name="background", target=self.__loop)
+        # TODO: should consider using daemon threads
+        self.__worker = Thread(
+            name="background", target=self.__loop, args=(initial_delay,)
+        )
         self.start_flag: Event = Event()
         self.stop_flag: Event = Event()
 
@@ -55,6 +62,12 @@ class Daemon(Loggable):
 
         return self.__interval
 
+    @property
+    def initial_delay(self) -> int:
+        """Returns initial delay before starting the loop, as a property"""
+
+        return self.__initial_delay
+
     def __set_interval(self, interval: int) -> None:
         """Sets waiting period to given interval on initialization.
 
@@ -63,6 +76,15 @@ class Daemon(Loggable):
         """
 
         self.__interval: int = interval
+
+    def __set_initial_delay(self, initial_delay: int) -> None:
+        """Sets initial delay before starting the loop, on initialization.
+
+        Args:
+            initial_delay (int): New initial delay
+        """
+
+        self.__initial_delay: int = initial_delay
 
     def __set_task(self, task: Callable) -> None:
         """Sets the task for the deamon on initialization.
@@ -83,10 +105,15 @@ class Daemon(Loggable):
 
         self.triggers: list[Trigger] = triggers
 
-    def __loop(self) -> None:
+    def __loop(self, initial_delay: int) -> None:
         """The main function of the Daemon, the loop.
         Waits for self.interval and checks for the triggers after running the tasks.
+
+        Args:
+            initial_delay (int): Initial delay before starting the loop.
         """
+
+        sleep(initial_delay)
 
         while not self.stop_flag.wait(self.interval):
             try:
