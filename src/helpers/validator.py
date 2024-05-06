@@ -8,7 +8,11 @@ from src.globals import CONFIG, SDK, OPERATOR_ID
 from src.actions import generate_deposit_data, call_proposeStake
 from src.helpers import get_withdrawal_address
 from src.utils import multithread
-from src.helpers.db_validators import save_local_state, save_portal_state
+from src.helpers.db_validators import (
+    fill_validators_table,
+    save_local_state,
+    save_portal_state,
+)
 
 validators_table: str = CONFIG.database.tables.validators.name
 pools_table: str = CONFIG.database.tables.pools.name
@@ -69,14 +73,4 @@ def check_and_propose(pool_id: int):
         pool_id, pubkeys, signatures1, signatures31
     )
 
-    # TODO: instead of for loop use insert_many_validators function
-    for pk in pubkeys:
-        # TODO: save signatures31 list to the validators  db
-        # there is no pubkey yet, so create a validator row on db first
-        # update db after a succesful call
-        multithread(
-            save_local_state, pk, VALIDATOR_STATE.PROPOSED
-        )  # TODO: this will be done during creation so this will be removed
-        multithread(
-            save_portal_state, pk, VALIDATOR_STATE.PROPOSED
-        )  # TODO: this will be done during creation so this will be removed
+    fill_validators_table(pubkeys)
