@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from src.classes import Trigger
+from src.helpers.db_events import create_deposit_table
 from src.helpers.portal import get_surplus
 from src.helpers.db_pools import create_pools_table, save_surplus
 
@@ -17,7 +18,7 @@ class DepositTrigger(Trigger):
         """Initializes the configured trigger."""
         Trigger.__init__(self, name=self.name, action=self.update_surplus)
         create_pools_table()
-        # TODO: create event_name table
+        create_deposit_table()
 
     def update_surplus(self, events: list[dict], *args, **kwargs):
         """Updates the surplus for given pool with the current data.

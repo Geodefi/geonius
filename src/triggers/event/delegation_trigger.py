@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from src.classes import Trigger
+from src.helpers.db_events import create_delegation_table
 from src.helpers.portal import get_operatorAllowance
 from src.helpers.db_pools import create_pools_table, save_allowance
 from src.globals import OPERATOR_ID
@@ -18,7 +19,7 @@ class DelegationTrigger(Trigger):
         """Initializes the configured trigger."""
         Trigger.__init__(self, name=self.name, action=self.update_allowance)
         create_pools_table()
-        # TODO: create event_name table
+        create_delegation_table()
 
     def __filter_events(self, event: dict):
         if event.args.operatorId == OPERATOR_ID:

@@ -17,7 +17,6 @@ class InitiationTrigger(Trigger):
         """Initializes the configured trigger."""
         Trigger.__init__(self, name=self.name, action=self.insert_pool)
         create_pools_table()
-        # TODO: create event_name table
 
     def __filter_events(self, event: dict):
         if event.args.TYPE == ID_TYPE.POOL:

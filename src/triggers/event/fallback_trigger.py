@@ -2,6 +2,7 @@
 
 from src.classes import Trigger
 from src.globals import OPERATOR_ID
+from src.helpers.db_events import create_fallback_table
 from src.helpers.portal import get_fallback_operator
 from src.helpers.db_pools import create_pools_table, save_fallback_operator
 
@@ -18,7 +19,7 @@ class FallbackTrigger(Trigger):
         """Initializes the configured trigger."""
         Trigger.__init__(self, name=self.name, action=self.update_fallback_operator)
         create_pools_table()
-        # TODO: create event_name table
+        create_fallback_table()
 
     def __filter_events(self, event: dict) -> bool:
         if event.args.operatorId == OPERATOR_ID:

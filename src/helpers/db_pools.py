@@ -5,6 +5,8 @@ from src.classes import Database
 from src.utils import multithread
 from src.globals import CONFIG
 
+# TODO: consider fixing the table name instead of using the config
+#       user can change the table name in the config file and it will cause an problems
 pools_table: str = CONFIG.database.tables.pools.name
 
 

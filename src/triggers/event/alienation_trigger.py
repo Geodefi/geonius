@@ -2,6 +2,7 @@
 
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Trigger
+from src.helpers.db_events import create_alienation_table
 from src.helpers.db_validators import (
     create_validators_table,
     save_portal_state,
@@ -21,7 +22,7 @@ class AlienationTrigger(Trigger):
         """Initializes the configured trigger."""
         Trigger.__init__(self, name=self.name, action=self.alienate_validators)
         create_validators_table()
-        # TODO: create event_name table
+        create_alienation_table()
 
     def alienate_validators(self, events: list[dict], *args, **kwargs):
         """

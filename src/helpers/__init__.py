@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from .db_events import (
+    find_latest_event_block,
+    create_alienation_table,
+    create_delegation_table,
+    create_deposit_table,
+    create_fallback_table,
+)
+
 from .db_pools import (
     create_pools_table,
     drop_pools_table,
