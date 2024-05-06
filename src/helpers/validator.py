@@ -2,8 +2,9 @@
 
 from web3.types import TxReceipt
 from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE
+from geodefi.utils import to_bytes32
 from src.classes.database import Database
-from src.globals import CONFIG
+from src.globals import CONFIG, SDK, OPERATOR_ID
 from src.actions import generate_deposit_data, call_proposeStake
 from src.helpers import get_withdrawal_address
 from src.utils import multithread
@@ -29,8 +30,13 @@ def max_proposals_count(pool_id: int):
             # every 32 ether is 1 validator.
             eth_per_prop = surplus // DEPOSIT_SIZE.STAKE
 
-            # TODO: we should also consider the wallet balance of the operator since it might not be enough (1 eth per val)
-            return min(allowance, eth_per_prop)
+            # considering the wallet balance of the operator since it might not be enough (1 eth per val)
+            wallet_balance = SDK.portal.functions.readUint(
+                OPERATOR_ID, to_bytes32("wallet")
+            ).call()
+            eth_per_wallet_balance = wallet_balance // DEPOSIT_SIZE.PROPOSAL
+
+            return min(allowance, eth_per_prop, eth_per_wallet_balance)
         else:
             return 0
 
