@@ -21,6 +21,7 @@ class AlienationTrigger(Trigger):
         """Initializes the configured trigger."""
         Trigger.__init__(self, name=self.name, action=self.alienate_validators)
         create_validators_table()
+        # TODO: create event_name table
 
     def alienate_validators(self, events: list[dict], *args, **kwargs):
         """
@@ -29,8 +30,11 @@ class AlienationTrigger(Trigger):
         Args:
             events(int) : sorted list of "Alienated" emits
         """
+        # TODO: for all event triggers: filter + parse + save_db => handler
+        # events = event_handler(filter_events(),parse_events(),save_events()) => do this to all event triggers
 
         alien_pks: list[int] = [x.args.pubkey for x in events]
+        # TODO: filter if pk is in db and then continue
 
         for pk in alien_pks:
             save_portal_state(pk, VALIDATOR_STATE.ALIENATED)

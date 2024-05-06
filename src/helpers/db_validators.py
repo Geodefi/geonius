@@ -40,9 +40,8 @@ def drop_validators_table():
 
 def reinitialize_validators_table():
     """Removes validators table and creates an empty one."""
-
-    create_validators_table()
     drop_validators_table()
+    create_validators_table()
 
 
 def fetch_validator(pubkey: str) -> list:
@@ -73,6 +72,7 @@ def insert_many_validators(new_validators: list[dict]):
 
     with Database() as db:
         db.executemany(
+            # wrong amount of question marks
             f"INSERT INTO {validators_table} VALUES (?,?,?,?,?)",
             [
                 (

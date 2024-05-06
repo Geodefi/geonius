@@ -22,7 +22,8 @@ def __init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
 
             # Set default account if one address is used generally
             sdk.w3.eth.defaultAccount = acct
-
+        else:
+            raise CouldNotConnect 
         return sdk
 
     except Exception as e:

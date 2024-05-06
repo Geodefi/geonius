@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# TODO: search for 'from ..' and use module import with src.
 from src.classes import Daemon, Trigger
 from src.globals import SDK, CONFIG, block_seconds
 
@@ -19,7 +18,11 @@ class BlockDaemon(Daemon):
 
     name: str = "BLOCK_DAEMON"
 
-    def __init__(self, triggers: list[Trigger]):
+    def __init__(
+        self,
+        triggers: list[Trigger],
+        block_period: int = int(CONFIG.chains[SDK.network.name].period),
+    ):
         """Initializes the configured daemon.
         Args:
             triggers (list): List of initialized Trigger instances
@@ -35,9 +38,9 @@ class BlockDaemon(Daemon):
 
         # block_identifier sets if we are looking for 'latest', 'earliest', 'pending', 'safe', 'finalized'.
         self.block_identifier: int = CONFIG.chains[SDK.network.name].identifier
-        self.block_period: int = int(CONFIG.chains[SDK.network.name].period)
 
         self.__recent_block: int = CONFIG.chains[SDK.network.name].first_block
+        self.block_period: int = block_period
 
     def listen_blocks(self) -> int:
         """The main task for the BlockDaemon.

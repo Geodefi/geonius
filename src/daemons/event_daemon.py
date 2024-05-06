@@ -27,17 +27,16 @@ class EventDaemon(Daemon):
         Args:
             triggers (list[Trigger]): List of initialized Trigger instances
             event (_type_): event to be checked.
-            start_block (int, optional): Defaults to CONFIG.chains[SDK.network.name].first_block.
+            start_block (int, optional): First block to look for given event.
         """
 
         Daemon.__init__(
             self,
             name=self.name,
-            interval=block_seconds,
+            interval=block_seconds + 1,  # TODO: this will be overriden by a flag
             task=self.listen_events,
             triggers=triggers,
         )
-
         self.event = event
 
         # block_identifier sets if we are looking for:

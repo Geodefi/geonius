@@ -21,7 +21,6 @@ def call_proposeStake(
         TxReceipt: receipt of the stake calli returned to be handled accordingly
     """
 
-    # todo: pubkeys len is limited to 50 but dividing it into multiple or just send some and continue waiting?
     tx_hash = SDK.portal.functions.call_proposeStake(
         pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
     ).transact({"from": SDK.w3.eth.defaultAccount})
@@ -57,6 +56,4 @@ def call_stake(pubkeys: list[str]) -> TxReceipt:
             return tx_receipt
 
     except Exception as e:
-        # just a place holder.
-        # most of the exceptions and error handling are TODO rn.
         raise e

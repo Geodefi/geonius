@@ -43,9 +43,9 @@ class Loggable:
         logging.basicConfig()
         logger.propagate = False
 
-        # TODO add flag for --no-log-stream
+        # TODO: add flag for --no-log-stream
         logger.addHandler(self.__get_stream_handler())
-        # TODO add flag for --no-log-file
+        # TODO: add flag for --no-log-file
         logger.addHandler(self.__get_file_handler(name=name))
 
         return logger
@@ -54,7 +54,7 @@ class Loggable:
     def __level(self):
         """Returns the logger level: DEBUG, INFO, WARNING, ERROR, CRITICAL"""
 
-        # TODO add flag for --log-level
+        # TODO: add flag for --log-level
         level_name = CONFIG.logger.level
         return logging.getLevelName(level_name)
 

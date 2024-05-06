@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from itertools import repeat
 from web3.types import TxReceipt
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Trigger, Database
@@ -36,7 +37,7 @@ class StakeTrigger(Trigger):
         Args:
             events(int) : sorted list of Delegation emits
         """
-        # TODO add flag for --min_proposal_queue --max-proposal-delay etc.
+        # TODO: add flag for --min-proposal-queue --max-proposal-delay etc.
         verification_index: int = get_StakeParams()[4]
 
         # check if there are any pending validator proposals.
@@ -48,12 +49,14 @@ class StakeTrigger(Trigger):
                     AND portal_index < {verification_index}
                 """
             )
-
+            # TODO: group and sort pks according to pool id
             approved_pks: list[str] = db.fetchall()
 
-            # todo : handle tx receipt
-            tx_receipt: TxReceipt = call_stake(approved_pks)
+        # TODO: call check_and_stake() function where call_stake is called after:
+        # checking the pubkeys list is no more then 50 and divide it into multiple calls
+        # TODO: handle tx receipt & errors
+        tx_receipt: TxReceipt = call_stake(approved_pks)
 
-            # update db after a succesful call
-            multithread(save_local_state, approved_pks, VALIDATOR_STATE.ACTIVE)
-            multithread(save_portal_state, approved_pks, VALIDATOR_STATE.ACTIVE)
+        # update db after a succesful call
+        multithread(save_local_state, approved_pks, repeat(VALIDATOR_STATE.ACTIVE))
+        multithread(save_portal_state, approved_pks, repeat(VALIDATOR_STATE.ACTIVE))

@@ -16,7 +16,6 @@ pools_table: str = CONFIG.database.tables.pools.name
 def max_proposals_count(pool_id: int):
     """Get max number of proposals possible"""
 
-    # Note that we should also consider the wallet balance of the operator since it might not be enough (1 eth per val)
     with Database() as db:
         db.execute(
             f"""
@@ -30,6 +29,7 @@ def max_proposals_count(pool_id: int):
             # every 32 ether is 1 validator.
             eth_per_prop = surplus // DEPOSIT_SIZE.STAKE
 
+            # TODO: we should also consider the wallet balance of the operator since it might not be enough (1 eth per val)
             return min(allowance, eth_per_prop)
         else:
             return 0
@@ -38,8 +38,8 @@ def max_proposals_count(pool_id: int):
 def check_and_propose(pool_id: int):
     """Propose new validators for given pool if able to"""
 
-    # todo: this function should accept some flags such as:
-    max_allowed int:= max_proposals_count(pool_id)
+    # TODO: this function should accept some flags such as:
+    max_allowed: int = max_proposals_count(pool_id)
 
     all_deposit_data: list[dict] = list()
 
@@ -58,15 +58,19 @@ def check_and_propose(pool_id: int):
     signatures1: list = [bytes.fromhex(prop.signature) for prop in proposal_data]
     signatures31: list = [bytes.fromhex(prop.signature) for prop in stake_data]
 
-    # todo : handle tx receipt and errors
+    # TODO: handle tx receipt and errors
     tx_receipt: TxReceipt = call_proposeStake(
         pool_id, pubkeys, signatures1, signatures31
     )
 
-    # update db after a succesful call
-    multithread(save_local_state, pubkeys, VALIDATOR_STATE.PROPOSED)
-    multithread(save_portal_state, pubkeys, VALIDATOR_STATE.PROPOSED)
-
-
-def check_and_stake(pool_id: int):
-    pass  # todo?
+    # TODO: instead of for loop use insert_many_validators function
+    for pk in pubkeys:
+        # TODO: save signatures31 list to the validators  db
+        # there is no pubkey yet, so create a validator row on db first
+        # update db after a succesful call
+        multithread(
+            save_local_state, pk, VALIDATOR_STATE.PROPOSED
+        )  # TODO: this will be done during creation so this will be removed
+        multithread(
+            save_portal_state, pk, VALIDATOR_STATE.PROPOSED
+        )  # TODO: this will be done during creation so this will be removed

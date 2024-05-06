@@ -7,4 +7,4 @@ hour_blocks: int = 300
 block_seconds: int = 12
 
 # number of blocks to divide the given range into multiple ranges while searching for events
-MAX_BLOCK_RANGE: int = 3_000  # todo: might be given as a flag param
+MAX_BLOCK_RANGE: int = 3_000  # TODO: might be given as a flag param

@@ -18,6 +18,7 @@ class FallbackTrigger(Trigger):
         """Initializes the configured trigger."""
         Trigger.__init__(self, name=self.name, action=self.update_fallback_operator)
         create_pools_table()
+        # TODO: create event_name table
 
     def __filter_events(self, event: dict) -> bool:
         if event.args.operatorId == OPERATOR_ID:
@@ -36,6 +37,9 @@ class FallbackTrigger(Trigger):
 
         # filter events where operator_id matches
         events_filtered: list[dict] = filter(self.__filter_events, events)
+        # TODO: for all event triggers: filter + parse + save_db => handler
+        # events = event_handler(filter_events(),parse_events(),save_events()) => do this to all event triggers
+
         # gather pool ids from filtered events
         pool_ids: list[int] = [x.args.poolId for x in events_filtered]
 
@@ -46,4 +50,4 @@ class FallbackTrigger(Trigger):
             # if so, column value is set to 1, sqlite3 don't do booleans
             save_fallback_operator(pool, fallback == OPERATOR_ID)
 
-        # TODO Check if you can propose any new validators
+        # TODO: Check if you can propose any new validators call check_and_propose function

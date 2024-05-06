@@ -36,5 +36,4 @@ class Trigger(Loggable):
         try:
             self.__action(*args, **kwargs)
         except Exception as e:
-            # todo placeholder
             raise e
