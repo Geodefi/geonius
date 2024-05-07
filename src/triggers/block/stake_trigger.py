@@ -11,7 +11,7 @@ from src.helpers.db_validators import (
 )
 from src.globals import CONFIG
 from src.helpers.portal import get_StakeParams
-from src.actions.portal import call_stake
+from src.helpers.validator import check_and_stake
 from src.utils import multithread
 
 pools_table: str = CONFIG.database.tables.pools.name
@@ -52,11 +52,11 @@ class StakeTrigger(Trigger):
             )
             approved_pks: list[str] = db.fetchall()
 
-        # TODO: call check_and_stake() function where call_stake is called after:
-        # checking the pubkeys list is no more then 50 and divide it into multiple calls
         # TODO: handle tx receipt & errors
-        tx_receipt: TxReceipt = call_stake(approved_pks)
+        tx_receipts: list[tuple] = check_and_stake(approved_pks)
 
+        # TODO: may need to extend tx_receipts tuples[1] (pks) in a list
+        #       instead of approved_pks
         # update db after a succesful call
         multithread(save_local_state, approved_pks, repeat(VALIDATOR_STATE.ACTIVE))
         multithread(save_portal_state, approved_pks, repeat(VALIDATOR_STATE.ACTIVE))

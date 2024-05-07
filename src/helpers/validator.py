@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from web3.types import TxReceipt
-from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE
+from geodefi.globals import DEPOSIT_SIZE
 from geodefi.utils import to_bytes32
 from src.classes.database import Database
 from src.globals import CONFIG, SDK, OPERATOR_ID
-from src.actions import generate_deposit_data, call_proposeStake
+from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.helpers import get_withdrawal_address
-from src.utils import multithread
-from src.helpers.db_validators import (
-    fill_validators_table,
-    save_local_state,
-    save_portal_state,
-)
+
 
 validators_table: str = CONFIG.database.tables.validators.name
 pools_table: str = CONFIG.database.tables.pools.name
@@ -68,9 +63,41 @@ def check_and_propose(pool_id: int):
     signatures1: list = [bytes.fromhex(prop.signature) for prop in proposal_data]
     signatures31: list = [bytes.fromhex(prop.signature) for prop in stake_data]
 
-    # TODO: handle tx receipt and errors
-    tx_receipt: TxReceipt = call_proposeStake(
-        pool_id, pubkeys, signatures1, signatures31
-    )
+    # TODO: current implementation is not considering last bunch of
+    #       validators count is higher than threshold or not may
+    #       need to implement a check for that later if needed.
+    txs: list[tuple] = []
+    for i in range(0, len(pubkeys), 50):
+        temp_pks: list[str] = pubkeys[i : i + 50]
+        temp_sigs1: list[str] = signatures1[i : i + 50]
+        temp_sigs31: list[str] = signatures31[i : i + 50]
 
-    fill_validators_table(pubkeys)
+        # TODO: handle tx receipt and errors
+        tx_receipt: TxReceipt = call_proposeStake(
+            pool_id, temp_pks, temp_sigs1, temp_sigs31
+        )
+        txs.append((tx_receipt, temp_pks))
+
+    return txs
+
+
+def check_and_stake(pks: list[str]) -> list[tuple]:
+    """Stake for given pubkey if able to
+
+    Args:
+        pks(list[str]) : pubkeys to stake for
+
+    Returns:
+        list[tuple] : list of tuples containing tx_receipt and pks
+    """
+
+    # TODO: current implementation is not considering last bunch of
+    #       validators count is higher than threshold or not may
+    #       need to implement a check for that later if needed.
+    txs: list[tuple] = []
+    for i in range(0, len(pks), 50):
+        temp_pks: list[str] = pks[i : i + 50]
+        tx_receipt: TxReceipt = call_stake(temp_pks)
+        txs.append((tx_receipt, temp_pks))
+
+    return txs
