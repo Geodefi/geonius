@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from typing import List
 from src.classes import Trigger, Database
 from src.helpers.db_events import create_deposit_table, event_handler
+from src.helpers.db_validators import fill_validators_table
 from src.helpers.portal import get_surplus
 from src.helpers.db_pools import create_pools_table, save_surplus
+from src.helpers.validator import check_and_propose
 
 
 class DepositTrigger(Trigger):
@@ -86,10 +89,16 @@ class DepositTrigger(Trigger):
 
         pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        for pool in pool_ids:
-            surplus: int = get_surplus(pool)
-
+        all_pks: List[tuple] = []
+        for pool_id in pool_ids:
             # save to db
-            save_surplus(pool, surplus)
+            surplus: int = get_surplus(pool_id)
+            save_surplus(pool_id, surplus)
 
-        # TODO: Check if you can propose any new validators call check_and_propose function
+            # if able to propose any new validators do so
+            txs: List[tuple] = check_and_propose(pool_id)
+            for tx_tuple in txs:
+                all_pks.extend(tx_tuple[1])  # tx[1] is the list of pubkeys
+
+        if len(all_pks) > 0:
+            fill_validators_table(all_pks)

@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from typing import List
 from src.classes import Trigger, Database
 from src.globals import OPERATOR_ID
 from src.helpers.db_events import create_fallback_table, event_handler
+from src.helpers.db_validators import fill_validators_table
 from src.helpers.portal import get_fallback_operator
 from src.helpers.db_pools import create_pools_table, save_fallback_operator
+from src.helpers.validator import check_and_propose
 
 
 class FallbackTrigger(Trigger):
@@ -92,13 +95,20 @@ class FallbackTrigger(Trigger):
         # gather pool ids from filtered events
         pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        for pool in pool_ids:
+        all_pks: List[tuple] = []
+        for pool_id in pool_ids:
             # TODO: consider not checking fetching this, instead using from the filtered events
             #       and also consider saving threshold value
-            fallback: int = get_fallback_operator(pool)
+            fallback: int = get_fallback_operator(pool_id)
 
             # check if the fallback id is OPERATOR_ID
             # if so, column value is set to 1, sqlite3 don't do booleans
-            save_fallback_operator(pool, fallback == OPERATOR_ID)
+            save_fallback_operator(pool_id, fallback == OPERATOR_ID)
 
-        # TODO: Check if you can propose any new validators call check_and_propose function
+            # if able to propose any new validators do so
+            txs: List[tuple] = check_and_propose(pool_id)
+            for tx_tuple in txs:
+                all_pks.extend(tx_tuple[1])  # tx[1] is the list of pubkeys
+
+        if len(all_pks) > 0:
+            fill_validators_table(all_pks)

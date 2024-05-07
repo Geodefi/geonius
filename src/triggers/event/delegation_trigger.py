@@ -5,6 +5,8 @@ from typing import List
 from src.classes import Trigger, Database
 from src.helpers.db_events import create_delegation_table, event_handler
 from src.helpers.portal import get_operatorAllowance
+from src.helpers.validator import check_and_propose
+from src.helpers.db_validators import fill_validators_table
 from src.helpers.db_pools import create_pools_table, save_allowance
 from src.globals import OPERATOR_ID
 
@@ -100,9 +102,16 @@ class DelegationTrigger(Trigger):
         # gather pool ids from filtered events
         pool_ids: List[int] = [x.args.poolId for x in filtered_events]
 
-        # update db
-        for pool in pool_ids:
-            allowance: int = get_operatorAllowance(pool)
-            save_allowance(pool, allowance)
+        all_pks: List[tuple] = []
+        for pool_id in pool_ids:
+            # update db
+            allowance: int = get_operatorAllowance(pool_id)
+            save_allowance(pool_id, allowance)
 
-        # TODO: Check if you can propose any new validators call check_and_propose function
+            # if able to propose any new validators do so
+            txs: List[tuple] = check_and_propose(pool_id)
+            for tx_tuple in txs:
+                all_pks.extend(tx_tuple[1])  # tx[1] is the list of pubkeys
+
+        if len(all_pks) > 0:
+            fill_validators_table(all_pks)
