@@ -7,8 +7,15 @@ from src.globals.env import EXECUTION_API, CONSENSUS_API, PRIVATE_KEY
 
 
 def __init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
-    """
-    Initialize an SDK object according to the env vars and return
+    """Initializes the SDK with the provided APIs and private key.
+
+    Args:
+        exec_api (str): Execution API URL.
+        cons_api (str): Consensus API URL.
+        priv_key (str, optional): Private key to be used. Default is None.
+
+    Returns:
+        Geode: Initialized Geode SDK instance.
     """
     try:
         sdk: Geode = Geode(exec_api=exec_api, cons_api=cons_api)
@@ -23,7 +30,7 @@ def __init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
             # Set default account if one address is used generally
             sdk.w3.eth.defaultAccount = acct
         else:
-            raise CouldNotConnect 
+            raise CouldNotConnect
         return sdk
 
     except Exception as e:

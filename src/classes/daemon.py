@@ -1,5 +1,5 @@
 from time import sleep
-from typing import Callable
+from typing import Callable, List
 from threading import Thread, Event
 from src.classes.trigger import Trigger
 from src.classes.loggable import Loggable
@@ -22,6 +22,15 @@ class Daemon(Loggable):
         quick_run()
 
         a.stop()
+
+    Attributes:
+        __interval (int): Time duration between 2 tasks.
+        __initial_delay (int): Initial delay before starting the loop.
+        __task (Callable): Work to be done after every iteration.
+        __worker (Thread): Thread object to run the loop.
+        triggers (List[Trigger]): List of initialized Trigger instances.
+        start_flag (Event): Event flag to start the daemon.
+        stop_flag (Event): Event flag to stop the daemon.
     """
 
     def __init__(
@@ -29,16 +38,16 @@ class Daemon(Loggable):
         name: str,
         interval: int,
         task: Callable,
-        triggers: list[Trigger],
+        triggers: List[Trigger],
         initial_delay: int = 0,
-    ):
-        """Initializes a Daemon object.
+    ) -> None:
+        """Initializes a Daemon object. The daemon will run the task with the given interval.
 
         Args:
             name (str): name of the daemon to be used when logging etc.
             interval (int): Time duration between 2 tasks.
             task (Callable): Work to be done after every iteration
-            triggers (list[Trigger]): List of initialized Trigger instances
+            triggers (List[Trigger]): List of initialized Trigger instances
             initial_delay (int, optional): Initial delay before starting the loop. Defaults to 0.
         """
 
@@ -50,19 +59,27 @@ class Daemon(Loggable):
         self.__set_triggers(triggers)
 
         # TODO: should consider using daemon threads
-        self.__worker = Thread(name="background", target=self.__loop)
+        self.__worker: Thread = Thread(name="background", target=self.__loop)
         self.start_flag: Event = Event()
         self.stop_flag: Event = Event()
 
     @property
     def interval(self) -> int:
-        """Returns waiting period (in seconds), as a property"""
+        """Returns waiting period (in seconds), as a property
+
+        Returns:
+            int: Waiting period in seconds
+        """
 
         return self.__interval
 
     @property
     def initial_delay(self) -> int:
-        """Returns initial delay before starting the loop, as a property"""
+        """Returns initial delay before starting the loop, as a property
+
+        Returns:
+            int: Initial delay in seconds
+        """
 
         return self.__initial_delay
 
@@ -94,21 +111,21 @@ class Daemon(Loggable):
 
         self.__task: Callable = task
 
-    def __set_triggers(self, triggers: list[Trigger]) -> None:
+    def __set_triggers(self, triggers: List[Trigger]) -> None:
         """Sets list of triggers that will be checked on every iteration, called on initialization.
 
         Args:
-            triggers (list): list of Trigger object entities.
+            triggers (List[Trigger]): List of initialized Trigger instances
         """
 
-        self.triggers: list[Trigger] = triggers
+        self.triggers: List[Trigger] = triggers
 
     def __loop(self) -> None:
-        """The main function of the Daemon, the loop.
-        Waits for self.interval and checks for the triggers after running the tasks.
+        """Runs the loop, checks for the task and triggers on every iteration. Stops when stop_flag is set.
 
-        Args:
-            initial_delay (int): Initial delay before starting the loop.
+        If the task raises an exception, the daemon stops and raises a DaemonStoppedException. This is to prevent
+        the daemon from running with a broken task. The exception is raised to the caller to handle the error. The
+        daemon can be restarted after the error is handled. The stop_flag is set to prevent the daemon from running again.
         """
 
         sleep(self.__initial_delay)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from itertools import repeat
+from typing import List
 from web3.types import TxReceipt
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Trigger, Database
@@ -18,24 +19,29 @@ pools_table: str = CONFIG.database.tables.pools.name
 
 
 class StakeTrigger(Trigger):
-    """
-    Every X hours checks for approved proposals.
+    """Every X hours checks for approved proposals.
     Finalizes the validator creation by calling portal.stake()
+
+    Attributes:
+        name (str): name of the trigger to be used when logging etc. (value: STAKE_TRIGGER)
     """
 
     name: str = "STAKE_TRIGGER"
 
-    def __init__(self):
-        """Initializes the configured trigger."""
+    def __init__(self) -> None:
+        """Initializes a StakeTrigger object. The trigger will process the changes of the daemon after a loop.
+        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """
+
         Trigger.__init__(self, name=self.name, action=self.activate_validators)
         create_validators_table()
 
-    def activate_validators(self, *args, **kwargs):
-        """
-        Checks for approved pending validator proposals and activates them by staking.
+    def activate_validators(self, *args, **kwargs) -> None:
+        """Checks for approved proposals and calls portal.stake() for them. Finalizes the validator creation.
 
         Args:
-            events(int) : sorted list of Delegation emits
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
         """
         # TODO: add flag for --min-proposal-queue --max-proposal-delay etc.
         verification_index: int = get_StakeParams()[4]
@@ -50,10 +56,10 @@ class StakeTrigger(Trigger):
                     ORDER BY id
                 """
             )
-            approved_pks: list[str] = db.fetchall()
+            approved_pks: List[str] = db.fetchall()
 
         # TODO: handle tx receipt & errors
-        tx_receipts: list[tuple] = check_and_stake(approved_pks)
+        tx_receipts: List[tuple] = check_and_stake(approved_pks)
 
         # TODO: may need to extend tx_receipts tuples[1] (pks) in a list
         #       instead of approved_pks

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
+from typing import List, Iterable
+from web3.types import EventData
+
 from src.classes import Trigger, Database
 from src.helpers.db_events import create_deposit_table, event_handler
 from src.helpers.db_validators import fill_validators_table
@@ -10,30 +12,35 @@ from src.helpers.validator import check_and_propose
 
 
 class DepositTrigger(Trigger):
-    """
-    Triggered when surplus changes for a pool.
+    """Triggered when surplus changes for a pool.
     Updates the database with the latest info.
+
+    Attributes:
+        name (str): name of the trigger to be used when logging etc. (value: DEPOSIT_TRIGGER)
     """
 
     name: str = "DEPOSIT_TRIGGER"
 
-    def __init__(self):
-        """Initializes the configured trigger."""
+    def __init__(self) -> None:
+        """Initializes a DepositTrigger object. The trigger will process the changes of the daemon after a loop.
+        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """
+
         Trigger.__init__(self, name=self.name, action=self.update_surplus)
         create_pools_table()
         create_deposit_table()
 
-    def __parse_events(self, events: list[dict]) -> list[tuple]:
-        """Parses the events and returns a list of tuples.
+    def __parse_events(self, events: Iterable[EventData]) -> List[tuple]:
+        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
-            events(list[dict]) : list of Deposit emits
+            events (Iterable[EventData]): List of Deposit emits
 
         Returns:
-            List[tuple] : list of saveable events
+            List[tuple]: List of saveable events
         """
 
-        saveable_events: list[tuple] = []
+        saveable_events: List[tuple] = []
         for event in events:
             pool_id: int = event.args.poolId
             bought_amount: int = event.args.boughtgETH
@@ -61,11 +68,11 @@ class DepositTrigger(Trigger):
 
         return saveable_events
 
-    def __save_events(self, events: list[tuple]):
+    def __save_events(self, events: List[tuple]) -> None:
         """Saves the events to the database.
 
         Args:
-            events(list[tuple]) : list of saveable events
+            events (List[tuple]): List of Deposit emits
         """
 
         with Database() as db:
@@ -74,20 +81,22 @@ class DepositTrigger(Trigger):
                 events,
             )
 
-    def update_surplus(self, events: list[dict], *args, **kwargs):
+    def update_surplus(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Updates the surplus for given pool with the current data.
         for encountered pool ids within provided "Deposit" emits.
 
         Args:
-            events(int) : sorted list of Deposit emits
+            events (Iterable[EventData]): List of events
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
         """
 
         # parse and save events
-        filtered_events: list[dict] = event_handler(
+        filtered_events: Iterable[EventData] = event_handler(
             events, self.__parse_events, self.__save_events
         )
 
-        pool_ids: list[int] = [x.args.poolId for x in filtered_events]
+        pool_ids: List[int] = [x.args.poolId for x in filtered_events]
 
         all_pks: List[tuple] = []
         for pool_id in pool_ids:

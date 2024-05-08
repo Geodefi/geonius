@@ -5,6 +5,8 @@ from src.globals import SDK, PRIVATE_KEY
 
 
 def set_web3_account():
+    """Sets the web3 account to the private key provided in the environment variables."""
+
     # Create account on Geode's web3py instance
     acct = SDK.w3.eth.account.from_key(PRIVATE_KEY)
 

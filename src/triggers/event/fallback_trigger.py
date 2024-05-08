@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
+from typing import List, Iterable
+from web3.types import EventData
+
 from src.classes import Trigger, Database
 from src.globals import OPERATOR_ID
 from src.helpers.db_events import create_fallback_table, event_handler
@@ -11,36 +13,50 @@ from src.helpers.validator import check_and_propose
 
 
 class FallbackTrigger(Trigger):
-    """
-    Triggered when a pool changes it's fallback operator.
+    """Triggered when a pool changes it's fallback operator.
     Updates the database with the latest info.
+
+    Attributes:
+        name (str): name of the trigger to be used when logging etc. (value: FALLBACK_TRIGGER)
     """
 
     name: str = "FALLBACK_TRIGGER"
 
-    def __init__(self):
-        """Initializes the configured trigger."""
+    def __init__(self) -> None:
+        """Initializes a FallbackTrigger object. The trigger will process the changes of the daemon after a loop.
+        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """
+
         Trigger.__init__(self, name=self.name, action=self.update_fallback_operator)
         create_pools_table()
         create_fallback_table()
 
-    def __filter_events(self, event: dict) -> bool:
+    def __filter_events(self, event: EventData) -> bool:
+        """Filters the events to check if the event is for the script's OPERATOR_ID.
+
+        Args:
+            event (EventData): Event to be checked
+
+        Returns:
+            bool: True if the event is for the script's OPERATOR_ID, False otherwise
+        """
+
         if event.args.operatorId == OPERATOR_ID:
             return True
         else:
             return False
 
-    def __parse_events(self, events: list[dict]) -> list[tuple]:
-        """Parses the events and returns a list of tuples.
+    def __parse_events(self, events: Iterable[EventData]) -> List[tuple]:
+        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
-            events(list[dict]) : list of FallbackOperator emits
+            events (Iterable[EventData]): List of FallbackOperator emits
 
         Returns:
-            List[tuple] : list of saveable events
+            List[tuple]: List of saveable events
         """
 
-        saveable_events: list[tuple] = []
+        saveable_events: List[tuple] = []
         for event in events:
             pool_id: int = event.args.poolId
             fallback_threshold: int = event.args.threshold
@@ -66,11 +82,11 @@ class FallbackTrigger(Trigger):
 
         return saveable_events
 
-    def __save_events(self, events: list[tuple]):
+    def __save_events(self, events: List[tuple]) -> None:
         """Saves the events to the database.
 
         Args:
-            events(list[tuple]) : list of saveable events
+            events (List[tuple]): List of FallbackOperator emits
         """
 
         with Database() as db:
@@ -79,21 +95,24 @@ class FallbackTrigger(Trigger):
                 events,
             )
 
-    def update_fallback_operator(self, events: list[dict], *args, **kwargs):
-        """
-        Checks if the fallback operator is set as script's OPERATOR_ID
+    def update_fallback_operator(
+        self, events: Iterable[EventData], *args, **kwargs
+    ) -> None:
+        """Checks if the fallback operator is set as script's OPERATOR_ID
         for encountered pool ids within provided "FallbackOperator" emits.
 
         Args:
-            events(int) : sorted list of FallbackOperator emits
+            events (Iterable[EventData]): List of events
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
         """
 
-        filtered_events: list[dict] = event_handler(
+        filtered_events: Iterable[EventData] = event_handler(
             events, self.__parse_events, self.__save_events, self.__filter_events
         )
 
         # gather pool ids from filtered events
-        pool_ids: list[int] = [x.args.poolId for x in filtered_events]
+        pool_ids: List[int] = [x.args.poolId for x in filtered_events]
 
         all_pks: List[tuple] = []
         for pool_id in pool_ids:

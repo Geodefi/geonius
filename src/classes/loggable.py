@@ -3,27 +3,31 @@ import os
 import logging
 from logging import StreamHandler, Formatter
 from logging.handlers import TimedRotatingFileHandler
+from typing import Any
 from src.globals import CONFIG
 
 
 class Loggable:
-    """
-    A helper class to print console statements to a file and/or a stream.
+    """A helper class to make logging easier for other classes. It initializes a logger object with given streams and files.
+    It uses the configuration file to set the log level, log directory, log file name, log file rotation interval, etc.
 
-    ...
+    Example:
+        class MyClass(Loggable):
+            def __init__(self):
+                Loggable.__init__(self, name="MY_CLASS")
+                self.logger.info("This is an info message.")
+                self.logger.error("This is an error message.")
 
     Attributes:
-        name (str): Unique name of the logger, log file and object instance using given streams.
-        logger (:obj:`Logger`): Logger instance to be utilized.
-
+        __logger_name (str): Unique name for the logger, log file and object instance using given streams, max 18 char.
+        logger (obj): Logger object to be used in the class.
     """
 
-    def __init__(self, name: str):
-        """
-        Initializes a helper loggable instance.
+    def __init__(self, name: str) -> None:
+        """Initializes a Loggable object.
 
         Args:
-                name (str): Unique name for the logger, max 18 char.
+            name (str): Unique name for the logger, log file and object instance using given streams, max 18 char.
         """
 
         if len(name) > 18:
@@ -33,13 +37,16 @@ class Loggable:
         self.logger: logging.Logger = self.__get_logger(name)
 
     def __get_logger(self, name: str) -> logging.Logger:
-        """Initializes and configures a Logger object.
+        """Initializes and returns a logger object with given streams and files.
 
         Args:
-                name (str): Unique name of the logger, log file and object instance using given streams.
+            name (str): Unique name for the logger, log file and object instance using given streams, max 18 char.
+
+        Returns:
+            logging.Logger: Logger object to be used in the class.
         """
 
-        logger = logging.getLogger(name=name)
+        logger: logging.Logger = logging.getLogger(name=name)
         logging.basicConfig()
         logger.propagate = False
 
@@ -51,19 +58,28 @@ class Loggable:
         return logger
 
     @property
-    def __level(self):
-        """Returns the logger level: DEBUG, INFO, WARNING, ERROR, CRITICAL"""
+    def __level(self) -> Any:
+        """Returns the logger level: DEBUG, INFO, WARNING, ERROR, CRITICAL.
+
+        Returns:
+            Any: Logger level name
+        """
 
         # TODO: add flag for --log-level
-        level_name = CONFIG.logger.level
+        level_name: Any = CONFIG.logger.level
+
+        # returns the level name as a string or an integer
         return logging.getLevelName(level_name)
 
     @property
-    def __file_formatter(self):
+    def __file_formatter(self) -> Formatter:
         """Returns the logger formatter for file as a property.
 
         Example formatted msg for BLOCK_DAEMON file:
-                [09:28:05] CRITICAL :: critical message
+            [09:28:05] CRITICAL :: critical message
+
+        Returns:
+            Formatter: Formatter object to be used in the logger.
         """
 
         return Formatter(
@@ -72,11 +88,14 @@ class Loggable:
         )
 
     @property
-    def __stream_formatter(self):
+    def __stream_formatter(self) -> Formatter:
         """Returns the logger formatter for stream as a property.
 
         Example formatted msg for stream:
-                [09:28:05] BLOCK_DAEMON | CRITICAL ::critical message
+            [09:28:05] BLOCK_DAEMON | CRITICAL ::critical message
+
+        Returns:
+            Formatter: Formatter object to be used in the logger.
         """
 
         return Formatter(
@@ -84,30 +103,34 @@ class Loggable:
             datefmt="%H:%M:%S",
         )
 
-    def __get_stream_handler(self):
-        """
+    def __get_stream_handler(self) -> StreamHandler:
+        """Returns an initialized Stream Handler.
+
         Returns:
-                sh (obj): Initialized Stream Handler
+            StreamHandler: Initialized and Configured Stream Handler
         """
 
-        sh = StreamHandler()
+        sh: StreamHandler = StreamHandler()
         sh.setFormatter(self.__stream_formatter)
         sh.setLevel(self.__level)
         return sh
 
-    def __get_file_handler(self, name: str):
-        """
+    def __get_file_handler(self, name: str) -> TimedRotatingFileHandler:
+        """Returns an initialized File Handler.
+
+        Args:
+            name (str): Name of the log file to be created.
+
         Returns:
-                fh (obj): Initialized and Configured File Handler
-                name (str): will be used as a file name.
+            TimedRotatingFileHandler: Initialized and Configured File Handler
         """
 
-        main_dir = CONFIG.directory
-        log_dir = CONFIG.logger.directory
-        path = os.path.join(main_dir, log_dir, name)
+        main_dir: str = CONFIG.directory
+        log_dir: str = CONFIG.logger.directory
+        path: str = os.path.join(main_dir, log_dir, name)
         if not os.path.exists(path):
             os.makedirs(path)
-        fh = TimedRotatingFileHandler(
+        fh: TimedRotatingFileHandler = TimedRotatingFileHandler(
             os.path.join(path, "log"),
             when=CONFIG.logger.when,
             interval=CONFIG.logger.interval,

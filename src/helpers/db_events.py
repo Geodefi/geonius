@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from typing import Callable, List
+from typing import Callable, List, Iterable
+from web3.types import EventData
 
 from src.classes import Database
 from src.globals import SDK, CONFIG
@@ -9,7 +10,16 @@ from src.globals import SDK, CONFIG
 pools_table: str = CONFIG.database.tables.pools.name
 
 
-def find_latest_event_block(event_name: str):
+def find_latest_event_block(event_name: str) -> int:
+    """Finds the latest block number for the given event_name in the database. If not found, returns the first block number.
+
+    Args:
+        event_name (str): Name of the event.
+
+    Returns:
+        int: Latest saved block number for the given event_name.
+    """
+
     # TODO: check db for given event_name
     return CONFIG.chains[SDK.network.name].first_block
 
@@ -122,19 +132,22 @@ def create_initiation_table() -> None:
 
 
 def event_handler(
-    events: List[dict], parser: Callable, saver: Callable, filter_func: Callable = None
+    events: Iterable[EventData],
+    parser: Callable,
+    saver: Callable,
+    filter_func: Callable = None,
 ) -> List[dict]:
     """Handles the events by filtering, parsing and saving them.
 
     Args:
-        events (list[dict]): List of events.
+        events (List[dict]): List of events.
         parser (Callable): Function to parse the events.
         saver (Callable): Function to save the events.
-        filter_func (Callable): Function to filter the events.
+        filter_func (Callable, optional): Function to filter the events. Defaults to None.
     """
     if filter_func != None:
-        events: List[dict] = filter(filter_func, events)
-    saveable_events = parser(events)
+        events: filter[EventData] = filter(filter_func, events)
+    saveable_events: List[tuple] = parser(events)
     saver(saveable_events)
 
     return events

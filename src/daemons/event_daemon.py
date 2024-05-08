@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from typing import List
+from web3.contract.contract import ContractEvent
 from src.classes import Daemon, Trigger
 from src.helpers import get_all_events
 from src.globals import SDK, CONFIG, block_seconds
@@ -8,26 +10,30 @@ from src.globals import SDK, CONFIG, block_seconds
 class EventDaemon(Daemon):
     """A type of Block Daemon that triggers every time the provided event is emitted.
     Interval is default block time (12s)
-    Task returns the events as a list.
-    ...
+    Task returns the events as a list. If no events are emitted, returns None.
 
     Attributes:
-        name (str): time_daemon
+        __recent_block (int): recent block number to be processed.
+        name (str): name of the daemon to be used when logging etc. (value: EVENT_DAEMON)
+        event (_type_): event to be checked.
+        block_period (int): number of blocks to wait before running the triggers.
+        block_identifier (int): block_identifier sets if we are looking for 'latest', 'earliest', 'pending', 'safe', 'finalized'.
     """
 
     name: str = "EVENT_DAEMON"
 
     def __init__(
         self,
-        triggers: list[Trigger],
-        event,
+        triggers: List[Trigger],
+        event: ContractEvent,
         start_block: int = CONFIG.chains[SDK.network.name].first_block,
-    ):
-        """Initalize an event daemon
+    ) -> None:
+        """Initializes a EventDaemon object. The daemon will run the triggers on every event emitted.
+
         Args:
-            triggers (list[Trigger]): List of initialized Trigger instances
-            event (_type_): event to be checked.
-            start_block (int, optional): First block to look for given event.
+            triggers (List[Trigger]): List of initialized Trigger instances.
+            event (ContractEvent): event to be checked.
+            start_block (int, optional): block number to start checking for events. Default is what is set in the config.
         """
 
         Daemon.__init__(
@@ -46,11 +52,12 @@ class EventDaemon(Daemon):
 
         self.__recent_block: int = start_block
 
-    def listen_events(self) -> dict:
-        """The function that runs every 12 seconds, checks if there are new emits.
+    def listen_events(self) -> List[dict]:
+        """The main task for the EventDaemon. Checks for new events. If any, runs the triggers and returns the events.
+        If no events are emitted, returns None.
 
         Returns:
-            list : sorted list of events emitted since the last check.
+            List[dict]: list of events as dictionaries.
         """
 
         # eth.block_number or eth.get_block_number() can also be used

@@ -1,20 +1,25 @@
 import json
 from subprocess import check_output
+from typing import Any
 import geodefi
+
 from src.globals.sdk import SDK
 from src.globals.env import ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE
 from src.globals.config import CONFIG
 
 
 def generate_deposit_data(
-    withdrawaladdress: str,
-    depositvalue: str,
-) -> list:
-    """Get a fresh deposit data from ethdo
+    withdrawal_address: str,
+    deposit_value: str,
+) -> Any:
+    """Generates the deposit data for a new validator proposal.
 
     Args:
-        withdrawaladdress (str): WithdrawalPackage contract address of the desired pool
-        depositvalue (str): 1 ETH on proposals & 31 ETH on stake calls.
+        withdrawal_address (str): WithdrawalPackage contract address of the desired pool to withdraw the deposit.
+        deposit_value (str): The amount of deposit to be made, 1 ETH on proposal, 31 ETH on stake.
+
+    Returns:
+        Any: Returns the deposit data in JSON format.
     """
 
     res: str = check_output(
@@ -24,8 +29,8 @@ def generate_deposit_data(
             "depositdata",
             f"--validatoraccount={CONFIG.ethdo.account_name}",
             f"--passphrase={ACCOUNT_PASSPHRASE}",
-            f"--withdrawaladdress={withdrawaladdress}",
-            f"--depositvalue={depositvalue}",
+            f"--withdrawaladdress={withdrawal_address}",
+            f"--depositvalue={deposit_value}",
             f"--forkversion={geodefi.globals.GENESIS_FORK_VERSION[SDK.network]}",
             "--launchpad",
         ]
@@ -34,8 +39,12 @@ def generate_deposit_data(
     return json.loads(res)
 
 
-def create_wallet() -> list:
-    """Creates a new wallet to be used on ethdo"""
+def create_wallet() -> Any:
+    """Creates a new wallet to be used on ethdo
+
+    Returns:
+        Any: Returns the wallet data in JSON format.
+    """
 
     res: str = check_output(
         [
@@ -50,8 +59,12 @@ def create_wallet() -> list:
     return json.loads(res)
 
 
-def create_account() -> list:
-    """Creates a new account on given ethdo wallet"""
+def create_account() -> Any:
+    """Creates a new account on given ethdo wallet
+
+    Returns:
+        Any: Returns the account data in JSON format.
+    """
 
     res: str = check_output(
         [
@@ -67,8 +80,15 @@ def create_account() -> list:
     return json.loads(res)
 
 
-def exit_validator(pubkey: str) -> list:
-    """Triggers a validator exit for given pubkey"""
+def exit_validator(pubkey: str) -> Any:
+    """Triggers a validator exit for given pubkey
+
+    Args:
+        pubkey (str): The validator pubkey to exit
+
+    Returns:
+        Any: Returns the exit data in JSON format.
+    """
 
     res: str = check_output(
         [

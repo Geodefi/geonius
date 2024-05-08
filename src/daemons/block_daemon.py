@@ -1,32 +1,41 @@
 # -*- coding: utf-8 -*-
 
+from typing import List
 from src.classes import Daemon, Trigger
 from src.globals import SDK, CONFIG, block_seconds
 
 
 class BlockDaemon(Daemon):
-    """
-    A Daemon that triggers provided actions on every X block on the blockchain.
+    """A Daemon that triggers provided actions on every X block on the blockchain.
     Interval is default block time (12s).
     Task returns: last block number which activates the triggers.
-    ...
+
+    Example:
+        def action():
+            print(datetime.datetime.now())
+
+        t = Trigger(action)
+        b = BlockDaemon(triggers=[t])
 
     Attributes:
-        name (str): block_daemon
-        last_block (int): latest block that is checked.
+        __recent_block (int): recent block number to be processed.
+        name (str): name of the daemon to be used when logging etc. (value: BLOCK_DAEMON)
+        block_period (int): number of blocks to wait before running the triggers.
+        block_identifier (int): block_identifier sets if we are looking for 'latest', 'earliest', 'pending', 'safe', 'finalized'.
     """
 
     name: str = "BLOCK_DAEMON"
 
     def __init__(
         self,
-        triggers: list[Trigger],
+        triggers: List[Trigger],
         block_period: int = int(CONFIG.chains[SDK.network.name].period),
-    ):
-        """Initializes the configured daemon.
+    ) -> None:
+        """Initializes a BlockDaemon object. The daemon will run the triggers on every X block.
+
         Args:
-            triggers (list): List of initialized Trigger instances
-            event (str): event to be checked.
+            triggers (List[Trigger]): List of initialized Trigger instances.
+            block_period (int, optional): number of blocks to wait before running the triggers. Default is what is set in the config.
         """
         Daemon.__init__(
             self,
@@ -45,10 +54,10 @@ class BlockDaemon(Daemon):
     def listen_blocks(self) -> int:
         """The main task for the BlockDaemon.
         1. Checks for new blocks.
-        2. On every X block (period by config), runs the triggers.
+        2. On every X block (period by config), runs the triggers. Returns the last block number.
 
         Returns:
-            int : latest block.
+            int: last block number which activates the triggers.
         """
         # eth.block_number or eth.get_block_number() can also be used
         # but this allows block_identifier.

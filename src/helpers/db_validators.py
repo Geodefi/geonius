@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import List
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Database
 from src.globals import SDK, CONFIG
@@ -8,8 +9,8 @@ from src.utils import multithread
 validators_table: str = CONFIG.database.tables.pools.name
 
 
-def create_validators_table():
-    """Creates the sql database table for Pools."""
+def create_validators_table() -> None:
+    """Creates the sql database table for Validators."""
 
     with Database() as db:
 
@@ -31,21 +32,29 @@ def create_validators_table():
         )
 
 
-def drop_validators_table():
-    """Removes Pools the table from database"""
+def drop_validators_table() -> None:
+    """Removes Validators table from the database."""
 
     with Database() as db:
         db.execute(f"""DROP TABLE IF EXISTS {validators_table}""")
 
 
-def reinitialize_validators_table():
+def reinitialize_validators_table() -> None:
     """Removes validators table and creates an empty one."""
+
     drop_validators_table()
     create_validators_table()
 
 
-def fetch_validator(pubkey: str) -> list:
-    """Gathers and returns all the fresh data from chain without saving it to db."""
+def fetch_validator(pubkey: str) -> dict:
+    """Fetches the data for a validator with the given pubkey. Returns the gathered data.
+
+    Args:
+        pubkey (str): public key of the validator
+
+    Returns:
+        dict: dictionary containing the validator info
+    """
 
     val = SDK.portal.validator(pubkey)
 
@@ -62,13 +71,25 @@ def fetch_validator(pubkey: str) -> list:
     }
 
 
-def fetch_validators_batch(pks: list[str]) -> list:
-    """Gathers and returns all the fresh data from chain without saving it to db."""
+def fetch_validators_batch(pks: List[str]) -> List[dict]:
+    """Fetches the data for validators within the given pks list. Returns the gathered data.
+
+    Args:
+        pks (List[str]): pubkeys that will be fetched
+
+    Returns:
+        List[dict]: list of dictionaries containing the validator info
+    """
+
     return multithread(fetch_validator, pks)
 
 
-def insert_many_validators(new_validators: list[dict]):
-    """Creates a new row with given id and info for a given list of dicts."""
+def insert_many_validators(new_validators: List[dict]) -> None:
+    """Inserts the given validators data into the database.
+
+    Args:
+        new_validators (List[dict]): list of dictionaries containing the validator info
+    """
 
     with Database() as db:
         db.executemany(
@@ -91,17 +112,22 @@ def insert_many_validators(new_validators: list[dict]):
         )
 
 
-def fill_validators_table(pks: list[int]):
-    """Updates the validators table for Operator' owned validators.
+def fill_validators_table(pks: List[int]) -> None:
+    """Fills the validators table with the data of the given pubkeys.
 
     Args:
-        pks (list[int]): list of pubkeys to be filled
+        pks (List[int]): pubkeys that will be fetched and inserted
     """
     insert_many_validators(fetch_validators_batch(pks))
 
 
-def save_local_state(pubkey: int, local_state: VALIDATOR_STATE):
-    """Sets local_state on db, which will be useful in the future bebek"""
+def save_local_state(pubkey: int, local_state: VALIDATOR_STATE) -> None:
+    """Sets local_state on db when it changes.
+
+    Args:
+        pubkey (int): public key of the validator
+        local_state (VALIDATOR_STATE): new local state of the validator
+    """
 
     with Database() as db:
         db.execute(
@@ -113,8 +139,14 @@ def save_local_state(pubkey: int, local_state: VALIDATOR_STATE):
         )
 
 
-def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE):
-    """Sets portal_state on db when it changes on chain"""
+def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE) -> None:
+    """Sets portal_state on db when it changes on chain.
+
+    Args:
+        pubkey (int): public key of the validator
+        portal_state (VALIDATOR_STATE): new portal state of the validator
+
+    """
 
     with Database() as db:
         db.execute(
