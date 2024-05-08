@@ -50,9 +50,7 @@ class Daemon(Loggable):
         self.__set_triggers(triggers)
 
         # TODO: should consider using daemon threads
-        self.__worker = Thread(
-            name="background", target=self.__loop, args=(initial_delay,)
-        )
+        self.__worker = Thread(name="background", target=self.__loop)
         self.start_flag: Event = Event()
         self.stop_flag: Event = Event()
 
@@ -105,7 +103,7 @@ class Daemon(Loggable):
 
         self.triggers: list[Trigger] = triggers
 
-    def __loop(self, initial_delay: int) -> None:
+    def __loop(self) -> None:
         """The main function of the Daemon, the loop.
         Waits for self.interval and checks for the triggers after running the tasks.
 
@@ -113,7 +111,7 @@ class Daemon(Loggable):
             initial_delay (int): Initial delay before starting the loop.
         """
 
-        sleep(initial_delay)
+        sleep(self.__initial_delay)
 
         while not self.stop_flag.wait(self.interval):
             try:
