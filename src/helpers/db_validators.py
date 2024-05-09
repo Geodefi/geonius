@@ -90,7 +90,6 @@ def insert_many_validators(new_validators: list[dict]) -> None:
 
     with Database() as db:
         db.executemany(
-            # wrong amount of question marks
             f"INSERT INTO {validators_table} VALUES (?,?,?,?,?,?,?,?,?)",
             [
                 (

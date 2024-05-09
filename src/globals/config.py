@@ -8,6 +8,15 @@ from src.globals.sdk import SDK
 
 
 def __apply_flags(config: AttributeDict):
+    """Applies the flags to the configuration. If a flag is not set, the configuration is not changed.
+
+    Args:
+        config (AttributeDict): the configuration as an AttributeDict.
+
+    Returns:
+        AttributeDict: the configuration with the flags applied.
+    """
+
     if flags.no_log_stream:
         config.logger.file = False
     if flags.no_log_file:
@@ -51,6 +60,11 @@ def __apply_flags(config: AttributeDict):
 
 
 def __init_config() -> AttributeDict:
+    """Initializes the configuration from the config.json file.
+
+    Returns:
+        AttributeDict: the configuration as an AttributeDict.
+    """
     # catch configuration variables
     config_dict: dict = json.load(open("config.json", encoding="utf-8"))
 
