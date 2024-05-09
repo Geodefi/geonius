@@ -104,8 +104,7 @@ def main():
 
     This function is called when the program is run.
 
-    It initializes the SDK, sets the web3 account, initializes the databases,
-    and sets up the daemons.
+    initializes the databases and sets up the daemons.
     """
 
     # make sure database is ok
