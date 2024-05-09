@@ -61,10 +61,8 @@ class FallbackTrigger(Trigger):
             pool_id: int = event.args.poolId
             fallback_threshold: int = event.args.threshold
             block_number: int = event.blockNumber
-            block_hash: str = event.blockHash
-            log_index: int = event.logIndex
             transaction_index: int = event.transactionIndex
-            transaction_hash: str = event.transactionHash
+            log_index: int = event.logIndex
             address: str = event.address
 
             saveable_events.append(
@@ -72,10 +70,8 @@ class FallbackTrigger(Trigger):
                     pool_id,
                     fallback_threshold,
                     block_number,
-                    block_hash,
-                    log_index,
                     transaction_index,
-                    transaction_hash,
+                    log_index,
                     address,
                 )
             )
@@ -95,9 +91,7 @@ class FallbackTrigger(Trigger):
                 events,
             )
 
-    def update_fallback_operator(
-        self, events: Iterable[EventData], *args, **kwargs
-    ) -> None:
+    def update_fallback_operator(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Checks if the fallback operator is set as script's OPERATOR_ID
         for encountered pool ids within provided "FallbackOperator" emits.
 

@@ -62,10 +62,8 @@ class DelegationTrigger(Trigger):
             operator_id: str = event.args.operatorId
             allowance: int = event.args.allowance
             block_number: int = event.blockNumber
-            block_hash: str = event.blockHash
-            log_index: int = event.logIndex
             transaction_index: int = event.transactionIndex
-            transaction_hash: str = event.transactionHash
+            log_index: int = event.logIndex
             address: str = event.address
 
             saveable_events.append(
@@ -74,10 +72,8 @@ class DelegationTrigger(Trigger):
                     operator_id,
                     allowance,
                     block_number,
-                    block_hash,
-                    log_index,
                     transaction_index,
-                    transaction_hash,
+                    log_index,
                     address,
                 )
             )

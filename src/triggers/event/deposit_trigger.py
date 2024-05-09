@@ -46,10 +46,8 @@ class DepositTrigger(Trigger):
             bought_amount: int = event.args.boughtgETH
             minted_amount: int = event.args.mintedgETH
             block_number: int = event.blockNumber
-            block_hash: str = event.blockHash
             log_index: int = event.logIndex
             transaction_index: int = event.transactionIndex
-            transaction_hash: str = event.transactionHash
             address: str = event.address
 
             saveable_events.append(
@@ -58,10 +56,8 @@ class DepositTrigger(Trigger):
                     bought_amount,
                     minted_amount,
                     block_number,
-                    block_hash,
-                    log_index,
                     transaction_index,
-                    transaction_hash,
+                    log_index,
                     address,
                 )
             )

@@ -33,10 +33,8 @@ def create_alienation_table() -> None:
                 CREATE TABLE IF NOT EXISTS alienation (
                     pk TEXT NOT NULL PRIMARY KEY,
                     block_number INTEGER NOT NULL
-                    block_hash TEXT NOT NULL
-                    log_index INTEGER NOT NULL
                     transaction_index INTEGER NOT NULL
-                    transaction_hash TEXT NOT NULL
+                    log_index INTEGER NOT NULL
                     address TEXT NOT NULL
                 )
         """
@@ -54,10 +52,8 @@ def create_delegation_table() -> None:
                     operator_id TEXT NOT NULL,
                     allowance TEXT NOT NULL
                     block_number INTEGER NOT NULL
-                    block_hash TEXT NOT NULL
-                    log_index INTEGER NOT NULL
                     transaction_index INTEGER NOT NULL
-                    transaction_hash TEXT NOT NULL
+                    log_index INTEGER NOT NULL
                     address TEXT NOT NULL
                     FOREIGN KEY (pool_id) REFERENCES {pools_table}(id),
                     PRIMARY KEY (pool_id, operator_id)
@@ -77,10 +73,8 @@ def create_deposit_table() -> None:
                     bought_amount TEXT NOT NULL,
                     minted_amount TEXT NOT NULL,
                     block_number INTEGER NOT NULL
-                    block_hash TEXT NOT NULL
-                    log_index INTEGER NOT NULL
                     transaction_index INTEGER NOT NULL
-                    transaction_hash TEXT NOT NULL
+                    log_index INTEGER NOT NULL
                     address TEXT NOT NULL
                     FOREIGN KEY (pool_id) REFERENCES {pools_table}(id),
                     PRIMARY KEY (pool_id)
@@ -99,10 +93,8 @@ def create_fallback_table() -> None:
                     pool_id TEXT NOT NULL,
                     fallback_threshold INTEGER NOT NULL,
                     block_number INTEGER NOT NULL
-                    block_hash TEXT NOT NULL
-                    log_index INTEGER NOT NULL
                     transaction_index INTEGER NOT NULL
-                    transaction_hash TEXT NOT NULL
+                    log_index INTEGER NOT NULL
                     address TEXT NOT NULL
                     FOREIGN KEY (pool_id) REFERENCES {pools_table}(id),
                     PRIMARY KEY (pool_id)
@@ -120,10 +112,8 @@ def create_initiation_table() -> None:
                 CREATE TABLE IF NOT EXISTS initiation (
                     pool_id TEXT NOT NULL,
                     block_number INTEGER NOT NULL
-                    block_hash TEXT NOT NULL
-                    log_index INTEGER NOT NULL
                     transaction_index INTEGER NOT NULL
-                    transaction_hash TEXT NOT NULL
+                    log_index INTEGER NOT NULL
                     address TEXT NOT NULL
                     PRIMARY KEY (pool_id)
                 )

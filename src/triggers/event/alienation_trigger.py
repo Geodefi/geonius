@@ -73,20 +73,16 @@ class AlienationTrigger(Trigger):
         for event in events:
             pubkey: int = event.args.pubkey
             block_number: int = event.blockNumber
-            block_hash: str = event.blockHash
-            log_index: int = event.logIndex
             transaction_index: int = event.transactionIndex
-            transaction_hash: str = event.transactionHash
+            log_index: int = event.logIndex
             address: str = event.address
 
             saveable_events.append(
                 (
                     pubkey,
                     block_number,
-                    block_hash,
-                    log_index,
                     transaction_index,
-                    transaction_hash,
+                    log_index,
                     address,
                 )
             )
