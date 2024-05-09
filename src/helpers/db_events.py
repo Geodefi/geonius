@@ -4,10 +4,7 @@ from typing import Callable, Iterable
 from web3.types import EventData
 
 from src.classes import Database
-from src.globals import SDK, CONFIG
-
-
-pools_table: str = CONFIG.database.tables.pools.name
+from src.globals import SDK, CONFIG, pools_table
 
 
 def find_latest_event_block(event_name: str) -> int:

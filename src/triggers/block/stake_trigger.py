@@ -8,12 +8,10 @@ from src.helpers.db_validators import (
     save_local_state,
     save_portal_state,
 )
-from src.globals import CONFIG
+from src.globals import pools_table
 from src.helpers.portal import get_StakeParams
 from src.helpers.validator import check_and_stake
 from src.utils import multithread
-
-pools_table: str = CONFIG.database.tables.pools.name
 
 
 class StakeTrigger(Trigger):

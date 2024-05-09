@@ -3,11 +3,7 @@
 from src.helpers.portal import get_surplus, get_operatorAllowance, get_fallback_operator
 from src.classes import Database
 from src.utils import multithread
-from src.globals import CONFIG, OPERATOR_ID
-
-# TODO: consider fixing the table name instead of using the config
-#       user can change the table name in the config file and it will cause an problems
-pools_table: str = CONFIG.database.tables.pools.name
+from src.globals import pools_table, OPERATOR_ID
 
 
 def create_pools_table() -> None:

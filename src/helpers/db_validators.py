@@ -2,10 +2,8 @@
 
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Database
-from src.globals import SDK, CONFIG
+from src.globals import SDK, validators_table
 from src.utils import multithread
-
-validators_table: str = CONFIG.database.tables.validators.name
 
 
 def create_validators_table() -> None:

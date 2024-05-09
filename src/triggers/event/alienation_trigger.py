@@ -4,15 +4,13 @@ from typing import Any, Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Trigger, Database
-from src.globals import CONFIG
+from src.globals import validators_table
 from src.helpers.db_events import create_alienation_table, event_handler
 from src.helpers.db_validators import (
     create_validators_table,
     save_portal_state,
     save_local_state,
 )
-
-validators_table: str = CONFIG.database.tables.validators.name
 
 
 class AlienationTrigger(Trigger):

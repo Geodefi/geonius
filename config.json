@@ -8,11 +8,7 @@
     "backupCount": 30
   },
   "database": {
-    "directory": "db",
-    "tables": {
-      "pools": { "name": "Pools" },
-      "validators": { "name": "Validators" }
-    }
+    "directory": "db"
   },
   "chains": {
     "holesky": {
