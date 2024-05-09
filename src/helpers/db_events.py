@@ -131,6 +131,27 @@ def create_initiation_table() -> None:
         )
 
 
+def create_exit_request_table() -> None:
+    """Creates the sql database table for Exit Request."""
+
+    # TODO: discuss what is address and why it is needed if needed add it to the table
+    #       else remove it from other tables as well
+    with Database() as db:
+        db.execute(
+            f"""
+                CREATE TABLE IF NOT EXISTS exit_request (
+                    pk TEXT NOT NULL,
+                    block_number INTEGER NOT NULL,
+                    log_index INTEGER NOT NULL,
+                    transaction_index INTEGER NOT NULL,
+                    address TEXT NOT NULL,
+                    FOREIGN KEY (pk) REFERENCES validators(pk),
+                    PRIMARY KEY (pk)
+                )
+        """
+        )
+
+
 def event_handler(
     events: Iterable[EventData],
     parser: Callable,
