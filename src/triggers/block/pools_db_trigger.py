@@ -38,5 +38,4 @@ class PoolsDBTrigger(Trigger):
 
         reinitialize_pools_table()
 
-        ids: list[int] = get_all_pool_ids()
-        fill_pools_table(ids)
+        fill_pools_table(get_all_pool_ids())
