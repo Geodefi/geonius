@@ -5,7 +5,7 @@ from src.classes import Database
 from src.globals import SDK, CONFIG
 from src.utils import multithread
 
-validators_table: str = CONFIG.database.tables.pools.name
+validators_table: str = CONFIG.database.tables.validators.name
 
 
 def create_validators_table() -> None:
@@ -20,12 +20,12 @@ def create_validators_table() -> None:
                     portal_index INTEGER NOT NULL UNIQUE,
                     beacon_index INTEGER NOT NULL UNIQUE,
                     pubkey TEXT NOT NULL PRIMARY KEY,
-                    pool_id TEXT NOT NULL PRIMARY KEY,
+                    pool_id TEXT NOT NULL,
                     local_state TEXT NOT NULL,
                     portal_state TEXT NOT NULL,
                     signature31 INTEGER NOT NULL,
                     withdrawal_credentials TEXT NOT NULL,
-                    exit_epoch INTEGER,
+                    exit_epoch INTEGER
                 )
         """
         )
@@ -93,7 +93,7 @@ def insert_many_validators(new_validators: list[dict]) -> None:
     with Database() as db:
         db.executemany(
             # wrong amount of question marks
-            f"INSERT INTO {validators_table} VALUES (?,?,?,?,?)",
+            f"INSERT INTO {validators_table} VALUES (?,?,?,?,?,?,?,?,?)",
             [
                 (
                     a["portal_index"],

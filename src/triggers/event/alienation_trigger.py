@@ -12,7 +12,7 @@ from src.helpers.db_validators import (
     save_local_state,
 )
 
-validators_table: str = CONFIG.database.tables.pools.name
+validators_table: str = CONFIG.database.tables.validators.name
 
 
 class AlienationTrigger(Trigger):
