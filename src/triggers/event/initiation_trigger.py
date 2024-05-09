@@ -64,8 +64,8 @@ class InitiationTrigger(Trigger):
                 (
                     pool_id,
                     block_number,
-                    log_index,
                     transaction_index,
+                    log_index,
                     address,
                 )
             )
