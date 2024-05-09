@@ -39,7 +39,7 @@ class StakeTrigger(Trigger):
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
-        # TODO: add flag for --min-proposal-queue --max-proposal-delay etc.
+        # TODO: utilize flags: --min-proposal-queue --max-proposal-delay
         verification_index: int = get_StakeParams()[4]
 
         # check if there are any pending validator proposals.

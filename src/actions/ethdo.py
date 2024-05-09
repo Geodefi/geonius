@@ -26,7 +26,7 @@ def generate_deposit_data(
             "ethdo",
             "validator",
             "depositdata",
-            f"--validatoraccount={CONFIG.ethdo.account_name}",
+            f"--validatoraccount={CONFIG.ethdo.account}",
             f"--passphrase={ACCOUNT_PASSPHRASE}",
             f"--withdrawaladdress={withdrawal_address}",
             f"--depositvalue={deposit_value}",
@@ -50,7 +50,7 @@ def create_wallet() -> dict:
             "ethdo",
             "wallet",
             "create",
-            f"--wallet={CONFIG.ethdo.wallet_name}",
+            f"--wallet={CONFIG.ethdo.wallet}",
             f"--wallet-passphrase={WALLET_PASSPHRASE}",
             f"-type=hd",
         ]
@@ -70,7 +70,7 @@ def create_account() -> dict:
             "ethdo",
             "account",
             "create",
-            f"--account={CONFIG.ethdo.account_name}",
+            f"--account={CONFIG.ethdo.account}",
             f"--passphrase={ACCOUNT_PASSPHRASE}",
             f"--wallet-passphrase={WALLET_PASSPHRASE}",
         ]

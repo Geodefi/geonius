@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
+from .config import CONFIG
+from .sdk import SDK
 
-# assuming avg 1 hour  == 300 blocks
-hour_blocks: int = 300
+hour_blocks: int = 3600 // CONFIG.chains[SDK.network.name].interval
 
-# assuming avg  1 block == 12 sec
-block_seconds: int = 12
 
-pools_table = "pools"
-validators_table = "validators"
-
-# number of blocks to divide the given range into multiple ranges while searching for events
-MAX_BLOCK_RANGE: int = 3_000  # TODO: might be given as a flag param
+pools_table: str = "pools"
+validators_table: str = "validators"

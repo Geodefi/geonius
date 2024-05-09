@@ -18,7 +18,7 @@ def find_latest_event_block(event_name: str) -> int:
     """
 
     # TODO: check db for given event_name
-    return CONFIG.chains[SDK.network.name].first_block
+    return CONFIG.chains[SDK.network.name].start
 
 
 def create_alienation_table() -> None:

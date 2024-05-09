@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from src.classes import Daemon, Trigger
-from src.globals import SDK, CONFIG, block_seconds
+from src.globals import SDK, CONFIG
 
 
 class BlockDaemon(Daemon):
@@ -39,7 +39,7 @@ class BlockDaemon(Daemon):
         Daemon.__init__(
             self,
             name=self.name,
-            interval=block_seconds,
+            interval=CONFIG.chains[SDK.network.name].interval,
             task=self.listen_blocks,
             triggers=triggers,
         )
@@ -47,7 +47,7 @@ class BlockDaemon(Daemon):
         # block_identifier sets if we are looking for 'latest', 'earliest', 'pending', 'safe', 'finalized'.
         self.block_identifier: int = CONFIG.chains[SDK.network.name].identifier
 
-        self.__recent_block: int = CONFIG.chains[SDK.network.name].first_block
+        self.__recent_block: int = CONFIG.chains[SDK.network.name].start
         self.block_period: int = block_period
 
     def listen_blocks(self) -> int:

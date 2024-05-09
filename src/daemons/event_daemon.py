@@ -3,7 +3,7 @@
 from web3.contract.contract import ContractEvent
 from src.classes import Daemon, Trigger
 from src.helpers import get_all_events
-from src.globals import SDK, CONFIG, block_seconds
+from src.globals import SDK, CONFIG
 
 
 class EventDaemon(Daemon):
@@ -25,7 +25,7 @@ class EventDaemon(Daemon):
         self,
         triggers: list[Trigger],
         event: ContractEvent,
-        start_block: int = CONFIG.chains[SDK.network.name].first_block,
+        start_block: int = CONFIG.chains[SDK.network.name].start,
     ) -> None:
         """Initializes a EventDaemon object. The daemon will run the triggers on every event emitted.
 
@@ -38,7 +38,7 @@ class EventDaemon(Daemon):
         Daemon.__init__(
             self,
             name=self.name,
-            interval=block_seconds + 1,  # TODO: this will be overriden by a flag
+            interval=CONFIG.chains[SDK.network.name].interval + 1,
             task=self.listen_events,
             triggers=triggers,
         )
@@ -56,7 +56,7 @@ class EventDaemon(Daemon):
         If no events are emitted, returns None.
 
         Returns:
-            List[dict]: list of events as dictionaries.
+            list[dict]: list of events as dictionaries.
         """
 
         # eth.block_number or eth.get_block_number() can also be used

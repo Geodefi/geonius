@@ -54,7 +54,6 @@ def check_and_propose(pool_id: int) -> list[tuple]:
         list[tuple]: list of tuples containing tx_receipt and pks
     """
 
-    # TODO: this function should accept some flags such as:
     max_allowed: int = max_proposals_count(pool_id)
 
     for i in range(max_allowed):

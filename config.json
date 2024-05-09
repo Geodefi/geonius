@@ -1,24 +1,28 @@
 {
   "directory": "geonius",
   "logger": {
+    "file": "True",
+    "stream": "True",
     "directory": "logs",
     "level": "DEBUG",
     "when": "midnight",
     "interval": 1,
-    "backupCount": 30
+    "backup": 30
   },
   "database": {
     "directory": "db"
   },
   "chains": {
     "holesky": {
-      "first_block": 1463900,
+      "start": 1463900,
       "identifier": "latest",
-      "period": "1"
+      "period": "1",
+      "interval": "12",
+      "range": "3000"
     }
   },
   "ethdo": {
-    "wallet_name": "geonius",
-    "account_name": "validators"
+    "wallet": "geonius",
+    "account": "validators"
   }
 }

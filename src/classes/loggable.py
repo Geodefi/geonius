@@ -50,10 +50,11 @@ class Loggable:
         logging.basicConfig()
         logger.propagate = False
 
-        # TODO: add flag for --no-log-stream
-        logger.addHandler(self.__get_stream_handler())
-        # TODO: add flag for --no-log-file
-        logger.addHandler(self.__get_file_handler(name=name))
+        if CONFIG.logger.stream:
+            logger.addHandler(self.__get_stream_handler())
+
+        if CONFIG.logger.file:
+            logger.addHandler(self.__get_file_handler(name=name))
 
         return logger
 
@@ -65,7 +66,6 @@ class Loggable:
             Any: Logger level name
         """
 
-        # TODO: add flag for --log-level
         level_name: str = CONFIG.logger.level
 
         # returns the level name as a string or an integer
@@ -134,7 +134,7 @@ class Loggable:
             os.path.join(path, "log"),
             when=CONFIG.logger.when,
             interval=CONFIG.logger.interval,
-            backupCount=CONFIG.logger.backupCount,
+            backupCount=CONFIG.logger.backup,
         )
         fh.suffix = "%Y-%m-%d"
 
