@@ -6,8 +6,15 @@ from src.globals.exceptions import CouldNotConnect
 from src.globals.env import EXECUTION_API, CONSENSUS_API, PRIVATE_KEY
 
 
-def __set_web3_account(sdk: Geode):
-    """Sets the web3 account to the private key provided in the environment variables."""
+def __set_web3_account(sdk: Geode) -> Geode:
+    """Sets the web3 account to the private key provided in the environment variables.
+
+    Args:
+        sdk: Initialized Geode SDK instance.
+
+    Returns:
+        Geode: Initialized Geode SDK instance.
+    """
 
     # Create account on Geode's web3py instance
     acct = sdk.w3.eth.account.from_key(PRIVATE_KEY)

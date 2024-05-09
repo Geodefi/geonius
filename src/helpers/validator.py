@@ -19,7 +19,7 @@ def max_proposals_count(pool_id: int) -> int:
     Returns:
         int: Maximum possible proposals count
     """
-
+    # TODO: remove allowance from database and call get_operatorAllowance
     with Database() as db:
         db.execute(
             f"""

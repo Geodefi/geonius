@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from typing import Any
 from itertools import repeat
 from geodefi.globals import ID_TYPE
 from geodefi.utils import to_bytes32, get_key
@@ -7,8 +8,7 @@ from src.utils import multithread
 
 
 # pylint: disable-next=invalid-name
-# TODO: is return type correct? should be list[dict]? or dict? or list[Any]? Change internal docstring to reflect that.
-def get_StakeParams() -> list:
+def get_StakeParams() -> list[Any]:
     """Returns the result of portal.StakeParams function.
 
     Returns:
