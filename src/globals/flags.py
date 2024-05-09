@@ -123,4 +123,4 @@ parser.add_argument(
     help="deafult ethdo account name to be created/used",
 )
 
-flags = parser.parse_args()
+flags, unknown = parser.parse_known_args()

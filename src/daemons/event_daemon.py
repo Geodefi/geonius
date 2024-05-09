@@ -38,7 +38,7 @@ class EventDaemon(Daemon):
         Daemon.__init__(
             self,
             name=self.name,
-            interval=CONFIG.chains[SDK.network.name].interval + 1,
+            interval=int(CONFIG.chains[SDK.network.name].interval) + 1,
             task=self.listen_events,
             triggers=triggers,
         )

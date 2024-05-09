@@ -39,7 +39,7 @@ class BlockDaemon(Daemon):
         Daemon.__init__(
             self,
             name=self.name,
-            interval=CONFIG.chains[SDK.network.name].interval,
+            interval=int(CONFIG.chains[SDK.network.name].interval),
             task=self.listen_blocks,
             triggers=triggers,
         )

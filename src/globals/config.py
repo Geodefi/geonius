@@ -30,18 +30,18 @@ def __apply_flags(config: AttributeDict):
         config.logger.interval = flags.logger_interval
     if flags.logger_backup:
         config.logger.backup = flags.logger_backup
-    if flags.database.directory:
+    if flags.database_directory:
         config.database.directory = flags.database_directory
     if flags.chain_start:
         config.chains[SDK.network.name].start = flags.chain_start
     if flags.chain_identifier:
         config.chains[SDK.network.name].identifier = flags.chain_identifier
     if flags.chain_period:
-        config.chains[SDK.network.name].period = flags.chain_period
+        config.chains[SDK.network.name].period = int(flags.chain_period)
     if flags.chain_interval:
-        config.chains[SDK.network.name].interval = flags.chain_interval
+        config.chains[SDK.network.name].interval = int(flags.chain_interval)
     if flags.chain_range:
-        config.chains[SDK.network.name].range = flags.chain_range
+        config.chains[SDK.network.name].range = int(flags.chain_range)
     if flags.ethdo_wallet:
         config.ethdo.wallet = flags.ethdo_wallet
     if flags.ethdo_account:
