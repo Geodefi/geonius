@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
 from src.helpers.portal import get_surplus, get_operatorAllowance, get_fallback_operator
 from src.classes import Database
 from src.utils import multithread
@@ -43,22 +42,22 @@ def reinitialize_pools_table() -> None:
     create_pools_table()
 
 
-def fetch_pools_batch(ids: List[int]) -> List[dict]:
+def fetch_pools_batch(ids: list[int]) -> list[dict]:
     """Fetches the data for pools within the given ids list. Returns the gathered data.
 
     Args:
-        ids (List[int]): pool IDs that will be fetched
+        ids (list[int]): pool IDs that will be fetched
 
     Returns:
-        List[dict]: list of dictionaries containing the pool info, in format of [{portal_index: val, id: val,...},...]
+        list[dict]: list of dictionaries containing the pool info, in format of [{portal_index: val, id: val,...},...]
     """
 
-    surpluses: List[int] = multithread(get_surplus, ids)
-    allowances: List[int] = multithread(get_operatorAllowance, ids)
-    fallback_operators: List[int] = multithread(get_fallback_operator, ids)
+    surpluses: list[int] = multithread(get_surplus, ids)
+    allowances: list[int] = multithread(get_operatorAllowance, ids)
+    fallback_operators: list[int] = multithread(get_fallback_operator, ids)
 
     # transpose the info and insert all the pools
-    pools_transposed: List[dict] = [
+    pools_transposed: list[dict] = [
         {
             "portal_index": portal_index,
             "id": id,
@@ -73,11 +72,11 @@ def fetch_pools_batch(ids: List[int]) -> List[dict]:
     return pools_transposed
 
 
-def insert_many_pools(new_pools: List[dict]) -> None:
+def insert_many_pools(new_pools: list[dict]) -> None:
     """Inserts the given pools data into the database.
 
     Args:
-        new_pools (List[dict]): list of dictionaries containing the pool info, in format of [{portal_index: val, id: val,...},...]
+        new_pools (list[dict]): list of dictionaries containing the pool info, in format of [{portal_index: val, id: val,...},...]
     """
 
     with Database() as db:
@@ -96,11 +95,11 @@ def insert_many_pools(new_pools: List[dict]) -> None:
         )
 
 
-def fill_pools_table(ids: List[int]) -> None:
+def fill_pools_table(ids: list[int]) -> None:
     """Fills the pools table with the data of the given pool IDs.
 
     Args:
-        ids (List[int]): pool IDs that will be fetched and inserted into the database
+        ids (list[int]): pool IDs that will be fetched and inserted into the database
     """
 
     insert_many_pools(fetch_pools_batch(ids))

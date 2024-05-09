@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
 from src.classes import Daemon, Trigger
 from src.globals import SDK, CONFIG, block_seconds
 
@@ -28,13 +27,13 @@ class BlockDaemon(Daemon):
 
     def __init__(
         self,
-        triggers: List[Trigger],
+        triggers: list[Trigger],
         block_period: int = int(CONFIG.chains[SDK.network.name].period),
     ) -> None:
         """Initializes a BlockDaemon object. The daemon will run the triggers on every X block.
 
         Args:
-            triggers (List[Trigger]): List of initialized Trigger instances.
+            triggers (list[Trigger]): list of initialized Trigger instances.
             block_period (int, optional): number of blocks to wait before running the triggers. Default is what is set in the config.
         """
         Daemon.__init__(

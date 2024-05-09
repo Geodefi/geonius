@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Iterable
+from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
@@ -46,17 +46,17 @@ class FallbackTrigger(Trigger):
         else:
             return False
 
-    def __parse_events(self, events: Iterable[EventData]) -> List[tuple]:
+    def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
-            events (Iterable[EventData]): List of FallbackOperator emits
+            events (Iterable[EventData]): list of FallbackOperator emits
 
         Returns:
-            List[tuple]: List of saveable events
+            list[tuple]: list of saveable events
         """
 
-        saveable_events: List[tuple] = []
+        saveable_events: list[tuple] = []
         for event in events:
             pool_id: int = event.args.poolId
             fallback_threshold: int = event.args.threshold
@@ -78,11 +78,11 @@ class FallbackTrigger(Trigger):
 
         return saveable_events
 
-    def __save_events(self, events: List[tuple]) -> None:
+    def __save_events(self, events: list[tuple]) -> None:
         """Saves the events to the database.
 
         Args:
-            events (List[tuple]): List of FallbackOperator emits
+            events (list[tuple]): list of FallbackOperator emits
         """
 
         with Database() as db:
@@ -96,7 +96,7 @@ class FallbackTrigger(Trigger):
         for encountered pool ids within provided "FallbackOperator" emits.
 
         Args:
-            events (Iterable[EventData]): List of events
+            events (Iterable[EventData]): list of events
             *args: Variable length argument list
             **kwargs: Arbitrary keyword arguments
         """
@@ -106,9 +106,9 @@ class FallbackTrigger(Trigger):
         )
 
         # gather pool ids from filtered events
-        pool_ids: List[int] = [x.args.poolId for x in filtered_events]
+        pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        all_pks: List[tuple] = []
+        all_pks: list[tuple] = []
         for pool_id in pool_ids:
             # TODO: consider not checking fetching this, instead using from the filtered events
             #       and also consider saving threshold value
@@ -119,7 +119,7 @@ class FallbackTrigger(Trigger):
             save_fallback_operator(pool_id, fallback == OPERATOR_ID)
 
             # if able to propose any new validators do so
-            txs: List[tuple] = check_and_propose(pool_id)
+            txs: list[tuple] = check_and_propose(pool_id)
             for tx_tuple in txs:
                 all_pks.extend(tx_tuple[1])  # tx[1] is the list of pubkeys
 

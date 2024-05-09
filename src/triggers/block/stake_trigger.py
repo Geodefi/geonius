@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from itertools import repeat
-from typing import List
-from web3.types import TxReceipt
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Trigger, Database
 from src.helpers.db_validators import (
@@ -56,10 +54,10 @@ class StakeTrigger(Trigger):
                     ORDER BY id
                 """
             )
-            approved_pks: List[str] = db.fetchall()
+            approved_pks: list[str] = db.fetchall()
 
         # TODO: handle tx receipt & errors
-        tx_receipts: List[tuple] = check_and_stake(approved_pks)
+        tx_receipts: list[tuple] = check_and_stake(approved_pks)
 
         # TODO: may need to extend tx_receipts tuples[1] (pks) in a list
         #       instead of approved_pks

@@ -1,6 +1,5 @@
 import json
 from subprocess import check_output
-from typing import Any
 import geodefi
 
 from src.globals.sdk import SDK
@@ -11,7 +10,7 @@ from src.globals.config import CONFIG
 def generate_deposit_data(
     withdrawal_address: str,
     deposit_value: str,
-) -> Any:
+) -> dict:
     """Generates the deposit data for a new validator proposal.
 
     Args:
@@ -19,7 +18,7 @@ def generate_deposit_data(
         deposit_value (str): The amount of deposit to be made, 1 ETH on proposal, 31 ETH on stake.
 
     Returns:
-        Any: Returns the deposit data in JSON format.
+        dict: Returns the deposit data in JSON format.
     """
 
     res: str = check_output(
@@ -39,11 +38,11 @@ def generate_deposit_data(
     return json.loads(res)
 
 
-def create_wallet() -> Any:
+def create_wallet() -> dict:
     """Creates a new wallet to be used on ethdo
 
     Returns:
-        Any: Returns the wallet data in JSON format.
+        dict: Returns the wallet data in JSON format.
     """
 
     res: str = check_output(
@@ -59,11 +58,11 @@ def create_wallet() -> Any:
     return json.loads(res)
 
 
-def create_account() -> Any:
+def create_account() -> dict:
     """Creates a new account on given ethdo wallet
 
     Returns:
-        Any: Returns the account data in JSON format.
+        dict: Returns the account data in JSON format.
     """
 
     res: str = check_output(
@@ -80,14 +79,14 @@ def create_account() -> Any:
     return json.loads(res)
 
 
-def exit_validator(pubkey: str) -> Any:
+def exit_validator(pubkey: str) -> dict:
     """Triggers a validator exit for given pubkey
 
     Args:
         pubkey (str): The validator pubkey to exit
 
     Returns:
-        Any: Returns the exit data in JSON format.
+        dict: Returns the exit data in JSON format.
     """
 
     res: str = check_output(

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
 from src.classes import Trigger
 from src.helpers.portal import get_all_pool_ids
 from src.helpers.db_pools import (
@@ -39,5 +38,5 @@ class PoolsDBTrigger(Trigger):
 
         reinitialize_pools_table()
 
-        ids: List[int] = get_all_pool_ids()
+        ids: list[int] = get_all_pool_ids()
         fill_pools_table(ids)

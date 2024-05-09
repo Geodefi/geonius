@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Callable, List, Iterable
+from typing import Callable, Iterable
 from web3.types import EventData
 
 from src.classes import Database
@@ -126,18 +126,18 @@ def event_handler(
     parser: Callable,
     saver: Callable,
     filter_func: Callable = None,
-) -> List[dict]:
+) -> list[dict]:
     """Handles the events by filtering, parsing and saving them.
 
     Args:
-        events (List[dict]): List of events.
+        events (list[dict]): list of events.
         parser (Callable): Function to parse the events.
         saver (Callable): Function to save the events.
         filter_func (Callable, optional): Function to filter the events. Defaults to None.
     """
-    if filter_func != None:
-        events: filter[EventData] = filter(filter_func, events)
-    saveable_events: List[tuple] = parser(events)
+    if filter_func is not None:
+        events: list[EventData] = filter(filter_func, events)
+    saveable_events: list[tuple] = parser(events)
     saver(saveable_events)
 
     return events

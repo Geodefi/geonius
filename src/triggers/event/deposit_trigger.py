@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Iterable
+from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
@@ -30,17 +30,17 @@ class DepositTrigger(Trigger):
         create_pools_table()
         create_deposit_table()
 
-    def __parse_events(self, events: Iterable[EventData]) -> List[tuple]:
+    def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
-            events (Iterable[EventData]): List of Deposit emits
+            events (Iterable[EventData]): list of Deposit emits
 
         Returns:
-            List[tuple]: List of saveable events
+            list[tuple]: list of saveable events
         """
 
-        saveable_events: List[tuple] = []
+        saveable_events: list[tuple] = []
         for event in events:
             pool_id: int = event.args.poolId
             bought_amount: int = event.args.boughtgETH
@@ -64,11 +64,11 @@ class DepositTrigger(Trigger):
 
         return saveable_events
 
-    def __save_events(self, events: List[tuple]) -> None:
+    def __save_events(self, events: list[tuple]) -> None:
         """Saves the events to the database.
 
         Args:
-            events (List[tuple]): List of Deposit emits
+            events (list[tuple]): list of Deposit emits
         """
 
         with Database() as db:
@@ -82,7 +82,7 @@ class DepositTrigger(Trigger):
         for encountered pool ids within provided "Deposit" emits.
 
         Args:
-            events (Iterable[EventData]): List of events
+            events (Iterable[EventData]): list of events
             *args: Variable length argument list
             **kwargs: Arbitrary keyword arguments
         """
@@ -92,16 +92,16 @@ class DepositTrigger(Trigger):
             events, self.__parse_events, self.__save_events
         )
 
-        pool_ids: List[int] = [x.args.poolId for x in filtered_events]
+        pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        all_pks: List[tuple] = []
+        all_pks: list[tuple] = []
         for pool_id in pool_ids:
             # save to db
             surplus: int = get_surplus(pool_id)
             save_surplus(pool_id, surplus)
 
             # if able to propose any new validators do so
-            txs: List[tuple] = check_and_propose(pool_id)
+            txs: list[tuple] = check_and_propose(pool_id)
             for tx_tuple in txs:
                 all_pks.extend(tx_tuple[1])  # tx[1] is the list of pubkeys
 

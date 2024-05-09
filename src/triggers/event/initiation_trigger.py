@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Iterable
+from typing import Iterable
 from web3.types import EventData
 
 from geodefi.globals import ID_TYPE
 from src.classes import Trigger, Database
 from src.helpers.db_pools import create_pools_table, fill_pools_table
-from helpers.db_events import create_initiation_table, event_handler
+from src.helpers.db_events import create_initiation_table, event_handler
 
 
 class InitiationTrigger(Trigger):
@@ -42,17 +42,17 @@ class InitiationTrigger(Trigger):
         else:
             return False
 
-    def __parse_events(self, events: Iterable[EventData]) -> List[tuple]:
+    def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
-            events (Iterable[EventData]): List of Initiation emits
+            events (Iterable[EventData]): list of Initiation emits
 
         Returns:
-            List[tuple]: List of saveable events
+            list[tuple]: list of saveable events
         """
 
-        saveable_events: List[tuple] = []
+        saveable_events: list[tuple] = []
         for event in events:
             pool_id: int = event.args.id
             block_number: int = event.blockNumber
@@ -72,11 +72,11 @@ class InitiationTrigger(Trigger):
 
         return saveable_events
 
-    def __save_events(self, events: List[tuple]) -> None:
+    def __save_events(self, events: list[tuple]) -> None:
         """Saves the parsed events to the database.
 
         Args:
-            events (List[tuple]): List of Initiation emits
+            events (list[tuple]): list of Initiation emits
         """
 
         with Database() as db:
@@ -87,7 +87,7 @@ class InitiationTrigger(Trigger):
         for encountered pool ids within provided "IdInitiated" emits.
 
         Args:
-            events (Iterable[EventData]): List of events
+            events (Iterable[EventData]): list of events
             *args: Variable length argument list
             **kwargs: Arbitrary keyword arguments
         """
@@ -100,6 +100,6 @@ class InitiationTrigger(Trigger):
         )
 
         # gather pool ids from filtered events
-        pool_ids: List[int] = [x.args.id for x in filtered_events]
+        pool_ids: list[int] = [x.args.id for x in filtered_events]
 
         fill_pools_table(pool_ids)

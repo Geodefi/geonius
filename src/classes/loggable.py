@@ -66,7 +66,7 @@ class Loggable:
         """
 
         # TODO: add flag for --log-level
-        level_name: Any = CONFIG.logger.level
+        level_name: str = CONFIG.logger.level
 
         # returns the level name as a string or an integer
         return logging.getLevelName(level_name)

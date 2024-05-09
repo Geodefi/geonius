@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Database
 from src.globals import SDK, CONFIG
@@ -71,24 +70,24 @@ def fetch_validator(pubkey: str) -> dict:
     }
 
 
-def fetch_validators_batch(pks: List[str]) -> List[dict]:
+def fetch_validators_batch(pks: list[str]) -> list[dict]:
     """Fetches the data for validators within the given pks list. Returns the gathered data.
 
     Args:
-        pks (List[str]): pubkeys that will be fetched
+        pks (list[str]): pubkeys that will be fetched
 
     Returns:
-        List[dict]: list of dictionaries containing the validator info
+        list[dict]: list of dictionaries containing the validator info
     """
 
     return multithread(fetch_validator, pks)
 
 
-def insert_many_validators(new_validators: List[dict]) -> None:
+def insert_many_validators(new_validators: list[dict]) -> None:
     """Inserts the given validators data into the database.
 
     Args:
-        new_validators (List[dict]): list of dictionaries containing the validator info
+        new_validators (list[dict]): list of dictionaries containing the validator info
     """
 
     with Database() as db:
@@ -112,11 +111,11 @@ def insert_many_validators(new_validators: List[dict]) -> None:
         )
 
 
-def fill_validators_table(pks: List[int]) -> None:
+def fill_validators_table(pks: list[int]) -> None:
     """Fills the validators table with the data of the given pubkeys.
 
     Args:
-        pks (List[int]): pubkeys that will be fetched and inserted
+        pks (list[int]): pubkeys that will be fetched and inserted
     """
     insert_many_validators(fetch_validators_batch(pks))
 
