@@ -123,17 +123,17 @@ def event_handler(
     parser: Callable,
     saver: Callable,
     filter_func: Callable = None,
-) -> list[dict]:
+) -> Iterable[EventData]:
     """Handles the events by filtering, parsing and saving them.
 
     Args:
-        events (list[dict]): list of events.
+        events (Iterable[EventData]): list of events.
         parser (Callable): Function to parse the events.
         saver (Callable): Function to save the events.
         filter_func (Callable, optional): Function to filter the events. Defaults to None.
     """
     if filter_func is not None:
-        events: list[EventData] = filter(filter_func, events)
+        events: Iterable[EventData] = filter(filter_func, events)
     saveable_events: list[tuple] = parser(events)
     saver(saveable_events)
 
