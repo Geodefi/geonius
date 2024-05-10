@@ -189,7 +189,6 @@ pyrightconfig.json
 profile_default/
 ipython_config.py
 
-*.md
 *.ipynb
 .DS_STORE
 geonius/*
