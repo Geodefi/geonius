@@ -1,26 +1,25 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, List, Iterable
+from typing import Any, Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Trigger, Database
-from src.globals import CONFIG
+from src.globals import validators_table
 from src.helpers.db_events import create_exit_request_table, event_handler
-from src.helpers.db_validators import (
-    create_validators_table,
-    save_portal_state,
-    save_local_state,
-)
-
-# TODO: need to be refactered after merged with other branch, need to fetch it from globals.constants
-validators_table: str = CONFIG.database.tables.pools.name
+from src.helpers.db_validators import save_portal_state, save_local_state
 
 
 class ExitRequestTrigger(Trigger):
+    """Trigger for the EXIT_REQUEST event. This event is emitted when a validator requests to exit the network.
+
+    Attributes:
+        name (str): The name of the trigger to be used when logging etc. (value: EXIT_REQUEST_TRIGGER)
+    """
+
     name: str = "EXIT_REQUEST_TRIGGER"
 
     def __init__(self) -> None:
-        Trigger.__init__(self, name=self.name, action=self.alienate_validators)
+        Trigger.__init__(self, name=self.name, action=self.update_validators_status)
         create_exit_request_table()
 
     # TODO: Same filter with alienation_trigger.py so it can be refactored to a common function in helpers like folder
@@ -38,43 +37,39 @@ class ExitRequestTrigger(Trigger):
         else:
             return False
 
-    def __parse_events(self, events: Iterable[EventData]) -> List[tuple]:
-        saveable_events: List[tuple] = []
+    def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
+        saveable_events: list[tuple] = []
         for event in events:
             pubkey: int = event.args.pubkey
             block_number: int = event.blockNumber
-            log_index: int = event.logIndex
             transaction_index: int = event.transactionIndex
-            address: str = event.address
+            log_index: int = event.logIndex
 
             saveable_events.append(
                 (
                     pubkey,
                     block_number,
-                    log_index,
                     transaction_index,
-                    address,
+                    log_index,
                 )
             )
 
         return saveable_events
 
-    def __save_events(self, events: List[tuple]) -> None:
+    def __save_events(self, events: list[tuple]) -> None:
         """Saves the events to the database.
 
         Args:
-            events (List[tuple]): List of saveable events
+            events (list[tuple]): list of saveable events
         """
 
         with Database() as db:
             db.executemany(
-                f"INSERT INTO exit_request VALUES (?,?,?,?,?,?,?)",
+                f"INSERT INTO ExitRequest VALUES (?,?,?,?,?,?,?)",
                 events,
             )
 
-    def update_validators_status(
-        self, events: Iterable[EventData], *args, **kwargs
-    ) -> None:
+    def update_validators_status(self, events: Iterable[EventData], *args, **kwargs) -> None:
         # filter, parse and save events
         filtered_events: Iterable[EventData] = event_handler(
             events,
@@ -83,8 +78,14 @@ class ExitRequestTrigger(Trigger):
             self.__filter_events,
         )
 
-        exit_requested_pks: List[int] = [x.args.pubkey for x in filtered_events]
+        for event in filtered_events:
+            save_portal_state(event.args.pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
 
-        for pk in exit_requested_pks:
-            save_portal_state(pk, VALIDATOR_STATE.EXIT_REQUESTED)
-            save_local_state(pk, VALIDATOR_STATE.EXIT_REQUESTED)
+        # TODO: call ethdo
+
+        # TODO: check if data shown in beacon chain
+
+        # TODO: write database the expected exit block
+
+        for event in filtered_events:
+            save_local_state(event.args.pubkey, VALIDATOR_STATE.EXIT_REQUESTED)

@@ -6,26 +6,26 @@ from web3.types import EventData
 from geodefi.globals import ID_TYPE
 from src.classes import Trigger, Database
 from src.helpers.db_pools import create_pools_table, fill_pools_table
-from src.helpers.db_events import create_initiation_table, event_handler
+from src.helpers.db_events import create_id_initiated_table, event_handler
 
 
-class InitiationTrigger(Trigger):
+class IdInitiatedTrigger(Trigger):
     """Triggered when a new pool is created. Creates and updates a pool on db.
 
     Attributes:
-        name (str): name of the trigger to be used when logging etc. (value: INITIATION_TRIGGER)
+        name (str): name of the trigger to be used when logging etc. (value: ID_INITIATED_TRIGGER)
     """
 
-    name: str = "INITIATION_TRIGGER"
+    name: str = "ID_INITIATED_TRIGGER"
 
     def __init__(self) -> None:
-        """Initializes a InitiationTrigger object. The trigger will process the changes of the daemon after a loop.
+        """Initializes a IdInitiatedTrigger object. The trigger will process the changes of the daemon after a loop.
         It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.insert_pool)
         create_pools_table()
-        create_initiation_table()
+        create_id_initiated_table()
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is a pool event.
@@ -46,7 +46,7 @@ class InitiationTrigger(Trigger):
         """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
-            events (Iterable[EventData]): list of Initiation emits
+            events (Iterable[EventData]): list of IdInitiated emits
 
         Returns:
             list[tuple]: list of saveable events
@@ -58,7 +58,6 @@ class InitiationTrigger(Trigger):
             block_number: int = event.blockNumber
             transaction_index: int = event.transactionIndex
             log_index: int = event.logIndex
-            address: str = event.address
 
             saveable_events.append(
                 (
@@ -66,7 +65,6 @@ class InitiationTrigger(Trigger):
                     block_number,
                     transaction_index,
                     log_index,
-                    address,
                 )
             )
 
@@ -76,11 +74,11 @@ class InitiationTrigger(Trigger):
         """Saves the parsed events to the database.
 
         Args:
-            events (list[tuple]): list of Initiation emits
+            events (list[tuple]): list of IdInitiated emits
         """
 
         with Database() as db:
-            db.execute(f"INSERT INTO initiation VALUES (?,?,?,?,?,?,?)", events)
+            db.execute(f"INSERT INTO IdInitiated VALUES (?,?,?,?,?,?,?)", events)
 
     def insert_pool(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Creates a new pool and fills it with data

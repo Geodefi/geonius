@@ -21,18 +21,17 @@ def find_latest_event_block(event_name: str) -> int:
     return CONFIG.chains[SDK.network.name].start
 
 
-def create_alienation_table() -> None:
-    """Creates the sql database table for Alienation."""
+def create_alienated_table() -> None:
+    """Creates the sql database table for Alienated."""
 
     with Database() as db:
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS alienation (
+                CREATE TABLE IF NOT EXISTS Alienated (
                     pk TEXT NOT NULL PRIMARY KEY,
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    address TEXT NOT NULL
                 )
         """
         )
@@ -44,14 +43,13 @@ def create_delegation_table() -> None:
     with Database() as db:
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS delegation (
+                CREATE TABLE IF NOT EXISTS Delegation (
                     pool_id TEXT NOT NULL,
                     operator_id TEXT NOT NULL,
                     allowance TEXT NOT NULL,
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    address TEXT NOT NULL,
                     FOREIGN KEY (pool_id) REFERENCES {pools_table}(id),
                     PRIMARY KEY (pool_id, operator_id)
                 )
@@ -65,14 +63,13 @@ def create_deposit_table() -> None:
     with Database() as db:
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS deposit (
+                CREATE TABLE IF NOT EXISTS Deposit (
                     pool_id TEXT NOT NULL,
                     bought_amount TEXT NOT NULL,
                     minted_amount TEXT NOT NULL,
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    address TEXT NOT NULL,
                     FOREIGN KEY (pool_id) REFERENCES {pools_table}(id),
                     PRIMARY KEY (pool_id)
                 )
@@ -80,19 +77,18 @@ def create_deposit_table() -> None:
         )
 
 
-def create_fallback_table() -> None:
-    """Creates the sql database table for Fallback."""
+def create_fallback_operator_table() -> None:
+    """Creates the sql database table for FallbackOperator."""
 
     with Database() as db:
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS fallback (
+                CREATE TABLE IF NOT EXISTS FallbackOperator (
                     pool_id TEXT NOT NULL,
                     fallback_threshold INTEGER NOT NULL,
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    address TEXT NOT NULL,
                     FOREIGN KEY (pool_id) REFERENCES {pools_table}(id),
                     PRIMARY KEY (pool_id)
                 )
@@ -100,18 +96,17 @@ def create_fallback_table() -> None:
         )
 
 
-def create_initiation_table() -> None:
-    """Creates the sql database table for Initiation."""
+def create_id_initiated_table() -> None:
+    """Creates the sql database table for IdInitiated."""
 
     with Database() as db:
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS initiation (
+                CREATE TABLE IF NOT EXISTS IdInitiated (
                     pool_id TEXT NOT NULL,
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    address TEXT NOT NULL,
                     PRIMARY KEY (pool_id)
                 )
         """
@@ -119,19 +114,16 @@ def create_initiation_table() -> None:
 
 
 def create_exit_request_table() -> None:
-    """Creates the sql database table for Exit Request."""
+    """Creates the sql database table for ExitRequest."""
 
-    # TODO: discuss what is address and why it is needed if needed add it to the table
-    #       else remove it from other tables as well
     with Database() as db:
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS exit_request (
+                CREATE TABLE IF NOT EXISTS ExitRequest (
                     pk TEXT NOT NULL,
                     block_number INTEGER NOT NULL,
-                    log_index INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
-                    address TEXT NOT NULL,
+                    log_index INTEGER NOT NULL,
                     FOREIGN KEY (pk) REFERENCES validators(pk),
                     PRIMARY KEY (pk)
                 )

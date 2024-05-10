@@ -5,31 +5,31 @@ from web3.types import EventData
 
 from src.classes import Trigger, Database
 from src.globals import OPERATOR_ID
-from src.helpers.db_events import create_fallback_table, event_handler
+from src.helpers.db_events import create_fallback_operator_table, event_handler
 from src.helpers.db_validators import fill_validators_table
 from src.helpers.portal import get_fallback_operator
 from src.helpers.db_pools import create_pools_table, save_fallback_operator
 from src.helpers.validator import check_and_propose
 
 
-class FallbackTrigger(Trigger):
+class FallbackOperatorTrigger(Trigger):
     """Triggered when a pool changes it's fallback operator.
     Updates the database with the latest info.
 
     Attributes:
-        name (str): name of the trigger to be used when logging etc. (value: FALLBACK_TRIGGER)
+        name (str): name of the trigger to be used when logging etc. (value: FALLBACK_OPERATOR_TRIGGER)
     """
 
-    name: str = "FALLBACK_TRIGGER"
+    name: str = "FALLBACK_OPERATOR_TRIGGER"
 
     def __init__(self) -> None:
-        """Initializes a FallbackTrigger object. The trigger will process the changes of the daemon after a loop.
+        """Initializes a FallbackOperatorTrigger object. The trigger will process the changes of the daemon after a loop.
         It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.update_fallback_operator)
         create_pools_table()
-        create_fallback_table()
+        create_fallback_operator_table()
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is for the script's OPERATOR_ID.
@@ -63,7 +63,6 @@ class FallbackTrigger(Trigger):
             block_number: int = event.blockNumber
             transaction_index: int = event.transactionIndex
             log_index: int = event.logIndex
-            address: str = event.address
 
             saveable_events.append(
                 (
@@ -72,7 +71,6 @@ class FallbackTrigger(Trigger):
                     block_number,
                     transaction_index,
                     log_index,
-                    address,
                 )
             )
 
@@ -87,7 +85,7 @@ class FallbackTrigger(Trigger):
 
         with Database() as db:
             db.executemany(
-                f"INSERT INTO fallback VALUES (?,?,?,?,?,?,?,?)",
+                f"INSERT INTO FallbackOperator VALUES (?,?,?,?,?,?,?,?)",
                 events,
             )
 

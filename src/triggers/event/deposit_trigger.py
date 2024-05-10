@@ -46,9 +46,8 @@ class DepositTrigger(Trigger):
             bought_amount: int = event.args.boughtgETH
             minted_amount: int = event.args.mintedgETH
             block_number: int = event.blockNumber
-            log_index: int = event.logIndex
             transaction_index: int = event.transactionIndex
-            address: str = event.address
+            log_index: int = event.logIndex
 
             saveable_events.append(
                 (
@@ -58,7 +57,6 @@ class DepositTrigger(Trigger):
                     block_number,
                     transaction_index,
                     log_index,
-                    address,
                 )
             )
 
@@ -73,7 +71,7 @@ class DepositTrigger(Trigger):
 
         with Database() as db:
             db.execute_many(
-                f"INSERT INTO deposit VALUES (?,?,?,?,?,?,?,?,?)",
+                f"INSERT INTO Deposit VALUES (?,?,?,?,?,?,?,?,?)",
                 events,
             )
 

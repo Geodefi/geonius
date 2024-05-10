@@ -2,9 +2,10 @@
 
 from .block import PoolsDBTrigger, StakeTrigger
 from .event import (
-    AlienationTrigger,
+    AlienatedTrigger,
     DelegationTrigger,
-    FallbackTrigger,
-    InitiationTrigger,
+    FallbackOperatorTrigger,
+    IdInitiatedTrigger,
     DepositTrigger,
+    ExitRequestTrigger,
 )

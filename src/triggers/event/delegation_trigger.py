@@ -64,7 +64,6 @@ class DelegationTrigger(Trigger):
             block_number: int = event.blockNumber
             transaction_index: int = event.transactionIndex
             log_index: int = event.logIndex
-            address: str = event.address
 
             saveable_events.append(
                 (
@@ -74,7 +73,6 @@ class DelegationTrigger(Trigger):
                     block_number,
                     transaction_index,
                     log_index,
-                    address,
                 )
             )
 
@@ -89,7 +87,7 @@ class DelegationTrigger(Trigger):
 
         with Database() as db:
             db.executemany(
-                f"INSERT INTO delegation VALUES (?,?,?,?,?,?,?,?,?)",
+                f"INSERT INTO Delegation VALUES (?,?,?,?,?,?,?,?,?)",
                 events,
             )
 

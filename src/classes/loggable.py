@@ -19,7 +19,7 @@ class Loggable:
                 self.logger.error("This is an error message.")
 
     Attributes:
-        __logger_name (str): Unique name for the logger, log file and object instance using given streams, max 18 char.
+        __logger_name (str): Unique name for the logger, log file and object instance using given streams, max 25 char.
         logger (obj): Logger object to be used in the class.
     """
 
@@ -27,20 +27,20 @@ class Loggable:
         """Initializes a Loggable object.
 
         Args:
-            name (str): Unique name for the logger, log file and object instance using given streams, max 18 char.
+            name (str): Unique name for the logger, log file and object instance using given streams, max 25 char.
         """
-
-        if len(name) > 18:
+        __name_len = 25
+        if len(name) > __name_len:
             raise Exception
+        self.__logger_name: str = f"{name:<__name_len}"
 
-        self.__logger_name: str = f"{name:<18}"
         self.logger: logging.Logger = self.__get_logger(name)
 
     def __get_logger(self, name: str) -> logging.Logger:
         """Initializes and returns a logger object with given streams and files.
 
         Args:
-            name (str): Unique name for the logger, log file and object instance using given streams, max 18 char.
+            name (str): Unique name for the logger, log file and object instance using given streams, max 25 char.
 
         Returns:
             logging.Logger: Logger object to be used in the class.

@@ -2,7 +2,7 @@
 
 from .db_events import (
     find_latest_event_block,
-    create_alienation_table,
+    create_alienated_table,
     create_delegation_table,
     create_deposit_table,
     create_fallback_table,

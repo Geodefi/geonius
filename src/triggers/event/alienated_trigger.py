@@ -5,7 +5,7 @@ from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Trigger, Database
 from src.globals import validators_table
-from src.helpers.db_events import create_alienation_table, event_handler
+from src.helpers.db_events import create_alienated_table, event_handler
 from src.helpers.db_validators import (
     create_validators_table,
     save_portal_state,
@@ -13,25 +13,25 @@ from src.helpers.db_validators import (
 )
 
 
-class AlienationTrigger(Trigger):
+class AlienatedTrigger(Trigger):
     """
     Triggered when a validator proposal is alienated.
     Updates the database with the latest info.
 
     Attributes:
-        name (str): name of the trigger to be used when logging etc. (value: ALIENATION_TRIGGER)
+        name (str): name of the trigger to be used when logging etc. (value: ALIENATED_TRIGGER)
     """
 
-    name: str = "ALIENATION_TRIGGER"
+    name: str = "ALIENATED_TRIGGER"
 
     def __init__(self) -> None:
-        """Initializes a AlienationTrigger object. The trigger will process the changes of the daemon after a loop.
+        """Initializes a AlienatedTrigger object. The trigger will process the changes of the daemon after a loop.
         It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.alienate_validators)
         create_validators_table()
-        create_alienation_table()
+        create_alienated_table()
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is in the validators table.
@@ -61,7 +61,7 @@ class AlienationTrigger(Trigger):
         """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
-            events (Iterable[EventData]): list of Alienation emits
+            events (Iterable[EventData]): list of Alienated emits
 
         Returns:
             list[tuple]: list of saveable events
@@ -73,7 +73,6 @@ class AlienationTrigger(Trigger):
             block_number: int = event.blockNumber
             transaction_index: int = event.transactionIndex
             log_index: int = event.logIndex
-            address: str = event.address
 
             saveable_events.append(
                 (
@@ -81,7 +80,6 @@ class AlienationTrigger(Trigger):
                     block_number,
                     transaction_index,
                     log_index,
-                    address,
                 )
             )
 
@@ -96,7 +94,7 @@ class AlienationTrigger(Trigger):
 
         with Database() as db:
             db.executemany(
-                f"INSERT INTO alienation VALUES (?,?,?,?,?,?,?)",
+                f"INSERT INTO Alienated VALUES (?,?,?,?,?,?,?)",
                 events,
             )
 
@@ -115,8 +113,6 @@ class AlienationTrigger(Trigger):
             self.__filter_events,
         )
 
-        alien_pks: list[int] = [x.args.pubkey for x in filtered_events]
-
-        for pk in alien_pks:
-            save_portal_state(pk, VALIDATOR_STATE.ALIENATED)
-            save_local_state(pk, VALIDATOR_STATE.ALIENATED)
+        for event in filtered_events:
+            save_portal_state(event.args.pubkey, VALIDATOR_STATE.ALIENATED)
+            save_local_state(event.args.pubkey, VALIDATOR_STATE.ALIENATED)
