@@ -66,10 +66,8 @@ class Loggable:
             Any: Logger level name
         """
 
-        level_name: str = CONFIG.logger.level
-
         # returns the level name as a string or an integer
-        return logging.getLevelName(level_name)
+        return logging.getLevelName(CONFIG.logger.level)
 
     @property
     def __file_formatter(self) -> Formatter:
