@@ -3,7 +3,7 @@
 Geonius is a deamonic python script that allows Node Operators to automate their operations on geodefi Operator Marketplace
 
 - [Geonius](#geonius)
-  - [Validator Creation Process](#validator-creation-process)
+  - [Validator Creation Explained](#validator-creation-explained)
   - [Getting Started](#getting-started)
   - [Installation](#installation)
     - [Binaries](#binaries)
@@ -15,8 +15,8 @@ Geonius is a deamonic python script that allows Node Operators to automate their
   - [Contacts](#contacts)
   - [License](#license)
 
-## Validator Creation Process
-
+## Validator Creation Explained
+<!-- TODO -->
 1. Delegation
 2. Proposal
 3. Approval
@@ -24,7 +24,7 @@ Geonius is a deamonic python script that allows Node Operators to automate their
 
 ## Getting Started
 
-[Here](./docs/getting_started.md) is the detailed documentation explaining how to install and configure dependencies before installing and running a geonius instance.
+[Here](./docs/getting_started.md) is the detailed documentation explaining how to install and configure dependencies before installing and running a `geonius` instance.
 
 ## Installation
 
@@ -41,8 +41,10 @@ docker pull Geodefi/geonius
 ```
 
 ### Build from source
+<!-- TODO: needs to check -->
 
 ## Usage
+<!-- TODO: add more information on usage -->
 
 ### Flags
 
@@ -68,6 +70,7 @@ docker pull Geodefi/geonius
 | --ethdo-account       |      Deafult ethdo account name to be created/used                                                                            |
 
 ### Scripts
+<!-- TODO: add more information on additional scripts when coded -->
 
 ## Contacts
 
