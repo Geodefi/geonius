@@ -5,7 +5,6 @@ from .db_events import (
     create_alienated_table,
     create_delegation_table,
     create_deposit_table,
-    create_fallback_table,
 )
 
 from .db_pools import (
@@ -27,6 +26,7 @@ from .db_validators import (
     insert_many_validators,
     save_local_state,
     save_portal_state,
+    save_exit_epoch,
 )
 from .event import get_batch_events, get_all_events, decode_abi
 from .portal import (

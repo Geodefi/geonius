@@ -3,10 +3,12 @@
 from typing import Any, Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
+from geodefi.classes import Validator
 from src.classes import Trigger, Database
-from src.globals import validators_table
+from src.globals import SDK, validators_table
 from src.helpers.db_events import create_exit_request_table, event_handler
-from src.helpers.db_validators import save_portal_state, save_local_state
+from src.helpers.db_validators import save_portal_state, save_local_state, save_exit_epoch
+from src.actions.ethdo import exit_validator
 
 
 class ExitRequestTrigger(Trigger):
@@ -70,6 +72,12 @@ class ExitRequestTrigger(Trigger):
             )
 
     def update_validators_status(self, events: Iterable[EventData], *args, **kwargs) -> None:
+        """Updates the status of validators that have requested to exit the network.
+
+        Args:
+            events (Iterable[EventData]): The events to be processed and saved to the database.
+        """
+
         # filter, parse and save events
         filtered_events: Iterable[EventData] = event_handler(
             events,
@@ -79,13 +87,21 @@ class ExitRequestTrigger(Trigger):
         )
 
         for event in filtered_events:
-            save_portal_state(event.args.pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
+            pubkey: str = event.args.pubkey
+            save_portal_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
 
-        # TODO: call ethdo
+            # TODO: if this is not waiting for tx to be mined, there should be a way to handle and check the beacon_status
+            exit_validator(pubkey)
 
-        # TODO: check if data shown in beacon chain
+            val: Validator = SDK.portal.validator(pubkey)
+            # TODO: check what the status is in the beacon chain
+            if val.beacon_status == "exiting":
 
-        # TODO: write database the expected exit block
+                # TODO: write database the expected exit block
+                save_exit_epoch(pubkey, val.exit_epoch)
+            else:
+                # TODO: error case, raise exception
+                pass
 
         for event in filtered_events:
             save_local_state(event.args.pubkey, VALIDATOR_STATE.EXIT_REQUESTED)

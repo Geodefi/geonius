@@ -152,3 +152,21 @@ def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE) -> None:
                 WHERE pubkey = {pubkey}
             """
         )
+
+
+def save_exit_epoch(pubkey: int, exit_epoch: str) -> None:
+    """Sets exit_epoch on db when it changes on chain.
+
+    Args:
+        pubkey (int): public key of the validator
+        exit_epoch (str): new exit epoch of the validator
+    """
+
+    with Database() as db:
+        db.execute(
+            f"""
+                UPDATE {validators_table} 
+                SET exit_epoch = {exit_epoch}
+                WHERE pubkey = {pubkey}
+            """
+        )
