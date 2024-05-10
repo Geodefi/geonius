@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from typing import Iterable
+from web3.types import EventData
 from web3.contract.contract import ContractEvent
 from src.classes import Daemon, Trigger
 from src.helpers import get_all_events
@@ -51,7 +53,7 @@ class EventDaemon(Daemon):
 
         self.__recent_block: int = start_block
 
-    def listen_events(self) -> list[dict]:
+    def listen_events(self) -> Iterable[EventData]:
         """The main task for the EventDaemon. Checks for new events. If any, runs the triggers and returns the events.
         If no events are emitted, returns None.
 
