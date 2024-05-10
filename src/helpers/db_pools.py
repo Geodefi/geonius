@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
 from src.helpers.portal import get_surplus, get_operatorAllowance, get_fallback_operator
 from src.classes import Database
 from src.utils import multithread
-from src.globals import CONFIG
-
-# TODO: consider fixing the table name instead of using the config
-#       user can change the table name in the config file and it will cause an problems
-pools_table: str = CONFIG.database.tables.pools.name
+from src.globals import pools_table, OPERATOR_ID
 
 
 def create_pools_table() -> None:
@@ -19,7 +14,6 @@ def create_pools_table() -> None:
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS {pools_table} (
-                    portal_index INTEGER NOT NULL UNIQUE,
                     id TEXT NOT NULL PRIMARY KEY,
                     surplus TEXT ,
                     allowance TEXT ,
@@ -43,49 +37,47 @@ def reinitialize_pools_table() -> None:
     create_pools_table()
 
 
-def fetch_pools_batch(ids: List[int]) -> List[dict]:
+def fetch_pools_batch(ids: list[int]) -> list[dict]:
     """Fetches the data for pools within the given ids list. Returns the gathered data.
 
     Args:
-        ids (List[int]): pool IDs that will be fetched
+        ids (list[int]): pool IDs that will be fetched
 
     Returns:
-        List[dict]: list of dictionaries containing the pool info, in format of [{portal_index: val, id: val,...},...]
+        list[dict]: list of dictionaries containing the pool info, in format of [{id: val, surplus: val,...},...]
     """
 
-    surpluses: List[int] = multithread(get_surplus, ids)
-    allowances: List[int] = multithread(get_operatorAllowance, ids)
-    fallback_operators: List[int] = multithread(get_fallback_operator, ids)
+    surpluses: list[int] = multithread(get_surplus, ids)
+    allowances: list[int] = multithread(get_operatorAllowance, ids)
+    fallback_operators: list[int] = multithread(get_fallback_operator, ids)
 
     # transpose the info and insert all the pools
-    pools_transposed: List[dict] = [
+    pools_transposed: list[dict] = [
         {
-            "portal_index": portal_index,
-            "id": id,
-            "surplus": surplus,
-            "allowance": allowance,
-            "fallback": fallback,
+            "id": str(id),
+            "surplus": str(surplus),
+            "allowance": str(allowance),
+            "fallback": 1 if fallback == OPERATOR_ID else 0,
         }
-        for (portal_index, id, surplus, allowance, fallback) in zip(
+        for (id, surplus, allowance, fallback) in zip(
             ids, surpluses, allowances, fallback_operators
         )
     ]
     return pools_transposed
 
 
-def insert_many_pools(new_pools: List[dict]) -> None:
+def insert_many_pools(new_pools: list[dict]) -> None:
     """Inserts the given pools data into the database.
 
     Args:
-        new_pools (List[dict]): list of dictionaries containing the pool info, in format of [{portal_index: val, id: val,...},...]
+        new_pools (list[dict]): list of dictionaries containing the pool info, in format of [{id: val, surplus: val,...},...]
     """
 
     with Database() as db:
         db.executemany(
-            f"INSERT INTO {pools_table} VALUES (?,?,?,?,?)",
+            f"INSERT INTO {pools_table} VALUES (?,?,?,?)",
             [
                 (
-                    a["portal_index"],
                     a["id"],
                     a["surplus"],
                     a["allowance"],
@@ -96,11 +88,11 @@ def insert_many_pools(new_pools: List[dict]) -> None:
         )
 
 
-def fill_pools_table(ids: List[int]) -> None:
+def fill_pools_table(ids: list[int]) -> None:
     """Fills the pools table with the data of the given pool IDs.
 
     Args:
-        ids (List[int]): pool IDs that will be fetched and inserted into the database
+        ids (list[int]): pool IDs that will be fetched and inserted into the database
     """
 
     insert_many_pools(fetch_pools_batch(ids))

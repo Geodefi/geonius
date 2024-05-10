@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, Callable, List
+from typing import Any, Callable
 from concurrent.futures import ThreadPoolExecutor
 
 
-def multithread(
-    func: Callable, *args, num_threads: int = None, chunk_size: int = 1
-) -> List[Any]:
+def multithread(func: Callable, *args, num_threads: int = None, chunk_size: int = 1) -> list[Any]:
     """Turn function calls into multithread with help of iterables arguments and return the results.
 
     Args:
@@ -16,7 +14,7 @@ def multithread(
         chunk_size (int, optional): size of the chunk. Defaults to 1.
 
     Returns:
-        List[Any]: list of results from the function calls
+        list[Any]: list of results from the function calls
     """
     with ThreadPoolExecutor(max_workers=num_threads) as pool:
         res: Any = pool.map(func, *args, chunksize=chunk_size)

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
 from src.classes import Daemon, Trigger
 
 
@@ -20,7 +19,7 @@ class TimeDaemon(Daemon):
 
     name: str = "TIME_DAEMON"
 
-    def __init__(self, interval: int, triggers: List[Trigger]) -> None:
+    def __init__(self, interval: int, triggers: list[Trigger]) -> None:
         Daemon.__init__(
             self,
             name=self.name,

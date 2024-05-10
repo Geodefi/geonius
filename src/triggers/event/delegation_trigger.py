@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Iterable
+from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
@@ -46,26 +46,24 @@ class DelegationTrigger(Trigger):
         else:
             return False
 
-    def __parse_events(self, events: Iterable[EventData]) -> List[tuple]:
+    def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
-            events (Iterable[EventData]): List of Delegation emits
+            events (Iterable[EventData]): list of Delegation emits
 
         Returns:
-            List[tuple]: List of saveable events
+            list[tuple]: list of saveable events
         """
 
-        saveable_events: List[tuple] = []
+        saveable_events: list[tuple] = []
         for event in events:
             pool_id: int = event.args.poolId
             operator_id: str = event.args.operatorId
             allowance: int = event.args.allowance
             block_number: int = event.blockNumber
-            block_hash: str = event.blockHash
-            log_index: int = event.logIndex
             transaction_index: int = event.transactionIndex
-            transaction_hash: str = event.transactionHash
+            log_index: int = event.logIndex
             address: str = event.address
 
             saveable_events.append(
@@ -74,21 +72,19 @@ class DelegationTrigger(Trigger):
                     operator_id,
                     allowance,
                     block_number,
-                    block_hash,
-                    log_index,
                     transaction_index,
-                    transaction_hash,
+                    log_index,
                     address,
                 )
             )
 
         return saveable_events
 
-    def __save_events(self, events: List[tuple]) -> None:
+    def __save_events(self, events: list[tuple]) -> None:
         """Saves the events to the database.
 
         Args:
-            events (List[tuple]): List of Delegation emits
+            events (list[tuple]): list of Delegation emits
         """
 
         with Database() as db:
@@ -104,7 +100,7 @@ class DelegationTrigger(Trigger):
         it also fills the validators table with the new validators data.
 
         Args:
-            events (Iterable[EventData]): List of Delegation emits
+            events (Iterable[EventData]): list of Delegation emits
             *args: Variable length argument list
             **kwargs: Arbitrary keyword arguments
         """
@@ -118,16 +114,16 @@ class DelegationTrigger(Trigger):
         )
 
         # gather pool ids from filtered events
-        pool_ids: List[int] = [x.args.poolId for x in filtered_events]
+        pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        all_pks: List[tuple] = []
+        all_pks: list[tuple] = []
         for pool_id in pool_ids:
             # update db
             allowance: int = get_operatorAllowance(pool_id)
             save_allowance(pool_id, allowance)
 
             # if able to propose any new validators do so
-            txs: List[tuple] = check_and_propose(pool_id)
+            txs: list[tuple] = check_and_propose(pool_id)
             for tx_tuple in txs:
                 all_pks.extend(tx_tuple[1])  # tx[1] is the list of pubkeys
 

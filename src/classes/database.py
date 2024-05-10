@@ -3,7 +3,6 @@ import os
 import sqlite3 as sql
 from typing import Any
 from src.globals import CONFIG
-from src.classes import Database
 
 
 class Database:
@@ -54,13 +53,8 @@ class Database:
         except Exception as e:
             raise e
 
-    def __enter__(self) -> Database:
-        """Used when entering a `with` statement.
-        Which is safer when using database.
-
-        Returns:
-            Database: Database object itself.
-        """
+    def __enter__(self):
+        """Used when entering a `with` statement. Which is safer when using database."""
 
         return self
 

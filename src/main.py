@@ -3,7 +3,6 @@
 from web3.contract.contract import ContractEvent
 
 from src.globals import SDK
-from src.classes import Trigger, Daemon
 from src.daemons import BlockDaemon, EventDaemon, TimeDaemon
 from src.triggers import (
     AlienationTrigger,
@@ -15,7 +14,6 @@ from src.triggers import (
     DepositTrigger,
 )
 
-from src.utils import set_web3_account
 from src.helpers.db_events import find_latest_event_block
 from src.helpers.db_validators import (
     reinitialize_validators_table,
@@ -89,9 +87,7 @@ def setup_daemons():
     pools_db_daemon: TimeDaemon = TimeDaemon(
         interval=21600, triggers=[pools_db_trigger]
     )  # TODO: This will be removed after testing
-    stake_daemon: BlockDaemon = BlockDaemon(
-        triggers=[stake_trigger], block_period=12 * hour_blocks
-    )
+    stake_daemon: BlockDaemon = BlockDaemon(triggers=[stake_trigger], block_period=12 * hour_blocks)
 
     # Run the daemons
     pools_db_daemon.run()
@@ -108,12 +104,8 @@ def main():
 
     This function is called when the program is run.
 
-    It initializes the SDK, sets the web3 account, initializes the databases,
-    and sets up the daemons.
+    initializes the databases and sets up the daemons.
     """
-
-    # Utilize the SDK.w3 with privaded private key
-    set_web3_account()
 
     # make sure database is ok
     init_dbs()

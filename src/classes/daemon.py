@@ -1,5 +1,5 @@
 from time import sleep
-from typing import Callable, List
+from typing import Callable
 from threading import Thread, Event
 from src.classes.trigger import Trigger
 from src.classes.loggable import Loggable
@@ -28,7 +28,7 @@ class Daemon(Loggable):
         __initial_delay (int): Initial delay before starting the loop.
         __task (Callable): Work to be done after every iteration.
         __worker (Thread): Thread object to run the loop.
-        triggers (List[Trigger]): List of initialized Trigger instances.
+        triggers (list[Trigger]): list of initialized Trigger instances.
         start_flag (Event): Event flag to start the daemon.
         stop_flag (Event): Event flag to stop the daemon.
     """
@@ -38,7 +38,7 @@ class Daemon(Loggable):
         name: str,
         interval: int,
         task: Callable,
-        triggers: List[Trigger],
+        triggers: list[Trigger],
         initial_delay: int = 0,
     ) -> None:
         """Initializes a Daemon object. The daemon will run the task with the given interval.
@@ -47,7 +47,7 @@ class Daemon(Loggable):
             name (str): name of the daemon to be used when logging etc.
             interval (int): Time duration between 2 tasks.
             task (Callable): Work to be done after every iteration
-            triggers (List[Trigger]): List of initialized Trigger instances
+            triggers (list[Trigger]): list of initialized Trigger instances
             initial_delay (int, optional): Initial delay before starting the loop. Defaults to 0.
         """
 
@@ -111,14 +111,14 @@ class Daemon(Loggable):
 
         self.__task: Callable = task
 
-    def __set_triggers(self, triggers: List[Trigger]) -> None:
+    def __set_triggers(self, triggers: list[Trigger]) -> None:
         """Sets list of triggers that will be checked on every iteration, called on initialization.
 
         Args:
-            triggers (List[Trigger]): List of initialized Trigger instances
+            triggers (list[Trigger]): list of initialized Trigger instances
         """
 
-        self.triggers: List[Trigger] = triggers
+        self.triggers: list[Trigger] = triggers
 
     def __loop(self) -> None:
         """Runs the loop, checks for the task and triggers on every iteration. Stops when stop_flag is set.

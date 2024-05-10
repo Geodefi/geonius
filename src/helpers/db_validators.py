@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Database
-from src.globals import SDK, CONFIG
+from src.globals import SDK, validators_table
 from src.utils import multithread
-
-validators_table: str = CONFIG.database.tables.pools.name
 
 
 def create_validators_table() -> None:
@@ -21,12 +18,12 @@ def create_validators_table() -> None:
                     portal_index INTEGER NOT NULL UNIQUE,
                     beacon_index INTEGER NOT NULL UNIQUE,
                     pubkey TEXT NOT NULL PRIMARY KEY,
-                    pool_id TEXT NOT NULL PRIMARY KEY,
+                    pool_id TEXT NOT NULL,
                     local_state TEXT NOT NULL,
                     portal_state TEXT NOT NULL,
                     signature31 INTEGER NOT NULL,
                     withdrawal_credentials TEXT NOT NULL,
-                    exit_epoch INTEGER,
+                    exit_epoch INTEGER
                 )
         """
         )
@@ -71,30 +68,29 @@ def fetch_validator(pubkey: str) -> dict:
     }
 
 
-def fetch_validators_batch(pks: List[str]) -> List[dict]:
+def fetch_validators_batch(pks: list[str]) -> list[dict]:
     """Fetches the data for validators within the given pks list. Returns the gathered data.
 
     Args:
-        pks (List[str]): pubkeys that will be fetched
+        pks (list[str]): pubkeys that will be fetched
 
     Returns:
-        List[dict]: list of dictionaries containing the validator info
+        list[dict]: list of dictionaries containing the validator info
     """
 
     return multithread(fetch_validator, pks)
 
 
-def insert_many_validators(new_validators: List[dict]) -> None:
+def insert_many_validators(new_validators: list[dict]) -> None:
     """Inserts the given validators data into the database.
 
     Args:
-        new_validators (List[dict]): list of dictionaries containing the validator info
+        new_validators (list[dict]): list of dictionaries containing the validator info
     """
 
     with Database() as db:
         db.executemany(
-            # wrong amount of question marks
-            f"INSERT INTO {validators_table} VALUES (?,?,?,?,?)",
+            f"INSERT INTO {validators_table} VALUES (?,?,?,?,?,?,?,?,?)",
             [
                 (
                     a["portal_index"],
@@ -112,11 +108,11 @@ def insert_many_validators(new_validators: List[dict]) -> None:
         )
 
 
-def fill_validators_table(pks: List[int]) -> None:
+def fill_validators_table(pks: list[int]) -> None:
     """Fills the validators table with the data of the given pubkeys.
 
     Args:
-        pks (List[int]): pubkeys that will be fetched and inserted
+        pks (list[int]): pubkeys that will be fetched and inserted
     """
     insert_many_validators(fetch_validators_batch(pks))
 

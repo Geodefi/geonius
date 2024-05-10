@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, List, Iterable
+from typing import Any, Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Trigger, Database
-from src.globals import CONFIG
+from src.globals import validators_table
 from src.helpers.db_events import create_alienation_table, event_handler
 from src.helpers.db_validators import (
     create_validators_table,
     save_portal_state,
     save_local_state,
 )
-
-validators_table: str = CONFIG.database.tables.pools.name
 
 
 class AlienationTrigger(Trigger):
@@ -59,45 +57,41 @@ class AlienationTrigger(Trigger):
         else:
             return False
 
-    def __parse_events(self, events: Iterable[EventData]) -> List[tuple]:
+    def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
-            events (Iterable[EventData]): List of Alienation emits
+            events (Iterable[EventData]): list of Alienation emits
 
         Returns:
-            List[tuple]: List of saveable events
+            list[tuple]: list of saveable events
         """
 
-        saveable_events: List[tuple] = []
+        saveable_events: list[tuple] = []
         for event in events:
             pubkey: int = event.args.pubkey
             block_number: int = event.blockNumber
-            block_hash: str = event.blockHash
-            log_index: int = event.logIndex
             transaction_index: int = event.transactionIndex
-            transaction_hash: str = event.transactionHash
+            log_index: int = event.logIndex
             address: str = event.address
 
             saveable_events.append(
                 (
                     pubkey,
                     block_number,
-                    block_hash,
-                    log_index,
                     transaction_index,
-                    transaction_hash,
+                    log_index,
                     address,
                 )
             )
 
         return saveable_events
 
-    def __save_events(self, events: List[tuple]) -> None:
+    def __save_events(self, events: list[tuple]) -> None:
         """Saves the events to the database.
 
         Args:
-            events (List[tuple]): List of saveable events
+            events (list[tuple]): list of saveable events
         """
 
         with Database() as db:
@@ -110,7 +104,7 @@ class AlienationTrigger(Trigger):
         """Alienates the validators in the database. Updates the database local and portal state of the validators to ALIENATED.
 
         Args:
-            events (Iterable[EventData]): List of events
+            events (Iterable[EventData]): list of events
         """
 
         # filter, parse and save events
@@ -121,7 +115,7 @@ class AlienationTrigger(Trigger):
             self.__filter_events,
         )
 
-        alien_pks: List[int] = [x.args.pubkey for x in filtered_events]
+        alien_pks: list[int] = [x.args.pubkey for x in filtered_events]
 
         for pk in alien_pks:
             save_portal_state(pk, VALIDATOR_STATE.ALIENATED)

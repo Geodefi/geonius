@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
+from typing import Any, Iterable
 from itertools import repeat
-from typing import Any, List, Iterable
-from web3.types import EventData
 from eth_abi import abi
+from web3.types import EventData
 from web3.contract.contract import ContractEvent
 from geodefi.utils.wrappers import multiple_attempt
 from src.utils import multithread
-from src.globals import MAX_BLOCK_RANGE
+from src.globals import CONFIG, SDK
+
+max_block_range = int(CONFIG.chains[SDK.network.name].range)
 
 
 @multiple_attempt
-def get_batch_events(
-    event: ContractEvent, from_block: int, limit: int
-) -> Iterable[EventData]:
+def get_batch_events(event: ContractEvent, from_block: int, limit: int) -> Iterable[EventData]:
     """Get events within a range of blocks.
 
     Args:
@@ -27,7 +27,7 @@ def get_batch_events(
     # if range is like [0,7,3] -> 0, 3, 6
     # get_batch_events would search 0-3, 3-6 and 6-9
     # but we want 0-3, 3-6, 6-7
-    to_block: int = from_block + MAX_BLOCK_RANGE
+    to_block: int = from_block + max_block_range
     if to_block > limit:
         to_block = limit
 
@@ -35,9 +35,7 @@ def get_batch_events(
     return event.get_logs(fromBlock=from_block, toBlock=to_block)
 
 
-def get_all_events(
-    event: ContractEvent, first_block: int, last_block: int
-) -> Iterable[EventData]:
+def get_all_events(event: ContractEvent, first_block: int, last_block: int) -> Iterable[EventData]:
     """Get all events emitted within given range of blocks. It uses get_batch_events
     to get events in batches within multhithread and then combines them.
 
@@ -49,7 +47,7 @@ def get_all_events(
     Returns:
         Iterable[EventData]: list of events.
     """
-    r: range = range(first_block, last_block, MAX_BLOCK_RANGE)
+    r: range = range(first_block, last_block, max_block_range)
     if first_block == last_block:
         r: range = range(first_block, first_block + 1)
 
@@ -66,11 +64,11 @@ def get_all_events(
     return logs
 
 
-def decode_abi(types: List, data: Any) -> tuple:
+def decode_abi(types: list, data: Any) -> tuple:
     """Decode the given data using the given types. It uses eth-abi library to decode the data.
 
     Args:
-        types (List): list of types to decode the data.
+        types (list): list of types to decode the data.
         data (Any): data to be decoded.
 
     Returns:

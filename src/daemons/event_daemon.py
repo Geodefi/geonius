@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
 from web3.contract.contract import ContractEvent
 from src.classes import Daemon, Trigger
 from src.helpers import get_all_events
-from src.globals import SDK, CONFIG, block_seconds
+from src.globals import SDK, CONFIG
 
 
 class EventDaemon(Daemon):
@@ -24,14 +23,14 @@ class EventDaemon(Daemon):
 
     def __init__(
         self,
-        triggers: List[Trigger],
+        triggers: list[Trigger],
         event: ContractEvent,
-        start_block: int = CONFIG.chains[SDK.network.name].first_block,
+        start_block: int = CONFIG.chains[SDK.network.name].start,
     ) -> None:
         """Initializes a EventDaemon object. The daemon will run the triggers on every event emitted.
 
         Args:
-            triggers (List[Trigger]): List of initialized Trigger instances.
+            triggers (list[Trigger]): list of initialized Trigger instances.
             event (ContractEvent): event to be checked.
             start_block (int, optional): block number to start checking for events. Default is what is set in the config.
         """
@@ -39,7 +38,7 @@ class EventDaemon(Daemon):
         Daemon.__init__(
             self,
             name=self.name,
-            interval=block_seconds + 1,  # TODO: this will be overriden by a flag
+            interval=int(CONFIG.chains[SDK.network.name].interval) + 1,
             task=self.listen_events,
             triggers=triggers,
         )
@@ -52,12 +51,12 @@ class EventDaemon(Daemon):
 
         self.__recent_block: int = start_block
 
-    def listen_events(self) -> List[dict]:
+    def listen_events(self) -> list[dict]:
         """The main task for the EventDaemon. Checks for new events. If any, runs the triggers and returns the events.
         If no events are emitted, returns None.
 
         Returns:
-            List[dict]: list of events as dictionaries.
+            list[dict]: list of events as dictionaries.
         """
 
         # eth.block_number or eth.get_block_number() can also be used

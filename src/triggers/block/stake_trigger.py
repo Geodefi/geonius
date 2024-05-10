@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from itertools import repeat
-from typing import List
-from web3.types import TxReceipt
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Trigger, Database
 from src.helpers.db_validators import (
@@ -10,12 +8,10 @@ from src.helpers.db_validators import (
     save_local_state,
     save_portal_state,
 )
-from src.globals import CONFIG
+from src.globals import pools_table
 from src.helpers.portal import get_StakeParams
 from src.helpers.validator import check_and_stake
 from src.utils import multithread
-
-pools_table: str = CONFIG.database.tables.pools.name
 
 
 class StakeTrigger(Trigger):
@@ -43,7 +39,7 @@ class StakeTrigger(Trigger):
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
-        # TODO: add flag for --min-proposal-queue --max-proposal-delay etc.
+        # TODO: utilize flags: --min-proposal-queue --max-proposal-delay
         verification_index: int = get_StakeParams()[4]
 
         # check if there are any pending validator proposals.
@@ -56,10 +52,10 @@ class StakeTrigger(Trigger):
                     ORDER BY id
                 """
             )
-            approved_pks: List[str] = db.fetchall()
+            approved_pks: list[str] = db.fetchall()
 
         # TODO: handle tx receipt & errors
-        tx_receipts: List[tuple] = check_and_stake(approved_pks)
+        tx_receipts: list[tuple] = check_and_stake(approved_pks)
 
         # TODO: may need to extend tx_receipts tuples[1] (pks) in a list
         #       instead of approved_pks

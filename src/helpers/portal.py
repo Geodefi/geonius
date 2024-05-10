@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import Any
 from itertools import repeat
-from typing import List
 from geodefi.globals import ID_TYPE
 from geodefi.utils import to_bytes32, get_key
 from src.globals import SDK, OPERATOR_ID
@@ -8,12 +8,11 @@ from src.utils import multithread
 
 
 # pylint: disable-next=invalid-name
-# TODO: is return type correct? should be List[dict]? or dict? or List[Any]? Change internal docstring to reflect that.
-def get_StakeParams() -> List:
+def get_StakeParams() -> list[Any]:
     """Returns the result of portal.StakeParams function.
 
     Returns:
-        List: List of StakeParams
+        list: list of StakeParams
     """
     return SDK.portal.functions.StakeParams().call()
 
@@ -59,9 +58,7 @@ def get_withdrawal_address(pool_id: int) -> str:
         str: Withdrawal address of the pool.
     """
 
-    res = SDK.portal.functions.readAddress(
-        pool_id, to_bytes32("withdrawalCredential")
-    ).call()
+    res = SDK.portal.functions.readAddress(pool_id, to_bytes32("withdrawalCredential")).call()
 
     return "0x" + res.hex()
 
@@ -113,14 +110,14 @@ def get_pools_count() -> int:
     return SDK.portal.functions.allIdsByTypeLength(ID_TYPE.POOL).call()
 
 
-def get_all_pool_ids(start_index: int = 0) -> List[int]:
+def get_all_pool_ids(start_index: int = 0) -> list[int]:
     """Returns the all current pool IDs from async Portal calls. It uses multithread to get all pool IDs.
 
     Args:
         start_index (int, optional): Index to start fetching pool IDs from. Default is 0.
 
     Returns:
-        List[int]: List of pool IDs.
+        list[int]: list of pool IDs.
     """
     return multithread(
         get_allIdsByType,
@@ -153,14 +150,14 @@ def get_owned_pubkey(index: int) -> str:
     return SDK.portal.functions.readBytes(index, get_key(OPERATOR_ID, "operators"))
 
 
-def get_all_owned_pubkeys(start_index: int = 0) -> List[str]:
+def get_all_owned_pubkeys(start_index: int = 0) -> list[str]:
     """Returns all of the validator pubkeys that is owned by the operator.
 
     Args:
         start_index (int, optional): Index to start fetching pubkeys from. Default is 0.
 
     Returns:
-        List[str]: List of validator pubkeys.
+        list[str]: list of validator pubkeys.
     """
     return multithread(
         get_owned_pubkey,
