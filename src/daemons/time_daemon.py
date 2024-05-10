@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from src.classes import Daemon, Trigger
+from typing_extensions import Self
 
 
 class TimeDaemon(Daemon):
@@ -19,19 +20,21 @@ class TimeDaemon(Daemon):
 
     name: str = "TIME_DAEMON"
 
-    def __init__(self, interval: int, triggers: list[Trigger]) -> None:
+    def __init__(self, interval: int, triggers: list[Trigger], initial_delay: int) -> None:
         Daemon.__init__(
             self,
             name=self.name,
             interval=interval,
             task=self.trigger,
             triggers=triggers,
+            initial_delay=initial_delay,
         )
 
-    def trigger(self) -> bool:
-        """Returns true and triggers the action.
+    def trigger(self) -> Self:
+        """Returns self. Self will be used to stop the deamon when needed by trigger itself
+        since return value will be passed to the trigger function.
 
         Returns:
-            bool: True
+            Self: self
         """
-        return True
+        return self
