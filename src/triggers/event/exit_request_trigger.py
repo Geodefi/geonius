@@ -5,10 +5,12 @@ from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
 from src.classes import Trigger, Database
-from src.globals import SDK, validators_table
+from src.daemons import TimeDaemon
+from src.globals import SDK, CONFIG, validators_table
 from src.helpers.db_events import create_exit_request_table, event_handler
 from src.helpers.db_validators import save_portal_state, save_local_state, save_exit_epoch
 from src.actions.ethdo import exit_validator
+from src.triggers import FinalizeExitTrigger
 
 
 class ExitRequestTrigger(Trigger):
@@ -103,5 +105,20 @@ class ExitRequestTrigger(Trigger):
                 # TODO: error case, raise exception
                 pass
 
+        # TODO: if exit_validator function (ethdo) is waiting for finalization, we do not need to
+        #       seperate the for loops and we can continue under the same loop
         for event in filtered_events:
-            save_local_state(event.args.pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
+            pubkey: str = event.args.pubkey
+
+            save_local_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
+
+            finalize_exit_trigger: FinalizeExitTrigger = FinalizeExitTrigger(pubkey)
+
+            # TODO: calculate initial delay related to the exit_epoch and the current block number and set it here
+            finalize_exit_deamon: TimeDaemon = TimeDaemon(
+                interval=int(CONFIG.chains[SDK.network.name].interval) + 1,
+                triggers=[finalize_exit_trigger],
+                initial_delay=val.exit_epoch,
+            )
+
+            finalize_exit_deamon.run()
