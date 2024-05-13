@@ -33,12 +33,12 @@ class FinalizeExitTrigger(Trigger):
         Trigger.__init__(self, name=self.name, action=self.finalize_exit)
         self.pubkey: str = pubkey
 
-    def finalize_exit(self, deamon: TimeDaemon, *args, **kwargs) -> None:
+    def finalize_exit(self, daemon: TimeDaemon, *args, **kwargs) -> None:
         """Finalizes the exit of the validator. Stops the daemon after the exit is finalized.
         Updates the database by setting the portal and local status to EXITED for the validator.
 
         Args:
-            deamon (TimeDaemon): The daemon that triggers the action
+            daemon (TimeDaemon): The daemon that triggers the action
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
@@ -69,4 +69,4 @@ class FinalizeExitTrigger(Trigger):
         save_local_state(self.pubkey, VALIDATOR_STATE.EXITED)
 
         # stop the daemon since the validator is exited now and there is no need to check it anymore
-        deamon.stop()
+        daemon.stop()
