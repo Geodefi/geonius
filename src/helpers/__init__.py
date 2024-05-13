@@ -42,4 +42,4 @@ from .portal import (
     get_all_owned_pubkeys,
     get_operatorAllowance,
 )
-from .validator import max_proposals_count, check_and_propose
+from .validator import max_proposals_count, check_and_propose, run_finalize_exit_triggers

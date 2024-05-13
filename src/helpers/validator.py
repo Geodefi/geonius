@@ -2,12 +2,15 @@
 
 from typing import Any
 from web3.types import TxReceipt
-from geodefi.globals import DEPOSIT_SIZE
+from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE
 from geodefi.utils import to_bytes32
+
 from src.classes.database import Database
-from src.globals import pools_table, SDK, OPERATOR_ID
+from src.globals import pools_table, validators_table, SDK, OPERATOR_ID, CONFIG
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
-from src.helpers import get_withdrawal_address
+from src.helpers import get_withdrawal_address, save_local_state
+from src.daemons import TimeDaemon
+from src.triggers import FinalizeExitTrigger
 
 
 def max_proposals_count(pool_id: int) -> int:
@@ -107,3 +110,41 @@ def check_and_stake(pks: list[str]) -> list[tuple]:
         txs.append((tx_receipt, temp_pks))
 
     return txs
+
+
+def run_finalize_exit_triggers():
+    """Run finalize exit trigger for all validators which are in EXIT_REQUESTED state"""
+
+    with Database() as db:
+        db.execute(
+            f"""
+                SELECT pubkey,exit_epoch  FROM {validators_table} 
+                WHERE state = 'EXIT_REQUESTED'
+            """
+        )
+        pks: list[str] = db.fetchall()
+
+    for pk, exit_epoch in pks:
+        # check portal status, if it is not EXITTED or EXIT_REQUESTED raise an error
+        chain_val_status: str = SDK.portal.validator(pk).status
+        if chain_val_status not in ["EXIT_REQUESTED", "EXITTED"]:
+            # TODO: raise an error
+            pass
+
+        # check portal status, if it is EXITTED save local state and continue
+        if chain_val_status == "EXITTED":
+            save_local_state(pk, VALIDATOR_STATE.EXITED)
+            continue
+
+        # TODO: get current epoch and calculate the initial delay if epoch is passed set initial delay to 0
+
+        finalize_exit_trigger: FinalizeExitTrigger = FinalizeExitTrigger(pk)
+
+        # TODO: calculate initial delay related to the exit_epoch and the current block number and set it here
+        finalize_exit_deamon: TimeDaemon = TimeDaemon(
+            interval=int(CONFIG.chains[SDK.network.name].interval) + 1,
+            triggers=[finalize_exit_trigger],
+            initial_delay=exit_epoch,
+        )
+
+        finalize_exit_deamon.run()

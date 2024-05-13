@@ -22,6 +22,7 @@ from src.helpers.db_validators import (
 )
 from src.helpers.db_pools import reinitialize_pools_table, fill_pools_table
 from src.helpers.portal import get_all_owned_pubkeys, get_all_pool_ids
+from src.helpers.validator import run_finalize_exit_triggers
 from src.globals.constants import hour_blocks
 
 
@@ -46,6 +47,10 @@ def setup_daemons():
     This function is called at the beginning of the program to make sure the
     daemons are running.
     """
+
+    # Runs finalize exit triggers if there are any validators to be finalized
+    run_finalize_exit_triggers()
+
     # Triggers
     pools_db_trigger: PoolsDBTrigger = (
         PoolsDBTrigger()
