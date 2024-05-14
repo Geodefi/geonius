@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import json
+
 from src.utils.attribute_dict import AttributeDict, convert_recursive
-from src.globals.exceptions import MissingConfigException
 from src.globals.flags import flags
 from src.globals.sdk import SDK
+from src.utils.error import MissingConfigError
 
 
 def __apply_flags(config: AttributeDict):
@@ -65,16 +66,21 @@ def __init_config() -> AttributeDict:
     Returns:
         AttributeDict: the configuration as an AttributeDict.
     """
-    # catch configuration variables
-    config_dict: dict = json.load(open("config.json", encoding="utf-8"))
 
-    # turn the config into AttributeDict recursively, so we can use dot notation
-    config: AttributeDict = AttributeDict()
+    try:
+        # catch configuration variables
+        config_dict: dict = json.load(open("config.json", encoding="utf-8"))
 
-    if not isinstance(config_dict, dict):
-        raise MissingConfigException
-    else:
-        config = convert_recursive(config_dict)
+        # turn the config into AttributeDict recursively, so we can use dot notation
+        config: AttributeDict = AttributeDict()
+
+        if not isinstance(config_dict, dict):
+            raise TypeError("Config file should be a dict after loading from json, but it is not.")
+    except Exception as e:
+        # TODO: exit the program after propor error log??
+        pass
+
+    config: AttributeDict = convert_recursive(config_dict)
 
     return config
 
