@@ -1,6 +1,7 @@
 from typing import Callable
 
 from src.classes.loggable import Loggable
+from src.utils.error import TriggerError
 
 
 class Trigger(Loggable):
@@ -50,4 +51,4 @@ class Trigger(Loggable):
         try:
             self.__action(*args, **kwargs)
         except Exception as e:
-            raise e
+            raise TriggerError(f"Error while processing the trigger, action failed") from e

@@ -3,6 +3,7 @@ import os
 import sqlite3 as sql
 from typing import Any
 from src.globals import CONFIG
+from src.utils.error import DatabaseError
 
 
 class Database:
@@ -24,6 +25,9 @@ class Database:
         path (str): Path of the database file.
         connection (sqlite3.Connection): Connection object to the database file.
         cursor (sqlite3.Cursor): Cursor object to the database file.
+
+    Raises:
+        DatabaseError: Error while connecting to the database.
     """
 
     main_dir: str = CONFIG.directory
@@ -36,6 +40,9 @@ class Database:
 
         Args:
             db_name (str, optional): Name of the database file. Defaults to `operator`.
+
+        Raises:
+            DatabaseError: Error while connecting to the database.
         """
 
         self.db_name: str = db_name
@@ -43,15 +50,17 @@ class Database:
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
+        connection_path: str = os.path.join(self.path, self.db_name + self.db_ext)
+
         try:
             # log(sql.version) #pyselite version
             # log(sql.sqlite_version) #SQLLite engine version
-            self.connection: sql.Connection = sql.connect(
-                os.path.join(self.path, self.db_name + self.db_ext)
-            )
+            self.connection: sql.Connection = sql.connect(connection_path)
             self.cursor: sql.Cursor = self.connection.cursor()
         except Exception as e:
-            raise e
+            raise DatabaseError(
+                f"Error while connecting to the database with database path {connection_path}"
+            ) from e
 
     def __enter__(self):
         """Used when entering a `with` statement. Which is safer when using database."""

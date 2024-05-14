@@ -31,6 +31,9 @@ class Daemon(Loggable):
         triggers (list[Trigger]): list of initialized Trigger instances.
         start_flag (Event): Event flag to start the daemon.
         stop_flag (Event): Event flag to stop the daemon.
+
+    Raises:
+        DaemonError: Raised in several cases, such as when the daemon is already running or stopped.
     """
 
     def __init__(
