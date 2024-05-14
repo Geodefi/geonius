@@ -3,7 +3,7 @@ from typing import Callable
 from threading import Thread, Event
 from src.classes.trigger import Trigger
 from src.classes.loggable import Loggable
-from src.globals.exceptions import DeadDaemonException, DaemonStoppedException
+from src.utils.error import DaemonError
 
 
 class Daemon(Loggable):
@@ -126,6 +126,9 @@ class Daemon(Loggable):
         If the task raises an exception, the daemon stops and raises a DaemonStoppedException. This is to prevent
         the daemon from running with a broken task. The exception is raised to the caller to handle the error. The
         daemon can be restarted after the error is handled. The stop_flag is set to prevent the daemon from running again.
+
+        Raises:
+            DaemonError: Raised if the daemon stops due to an exception.
         """
 
         sleep(self.__initial_delay)
@@ -143,14 +146,18 @@ class Daemon(Loggable):
             except Exception as e:
                 self.start_flag.clear()
                 self.stop_flag.set()
-                raise DaemonStoppedException from e
+                raise DaemonError("Daemon stopped due to an exception.") from e
 
     def run(self) -> None:
-        """Starts the daemon, runs the loop when called."""
+        """Starts the daemon, runs the loop when called.
+
+        Raises:
+            DaemonError: Raised if the daemon is already running.
+        """
 
         # if already started
         if self.start_flag.is_set():
-            raise DeadDaemonException
+            raise DaemonError("Daemon is already running.")
         self.stop_flag.clear()
 
         self.__worker.start()
@@ -159,10 +166,14 @@ class Daemon(Loggable):
         self.start_flag.set()
 
     def stop(self) -> None:
-        """Stops the daemon, exits the loop."""
+        """Stops the daemon, exits the loop.
+
+        Raises:
+            DaemonError: Raised if the daemon is already stopped.
+        """
 
         # if already stopped
         if not self.start_flag.is_set() or self.stop_flag.is_set():
-            raise DeadDaemonException
+            raise DaemonError("Daemon is already stopped.")
 
         self.stop_flag.set()

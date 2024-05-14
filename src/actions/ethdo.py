@@ -5,12 +5,7 @@ import geodefi
 from src.globals.sdk import SDK
 from src.globals.env import ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE
 from src.globals.config import CONFIG
-from src.utils.error import (
-    GenerateDepositDataError,
-    CreateWalletError,
-    CreateAccountError,
-    ExitValidatorError,
-)
+from src.utils.error import EthdoError
 
 
 def generate_deposit_data(
@@ -27,7 +22,7 @@ def generate_deposit_data(
         dict: Returns the deposit data in JSON format.
 
     Raises:
-        GenerateDepositDataError: Raised if the deposit data generation fails.
+        EthdoError: Raised if the deposit data generation fails.
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
@@ -48,7 +43,11 @@ def generate_deposit_data(
         )
 
     except Exception as e:
-        raise GenerateDepositDataError("Failed to generate deposit data") from e
+        raise EthdoError(
+            f"Failed to generate deposit data from account {CONFIG.ethdo.account} \
+                with withdrawal address {withdrawal_address}, deposit value {deposit_value} \
+                and fork version {geodefi.globals.GENESIS_FORK_VERSION[SDK.network]}"
+        ) from e
 
     try:
         return json.loads(res)
@@ -63,7 +62,7 @@ def create_wallet() -> dict:
         dict: Returns the wallet data in JSON format.
 
     Raises:
-        CreateWalletError: Raised if the wallet creation fails.
+        EthdoError: Raised if the wallet creation fails.
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
@@ -81,7 +80,7 @@ def create_wallet() -> dict:
         )
 
     except Exception as e:
-        raise CreateWalletError("Failed to create wallet") from e
+        raise EthdoError(f"Failed to create wallet {CONFIG.ethdo.wallet}") from e
 
     try:
         return json.loads(res)
@@ -96,7 +95,7 @@ def create_account() -> dict:
         dict: Returns the account data in JSON format.
 
     Raises:
-        CreateAccountError: Raised if the account creation fails.
+        EthdoError: Raised if the account creation fails.
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
@@ -114,7 +113,7 @@ def create_account() -> dict:
         )
 
     except Exception as e:
-        raise CreateAccountError("Failed to create account") from e
+        raise EthdoError(f"Failed to create account {CONFIG.ethdo.account}") from e
 
     try:
         return json.loads(res)
@@ -132,7 +131,7 @@ def exit_validator(pubkey: str) -> dict:
         dict: Returns the exit data in JSON format.
 
     Raises:
-        ExitValidatorError: Raised if the validator exit fails.
+        EthdoError: Raised if the validator exit fails.
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
@@ -150,7 +149,7 @@ def exit_validator(pubkey: str) -> dict:
         )
 
     except Exception as e:
-        raise ExitValidatorError("Failed to exit validator") from e
+        raise EthdoError(f"Failed to exit validator {pubkey}") from e
 
     try:
         return json.loads(res)

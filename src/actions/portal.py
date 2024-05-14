@@ -1,6 +1,6 @@
 from web3.types import TxReceipt
 from src.globals import SDK, OPERATOR_ID
-from src.utils.error import CannotStakeError, CallStakeError, CallProposeError
+from src.utils.error import CannotStakeError, CallFailedError
 from web3.exceptions import TimeExhausted
 
 
@@ -28,7 +28,7 @@ def call_proposeStake(
 
     Raises:
         TimeExhausted: Raised if the transaction takes too long to be mined.
-        CallProposeError: Raised if the proposeStake call fails.
+        CallFailedError: Raised if the proposeStake call fails.
     """
 
     try:
@@ -43,7 +43,7 @@ def call_proposeStake(
     except TimeExhausted as e:
         raise e
     except Exception as e:
-        raise CallProposeError("Failed to call proposeStake on portal contract") from e
+        raise CallFailedError("Failed to call proposeStake on portal contract") from e
 
 
 def call_stake(pubkeys: list[str]) -> TxReceipt:
@@ -63,7 +63,7 @@ def call_stake(pubkeys: list[str]) -> TxReceipt:
     Raises:
         CannotStakeError: Raised if any of the validators cannot stake.
         TimeExhausted: Raised if the transaction takes too long to be mined.
-        CallStakeError: Raised if the stake call fails.
+        CallFailedError: Raised if the stake call fails.
     """
 
     try:
@@ -86,4 +86,4 @@ def call_stake(pubkeys: list[str]) -> TxReceipt:
     except (CannotStakeError, TimeExhausted) as e:
         raise e
     except Exception as e:
-        raise CallStakeError("Failed to call stake on portal contract") from e
+        raise CallFailedError("Failed to call stake on portal contract") from e
