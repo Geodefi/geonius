@@ -47,8 +47,8 @@ def generate_deposit_data(
             ]
         )
 
-    except Exception:
-        raise GenerateDepositDataError("Failed to generate deposit data")
+    except Exception as e:
+        raise GenerateDepositDataError("Failed to generate deposit data") from e
 
     try:
         return json.loads(res)
@@ -80,8 +80,8 @@ def create_wallet() -> dict:
             ]
         )
 
-    except Exception:
-        raise CreateWalletError("Failed to create wallet")
+    except Exception as e:
+        raise CreateWalletError("Failed to create wallet") from e
 
     try:
         return json.loads(res)
@@ -113,8 +113,8 @@ def create_account() -> dict:
             ]
         )
 
-    except Exception:
-        raise CreateAccountError("Failed to create account")
+    except Exception as e:
+        raise CreateAccountError("Failed to create account") from e
 
     try:
         return json.loads(res)
@@ -149,8 +149,8 @@ def exit_validator(pubkey: str) -> dict:
             ]
         )
 
-    except Exception:
-        raise ExitValidatorError("Failed to exit validator")
+    except Exception as e:
+        raise ExitValidatorError("Failed to exit validator") from e
 
     try:
         return json.loads(res)

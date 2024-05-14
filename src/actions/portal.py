@@ -43,7 +43,7 @@ def call_proposeStake(
     except TimeExhausted as e:
         raise e
     except Exception as e:
-        raise CallProposeError("Failed to call proposeStake on portal contract")
+        raise CallProposeError("Failed to call proposeStake on portal contract") from e
 
 
 def call_stake(pubkeys: list[str]) -> TxReceipt:
@@ -85,5 +85,5 @@ def call_stake(pubkeys: list[str]) -> TxReceipt:
 
     except (CannotStakeError, TimeExhausted) as e:
         raise e
-    except Exception:
-        raise CallStakeError("Failed to call stake on portal contract")
+    except Exception as e:
+        raise CallStakeError("Failed to call stake on portal contract") from e
