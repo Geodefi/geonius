@@ -4,30 +4,46 @@ from src.helpers.portal import get_surplus, get_operatorAllowance, get_fallback_
 from src.classes import Database
 from src.utils import multithread
 from src.globals import pools_table, OPERATOR_ID
+from src.utils.error import DatabaseError
 
 
 def create_pools_table() -> None:
-    """Creates the sql database table for Pools."""
+    """Creates the sql database table for Pools.
 
-    with Database() as db:
-        # fallback just records if operator is set as fallback.
-        db.execute(
-            f"""
-                CREATE TABLE IF NOT EXISTS {pools_table} (
-                    id TEXT NOT NULL PRIMARY KEY,
-                    surplus TEXT ,
-                    allowance TEXT ,
-                    fallback INTEGER DEFAULT 0
-                )
-        """
-        )
+    Raises:
+        DatabaseError: Error creating Pools table
+    """
+
+    try:
+        with Database() as db:
+            # fallback just records if operator is set as fallback.
+            db.execute(
+                f"""
+                    CREATE TABLE IF NOT EXISTS {pools_table} (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        surplus TEXT ,
+                        allowance TEXT ,
+                        fallback INTEGER DEFAULT 0
+                    )
+            """
+            )
+
+    except Exception as e:
+        raise DatabaseError(f"Error creating Pools table with name {pools_table}") from e
 
 
 def drop_pools_table() -> None:
-    """Removes Pools table from the database."""
+    """Removes Pools table from the database.
 
-    with Database() as db:
-        db.execute(f"""DROP TABLE IF EXISTS {pools_table}""")
+    Raises:
+        DatabaseError: Error dropping Pools table
+    """
+
+    try:
+        with Database() as db:
+            db.execute(f"""DROP TABLE IF EXISTS {pools_table}""")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping Pools table with name {pools_table}") from e
 
 
 def reinitialize_pools_table() -> None:
@@ -71,21 +87,27 @@ def insert_many_pools(new_pools: list[dict]) -> None:
 
     Args:
         new_pools (list[dict]): list of dictionaries containing the pool info, in format of [{id: val, surplus: val,...},...]
+
+    Raises:
+        DatabaseError: Error inserting many pools into table
     """
 
-    with Database() as db:
-        db.executemany(
-            f"INSERT INTO {pools_table} VALUES (?,?,?,?)",
-            [
-                (
-                    a["id"],
-                    a["surplus"],
-                    a["allowance"],
-                    a["fallback"],
-                )
-                for a in new_pools
-            ],
-        )
+    try:
+        with Database() as db:
+            db.executemany(
+                f"INSERT INTO {pools_table} VALUES (?,?,?,?)",
+                [
+                    (
+                        a["id"],
+                        a["surplus"],
+                        a["allowance"],
+                        a["fallback"],
+                    )
+                    for a in new_pools
+                ],
+            )
+    except Exception as e:
+        raise DatabaseError(f"Error inserting many pools into table {pools_table}") from e
 
 
 def fill_pools_table(ids: list[int]) -> None:
@@ -104,16 +126,25 @@ def save_surplus(pool_id: int, surplus: int) -> None:
     Args:
         pool_id (int): pool ID
         surplus (int): surplus value to be updated
+
+    Raises:
+        DatabaseError: Error updating surplus of pool
     """
 
-    with Database() as db:
-        db.execute(
-            f"""
-                UPDATE {pools_table} 
-                SET surplus = {surplus}
-                WHERE Id = {pool_id}
-            """
-        )
+    try:
+        with Database() as db:
+            db.execute(
+                f"""
+                    UPDATE {pools_table} 
+                    SET surplus = {surplus}
+                    WHERE Id = {pool_id}
+                """
+            )
+    except Exception as e:
+        raise DatabaseError(
+            f"Error updating surplus of pool with id {pool_id} and surplus {surplus} \
+                in table {pools_table}"
+        ) from e
 
 
 def save_fallback_operator(pool_id: int, value: bool) -> None:
@@ -122,16 +153,25 @@ def save_fallback_operator(pool_id: int, value: bool) -> None:
     Args:
         pool_id (int): pool ID
         value (bool): fallback value to be updated
+
+    Raises:
+        DatabaseError: Error updating fallback of pool
     """
 
-    with Database() as db:
-        db.execute(
-            f"""
-            UPDATE {pools_table} 
-            SET fallback = {1 if value else 0}
-            WHERE Id = {pool_id}
-            """
-        )
+    try:
+        with Database() as db:
+            db.execute(
+                f"""
+                UPDATE {pools_table} 
+                SET fallback = {1 if value else 0}
+                WHERE Id = {pool_id}
+                """
+            )
+    except Exception as e:
+        raise DatabaseError(
+            f"Error updating fallback of pool with id {pool_id} and value {value} \
+                in table {pools_table}"
+        ) from e
 
 
 def save_allowance(pool_id: int, allowance: int) -> None:
@@ -140,13 +180,22 @@ def save_allowance(pool_id: int, allowance: int) -> None:
     Args:
         pool_id (int): pool ID
         allowance (int): allowance value to be updated
+
+    Raises:
+        DatabaseError: Error updating allowance of pool
     """
 
-    with Database() as db:
-        db.execute(
-            f"""
-                UPDATE {pools_table} 
-                SET allowance = {allowance}
-                WHERE Id = {pool_id}
-            """
-        )
+    try:
+        with Database() as db:
+            db.execute(
+                f"""
+                    UPDATE {pools_table} 
+                    SET allowance = {allowance}
+                    WHERE Id = {pool_id}
+                """
+            )
+    except Exception as e:
+        raise DatabaseError(
+            f"Error updating allowance of pool with id {pool_id} and allowance {allowance} \
+                in table {pools_table}"
+        ) from e

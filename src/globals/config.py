@@ -65,6 +65,9 @@ def __init_config() -> AttributeDict:
 
     Returns:
         AttributeDict: the configuration as an AttributeDict.
+
+    Raises:
+        TypeError: if the config file is not a dict after loading from json.
     """
 
     try:

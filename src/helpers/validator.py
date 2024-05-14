@@ -11,6 +11,7 @@ from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.helpers import get_withdrawal_address, save_local_state
 from src.daemons import TimeDaemon
 from src.triggers import FinalizeExitTrigger
+from src.utils.error import DatabaseError, DatabaseMismatchError
 
 
 def max_proposals_count(pool_id: int) -> int:
@@ -21,30 +22,39 @@ def max_proposals_count(pool_id: int) -> int:
 
     Returns:
         int: Maximum possible proposals count
+
+    Raises:
+        DatabaseError: Error fetching allowance and surplus for pool from table
     """
+
     # TODO: remove allowance from database and call get_operatorAllowance
-    with Database() as db:
-        db.execute(
-            f"""
-                SELECT allowance,surplus FROM {pools_table} 
-                WHERE id = {pool_id.PROPOSED}  
-            """
-        )
-        allowance, surplus = db.fetchall()
+    try:
+        with Database() as db:
+            db.execute(
+                f"""
+                    SELECT allowance,surplus FROM {pools_table} 
+                    WHERE id = {pool_id}  
+                """
+            )
+            allowance, surplus = db.fetchall()
+    except Exception as e:
+        raise DatabaseError(
+            f"Error fetching allowance and surplus for pool {pool_id} from table {pools_table}"
+        ) from e
 
-        if allowance > 0:
-            # every 32 ether is 1 validator.
-            eth_per_prop: int = surplus // DEPOSIT_SIZE.STAKE
+    if allowance > 0:
+        # every 32 ether is 1 validator.
+        eth_per_prop: int = surplus // DEPOSIT_SIZE.STAKE
 
-            # considering the wallet balance of the operator since it might not be enough (1 eth per val)
-            wallet_balance: int = SDK.portal.functions.readUint(
-                OPERATOR_ID, to_bytes32("wallet")
-            ).call()
-            eth_per_wallet_balance: int = wallet_balance // DEPOSIT_SIZE.PROPOSAL
+        # considering the wallet balance of the operator since it might not be enough (1 eth per val)
+        wallet_balance: int = SDK.portal.functions.readUint(
+            OPERATOR_ID, to_bytes32("wallet")
+        ).call()
+        eth_per_wallet_balance: int = wallet_balance // DEPOSIT_SIZE.PROPOSAL
 
-            return min(allowance, eth_per_prop, eth_per_wallet_balance)
-        else:
-            return 0
+        return min(allowance, eth_per_prop, eth_per_wallet_balance)
+    else:
+        return 0
 
 
 def check_and_propose(pool_id: int) -> list[tuple]:
@@ -115,21 +125,27 @@ def check_and_stake(pks: list[str]) -> list[tuple]:
 def run_finalize_exit_triggers():
     """Run finalize exit trigger for all validators which are in EXIT_REQUESTED state"""
 
-    with Database() as db:
-        db.execute(
-            f"""
-                SELECT pubkey,exit_epoch  FROM {validators_table} 
-                WHERE state = 'EXIT_REQUESTED'
-            """
-        )
-        pks: list[str] = db.fetchall()
+    try:
+        with Database() as db:
+            db.execute(
+                f"""
+                    SELECT pubkey,exit_epoch  FROM {validators_table} 
+                    WHERE state = 'EXIT_REQUESTED'
+                """
+            )
+            pks: list[str] = db.fetchall()
+    except Exception as e:
+        raise DatabaseError(
+            f"Error fetching validators in EXIT_REQUESTED state from table {validators_table}"
+        ) from e
 
     for pk, exit_epoch in pks:
         # check portal status, if it is not EXITTED or EXIT_REQUESTED raise an error
         chain_val_status: str = SDK.portal.validator(pk).status
         if chain_val_status not in ["EXIT_REQUESTED", "EXITTED"]:
-            # TODO: raise an error
-            pass
+            raise DatabaseMismatchError(
+                f"Validator status mismatch in chain and database for pubkey {pk}"
+            )
 
         # check portal status, if it is EXITTED save local state and continue
         if chain_val_status == "EXITTED":
