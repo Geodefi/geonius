@@ -45,6 +45,11 @@ docker pull Geodefi/geonius
 
 ## Usage
 <!-- TODO: add more information on usage -->
+Run:
+
+```
+PYTHONPATH=.  python3 src/main.py --flags
+```
 
 ### Flags
 
