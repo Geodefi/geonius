@@ -53,10 +53,11 @@ class FinalizeExitTrigger(Trigger):
 
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT pool_id FROM Validators
-                    WHERE pubkey = {self.pubkey}
                 """
+                SELECT pool_id FROM Validators
+                WHERE pubkey = ?
+                """,
+                (self.pubkey),
             )
             row: Any = db.fetchone()
             if not row:

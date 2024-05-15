@@ -40,10 +40,11 @@ class ExitRequestTrigger(Trigger):
     def __filter_events(self, event: EventData) -> bool:
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT pubkey FROM Validators
-                    WHERE pubkey = {event.args.pubkey}
                 """
+                SELECT pubkey FROM Validators
+                WHERE pubkey = ?
+                """,
+                (event.args.pubkey),
             )
             res: Any = db.fetchone()  # returns None if not found
         if res:
@@ -79,7 +80,7 @@ class ExitRequestTrigger(Trigger):
 
         with Database() as db:
             db.executemany(
-                f"INSERT INTO ExitRequest VALUES (?,?,?,?,?,?,?)",
+                "INSERT INTO ExitRequest VALUES (?,?,?,?,?,?,?)",
                 events,
             )
 

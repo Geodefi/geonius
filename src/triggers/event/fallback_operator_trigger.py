@@ -89,7 +89,7 @@ class FallbackOperatorTrigger(Trigger):
 
         with Database() as db:
             db.executemany(
-                f"INSERT INTO FallbackOperator VALUES (?,?,?,?,?,?,?,?)",
+                "INSERT INTO FallbackOperator VALUES (?,?,?,?,?,?,?,?)",
                 events,
             )
 

@@ -32,10 +32,11 @@ def max_proposals_count(pool_id: int) -> int:
     try:
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT surplus FROM Pools 
-                    WHERE id = {pool_id}  
                 """
+                SELECT surplus FROM Pools 
+                WHERE id = ?
+                """,
+                (pool_id),
             )
             surplus: str = db.fetchone()  # surplus is a TEXT field
             surplus = int(surplus)
@@ -138,10 +139,11 @@ def run_finalize_exit_triggers():
     try:
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT pubkey,exit_epoch  FROM Validators 
-                    WHERE portal_state = 'EXIT_REQUESTED'
                 """
+                SELECT pubkey,exit_epoch  FROM Validators 
+                WHERE portal_state = ?
+                """,
+                (int(VALIDATOR_STATE.EXIT_REQUESTED),),
             )
             pks: list[str] = db.fetchall()
     except Exception as e:

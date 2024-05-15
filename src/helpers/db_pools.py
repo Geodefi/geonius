@@ -19,13 +19,13 @@ def create_pools_table() -> None:
         with Database() as db:
             # fallback just records if operator is set as fallback.
             db.execute(
-                f"""
-                    CREATE TABLE IF NOT EXISTS Pools (
-                        id TEXT NOT NULL PRIMARY KEY,
-                        surplus TEXT ,
-                        fallback INTEGER DEFAULT 0
-                    )
-            """
+                """
+                CREATE TABLE IF NOT EXISTS Pools (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    surplus TEXT ,
+                    fallback INTEGER DEFAULT 0
+                )
+                """
             )
 
     except Exception as e:
@@ -41,7 +41,7 @@ def drop_pools_table() -> None:
 
     try:
         with Database() as db:
-            db.execute(f"""DROP TABLE IF EXISTS Pools""")
+            db.execute("""DROP TABLE IF EXISTS Pools""")
     except Exception as e:
         raise DatabaseError(f"Error dropping Pools table with name Pools") from e
 
@@ -91,7 +91,7 @@ def insert_many_pools(new_pools: list[dict]) -> None:
     try:
         with Database() as db:
             db.executemany(
-                f"INSERT INTO Pools VALUES (?,?,?)",
+                "INSERT INTO Pools VALUES (?,?,?)",
                 [
                     (
                         a["id"],
@@ -129,11 +129,12 @@ def save_surplus(pool_id: int, surplus: int) -> None:
     try:
         with Database() as db:
             db.execute(
-                f"""
-                    UPDATE Pools 
-                    SET surplus = {surplus}
-                    WHERE Id = {pool_id}
                 """
+                UPDATE Pools 
+                SET surplus = ?
+                WHERE Id =?
+                """,
+                (surplus, pool_id),
             )
     except Exception as e:
         raise DatabaseError(
@@ -156,11 +157,12 @@ def save_fallback_operator(pool_id: int, value: bool) -> None:
     try:
         with Database() as db:
             db.execute(
-                f"""
-                UPDATE Pools 
-                SET fallback = {1 if value else 0}
-                WHERE Id = {pool_id}
                 """
+                UPDATE Pools 
+                SET fallback = ?
+                WHERE Id = ?
+                """,
+                (1 if value else 0, pool_id),
             )
     except Exception as e:
         raise DatabaseError(

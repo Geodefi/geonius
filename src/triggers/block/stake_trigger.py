@@ -47,12 +47,13 @@ class StakeTrigger(Trigger):
         #       handle the try except here or move them to a helper function.
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT pubkey FROM Validators 
-                    WHERE local_state = {VALIDATOR_STATE.PROPOSED}  
-                    AND portal_index < {verification_index}
-                    ORDER BY pool_id
                 """
+                SELECT pubkey FROM Validators 
+                WHERE local_state = ?  
+                AND portal_index < ?
+                ORDER BY pool_id
+                """,
+                (int(VALIDATOR_STATE.PROPOSED), verification_index),
             )
             approved_pks: list[str] = db.fetchall()
 
