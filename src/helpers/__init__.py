@@ -15,7 +15,6 @@ from .db_pools import (
     fill_pools_table,
     save_surplus,
     save_fallback_operator,
-    save_allowance,
     insert_many_pools,
 )
 from .db_validators import (

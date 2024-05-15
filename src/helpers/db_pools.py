@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from src.helpers.portal import get_surplus, get_operatorAllowance, get_fallback_operator
+from src.helpers.portal import get_surplus, get_fallback_operator
 from src.classes import Database
 from src.utils import multithread
 from src.globals import pools_table, OPERATOR_ID
@@ -22,7 +22,6 @@ def create_pools_table() -> None:
                     CREATE TABLE IF NOT EXISTS {pools_table} (
                         id TEXT NOT NULL PRIMARY KEY,
                         surplus TEXT ,
-                        allowance TEXT ,
                         fallback INTEGER DEFAULT 0
                     )
             """
@@ -64,7 +63,6 @@ def fetch_pools_batch(ids: list[int]) -> list[dict]:
     """
 
     surpluses: list[int] = multithread(get_surplus, ids)
-    allowances: list[int] = multithread(get_operatorAllowance, ids)
     fallback_operators: list[int] = multithread(get_fallback_operator, ids)
 
     # transpose the info and insert all the pools
@@ -72,12 +70,9 @@ def fetch_pools_batch(ids: list[int]) -> list[dict]:
         {
             "id": str(id),
             "surplus": str(surplus),
-            "allowance": str(allowance),
             "fallback": 1 if fallback == OPERATOR_ID else 0,
         }
-        for (id, surplus, allowance, fallback) in zip(
-            ids, surpluses, allowances, fallback_operators
-        )
+        for (id, surplus, fallback) in zip(ids, surpluses, fallback_operators)
     ]
     return pools_transposed
 
@@ -100,7 +95,6 @@ def insert_many_pools(new_pools: list[dict]) -> None:
                     (
                         a["id"],
                         a["surplus"],
-                        a["allowance"],
                         a["fallback"],
                     )
                     for a in new_pools
@@ -170,32 +164,5 @@ def save_fallback_operator(pool_id: int, value: bool) -> None:
     except Exception as e:
         raise DatabaseError(
             f"Error updating fallback of pool with id {pool_id} and value {value} \
-                in table {pools_table}"
-        ) from e
-
-
-def save_allowance(pool_id: int, allowance: int) -> None:
-    """Sets allowance for pool on database to provided value
-
-    Args:
-        pool_id (int): pool ID
-        allowance (int): allowance value to be updated
-
-    Raises:
-        DatabaseError: Error updating allowance of pool
-    """
-
-    try:
-        with Database() as db:
-            db.execute(
-                f"""
-                    UPDATE {pools_table} 
-                    SET allowance = {allowance}
-                    WHERE Id = {pool_id}
-                """
-            )
-    except Exception as e:
-        raise DatabaseError(
-            f"Error updating allowance of pool with id {pool_id} and allowance {allowance} \
                 in table {pools_table}"
         ) from e

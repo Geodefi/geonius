@@ -5,16 +5,15 @@ from web3.types import EventData
 
 from src.classes import Trigger, Database
 from src.helpers.db_events import create_delegation_table, event_handler
-from src.helpers.portal import get_operatorAllowance
 from src.helpers.validator import check_and_propose
 from src.helpers.db_validators import fill_validators_table
-from src.helpers.db_pools import create_pools_table, save_allowance
+from src.helpers.db_pools import create_pools_table
 from src.globals import OPERATOR_ID
 
 
 class DelegationTrigger(Trigger):
     """Triggered when a pool changes the Allowance for the operator.
-    Updates the database with the latest info.
+    Updates the database with the latest info by saving delegation events.
 
     Attributes:
         name (str): name of the trigger to be used when logging etc. (value: DELEGATION_TRIGGER)
@@ -91,11 +90,11 @@ class DelegationTrigger(Trigger):
                 events,
             )
 
+    # TODO: naming may change?
     def update_allowance(self, events: Iterable[EventData], *args, **kwargs) -> None:
-        """Updates the allowance for given pool that is granted to script's OPERATOR_ID.
-        for encountered pool ids within provided "Delegation" emits. If the allowance is changed,
-        it also proposes new validators for the pool if possible. If new validators are proposed,
-        it also fills the validators table with the new validators data.
+        """If the allowance is changed, it proposes new validators for the pool if possible.
+        If new validators are proposed, it also fills the validators table
+        with the new validators data.
 
         Args:
             events (Iterable[EventData]): list of Delegation emits
@@ -116,10 +115,6 @@ class DelegationTrigger(Trigger):
 
         all_pks: list[tuple] = []
         for pool_id in pool_ids:
-            # update db
-            allowance: int = get_operatorAllowance(pool_id)
-            save_allowance(pool_id, allowance)
-
             # if able to propose any new validators do so
             # TODO: changed fix
             txs: list[tuple] = check_and_propose(pool_id)

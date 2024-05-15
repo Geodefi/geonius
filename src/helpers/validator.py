@@ -11,7 +11,7 @@ from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.daemons import TimeDaemon
 from src.triggers import FinalizeExitTrigger
 from src.utils.error import DatabaseError, DatabaseMismatchError
-from .portal import get_withdrawal_address
+from .portal import get_operatorAllowance, get_withdrawal_address
 from .db_validators import save_local_state
 from geodefi.classes.beacon import Beacon
 
@@ -29,24 +29,25 @@ def max_proposals_count(pool_id: int) -> int:
         DatabaseError: Error fetching allowance and surplus for pool from table
     """
 
-    # TODO: NOW remove allowance from database and call get_operatorAllowance
+    allowance: int = get_operatorAllowance(pool_id, OPERATOR_ID)
     try:
         with Database() as db:
             db.execute(
                 f"""
-                    SELECT allowance,surplus FROM {pools_table} 
+                    SELECT surplus FROM {pools_table} 
                     WHERE id = {pool_id}  
                 """
             )
-            allowance, surplus = db.fetchall()
+            surplus: str = db.fetchone()  # surplus is a TEXT field
+            surplus = int(surplus)
     except Exception as e:
         raise DatabaseError(
-            f"Error fetching allowance and surplus for pool {pool_id} from table {pools_table}"
+            f"Error fetching surplus for pool {pool_id} from table {pools_table}"
         ) from e
 
     if allowance > 0:
         # every 32 ether is 1 validator.
-        eth_per_prop: int = surplus // DEPOSIT_SIZE.STAKE
+        eth_per_prop: int = int(surplus) // DEPOSIT_SIZE.STAKE
 
         # considering the wallet balance of the operator since it might not be enough (1 eth per val)
         wallet_balance: int = SDK.portal.functions.readUint(
