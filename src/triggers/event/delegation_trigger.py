@@ -121,6 +121,7 @@ class DelegationTrigger(Trigger):
             save_allowance(pool_id, allowance)
 
             # if able to propose any new validators do so
+            # TODO: changed fix
             txs: list[tuple] = check_and_propose(pool_id)
             for tx_tuple in txs:
                 all_pks.extend(tx_tuple[1])  # tx[1] is the list of pubkeys

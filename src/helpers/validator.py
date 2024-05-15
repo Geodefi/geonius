@@ -8,10 +8,12 @@ from geodefi.utils import to_bytes32
 from src.classes.database import Database
 from src.globals import pools_table, validators_table, SDK, OPERATOR_ID, CONFIG
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
-from src.helpers import get_withdrawal_address, save_local_state
 from src.daemons import TimeDaemon
 from src.triggers import FinalizeExitTrigger
 from src.utils.error import DatabaseError, DatabaseMismatchError
+from .portal import get_withdrawal_address
+from .db_validators import save_local_state
+from geodefi.classes.beacon import Beacon
 
 
 def max_proposals_count(pool_id: int) -> int:
@@ -27,7 +29,7 @@ def max_proposals_count(pool_id: int) -> int:
         DatabaseError: Error fetching allowance and surplus for pool from table
     """
 
-    # TODO: remove allowance from database and call get_operatorAllowance
+    # TODO: NOW remove allowance from database and call get_operatorAllowance
     try:
         with Database() as db:
             db.execute(
@@ -57,7 +59,7 @@ def max_proposals_count(pool_id: int) -> int:
         return 0
 
 
-def check_and_propose(pool_id: int) -> list[tuple]:
+def check_and_propose(pool_id: int) -> list[str]:
     """Propose for given pool if able to propose for all of them at once or in batches of 50 pubkeys at a time if needed to.
 
     Args:
@@ -87,20 +89,19 @@ def check_and_propose(pool_id: int) -> list[tuple]:
     # TODO: current implementation is not considering last bunch of
     #       validators count is higher than threshold or not may
     #       need to implement a check for that later if needed.
-    txs: list[tuple] = []
+    pks: list[str] = []
     for i in range(0, len(pubkeys), 50):
         temp_pks: list[str] = pubkeys[i : i + 50]
         temp_sigs1: list[str] = signatures1[i : i + 50]
         temp_sigs31: list[str] = signatures31[i : i + 50]
 
-        # TODO: handle tx receipt and errors
-        tx_receipt: TxReceipt = call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
-        txs.append((tx_receipt, temp_pks))
+        call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
+        pks.extend(temp_pks)
 
-    return txs
+    return pks
 
 
-def check_and_stake(pks: list[str]) -> list[tuple]:
+def check_and_stake(pks: list[str]) -> list[str]:
     """Stake for given pubkeys if able to stake for all of them at once or in batches of 50 pubkeys at a time if needed to.
 
     Args:
@@ -113,13 +114,14 @@ def check_and_stake(pks: list[str]) -> list[tuple]:
     # TODO: current implementation is not considering last bunch of
     #       validators count is higher than threshold or not may
     #       need to implement a check for that later if needed.
-    txs: list[tuple] = []
+    pks: list[str] = []
     for i in range(0, len(pks), 50):
         temp_pks: list[str] = pks[i : i + 50]
-        tx_receipt: TxReceipt = call_stake(temp_pks)
-        txs.append((tx_receipt, temp_pks))
 
-    return txs
+        call_stake(temp_pks)
+        pks.extend(temp_pks)
+
+    return pks
 
 
 def run_finalize_exit_triggers():

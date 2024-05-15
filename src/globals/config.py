@@ -74,13 +74,11 @@ def __init_config() -> AttributeDict:
         # catch configuration variables
         config_dict: dict = json.load(open("config.json", encoding="utf-8"))
 
-        # turn the config into AttributeDict recursively, so we can use dot notation
-        config: AttributeDict = AttributeDict()
-
         if not isinstance(config_dict, dict):
             raise TypeError("Config file should be a dict after loading from json, but it is not.")
+
     except Exception as e:
-        # TODO: exit the program after propor error log??
+        # TODO: sys exit the program HERE
         pass
 
     config: AttributeDict = convert_recursive(config_dict)

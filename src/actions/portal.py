@@ -10,7 +10,7 @@ def call_proposeStake(
     pubkeys: list,
     sig1s: list,
     sig31s: list,
-) -> TxReceipt:
+) -> None:
     """Transact on proposeStake function with given pubkeys, sigs, and pool_id.
 
     This function initiates a transaction to propose new validators for a given pool_id.
@@ -38,15 +38,16 @@ def call_proposeStake(
 
         # Wait for the transaction to be mined, and get the transaction receipt
         tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
-        return tx_receipt
+        # TODO: log tx_receipt
 
     except TimeExhausted as e:
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call proposeStake on portal contract") from e
+    # TODO: sys exit if this fails while handling
 
 
-def call_stake(pubkeys: list[str]) -> TxReceipt:
+def call_stake(pubkeys: list[str]) -> None:
     """Transact on stake function with given pubkeys, activating the approved validators.
 
     This function initiates a transaction to stake the approved validators. It takes a list of
@@ -72,7 +73,6 @@ def call_stake(pubkeys: list[str]) -> TxReceipt:
 
             for pubkey in pubkeys:
                 if not SDK.portal.functions.canStake(pubkey).call():
-                    # TODO: Again placeholder, maybe pass or update the db and try again?
                     raise CannotStakeError(f"Validator with pubkey {pubkey} cannot stake")
 
             tx_hash: str = SDK.portal.functions.stake(pubkeys).transact(
@@ -81,9 +81,13 @@ def call_stake(pubkeys: list[str]) -> TxReceipt:
 
             # Wait for the transaction to be mined, and get the transaction receipt
             tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
-            return tx_receipt
+            # TODO: log tx_receipt
 
-    except (CannotStakeError, TimeExhausted) as e:
+    except CannotStakeError as e:
+        # TODO: send mail both to us and them about this anomaly
+        pass
+    except TimeExhausted as e:
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call stake on portal contract") from e
+        # TODO: sys exit if this fails while handling

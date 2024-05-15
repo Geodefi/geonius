@@ -38,8 +38,7 @@ class Loggable:
         __name_len = 25
         if len(name) > __name_len:
             raise ValueError(f"Name length should be max {__name_len} characters.")
-        # TODO: what is < doing before __name_len?
-        self.__logger_name: str = f"{name:<__name_len}"
+        self.__logger_name: str = f"{name:<{__name_len}}"
 
         self.logger: logging.Logger = self.__get_logger(name)
 

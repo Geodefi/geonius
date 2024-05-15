@@ -46,11 +46,16 @@ def __init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
     try:
         sdk: Geode = Geode(exec_api=exec_api, cons_api=cons_api)
         if not priv_key:
-            priv_key = PRIVATE_KEY
-        sdk = __set_web3_account(sdk, PRIVATE_KEY)
+            # TODO: create a new exception for value missing error
+            raise SDKException(
+                "Problem occured while connecting to SDK, failed to initialize SDK. \
+                with execution API: {exec_api} and consensus API: {cons_api}"
+            ) from e
+        sdk = __set_web3_account(sdk, priv_key)
         return sdk
 
     except Exception as e:
+        # TODO: sys exit the program HERE no raise, divide exceptions to two SDKException and Exception while catching
         raise SDKException(
             "Problem occured while connecting to SDK, failed to initialize SDK. \
                 with execution API: {exec_api} and consensus API: {cons_api}"

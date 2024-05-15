@@ -9,8 +9,9 @@ from src.daemons import TimeDaemon
 from src.globals import SDK, CONFIG, validators_table
 from src.helpers.db_events import create_exit_request_table, event_handler
 from src.helpers.db_validators import save_portal_state, save_local_state, save_exit_epoch
+from src.helpers.validator import run_finalize_exit_triggers
 from src.actions.ethdo import exit_validator
-from src.triggers import FinalizeExitTrigger
+from ..time import FinalizeExitTrigger
 
 
 class ExitRequestTrigger(Trigger):
@@ -24,6 +25,8 @@ class ExitRequestTrigger(Trigger):
 
     def __init__(self) -> None:
         Trigger.__init__(self, name=self.name, action=self.update_validators_status)
+        # Runs finalize exit triggers if there are any validators to be finalized
+        run_finalize_exit_triggers()
         create_exit_request_table()
 
     # TODO: Same filter with alienation_trigger.py so it can be refactored to a common function in helpers like folder
@@ -89,21 +92,24 @@ class ExitRequestTrigger(Trigger):
         )
 
         for event in filtered_events:
-            pubkey: str = event.args.pubkey
-            save_portal_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
+            try:
+                pubkey: str = event.args.pubkey
+                save_portal_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
 
-            # TODO: if this is not waiting for tx to be mined, there should be a way to handle and check the beacon_status
-            exit_validator(pubkey)
+                # TODO: if this is not waiting for tx to be mined, there should be a way to handle and check the beacon_status
+                exit_validator(pubkey)
 
-            val: Validator = SDK.portal.validator(pubkey)
-            # TODO: check what the status is in the beacon chain
-            if val.beacon_status == "exiting":
+                val: Validator = SDK.portal.validator(pubkey)
+                # TODO: check what the expected status below should be in the beacon chain
+                if val.beacon_status == "exiting":
 
-                # TODO: write database the expected exit block
-                save_exit_epoch(pubkey, val.exit_epoch)
-            else:
-                # TODO: error case, raise exception
-                pass
+                    # write database the expected exit block
+                    save_exit_epoch(pubkey, val.exit_epoch)
+                else:
+                    # TODO: error case, raise exception to be closed in except catch
+                    pass
+            except Exception as e:
+                raise e
 
         # TODO: if exit_validator function (ethdo) is waiting for finalization, we do not need to
         #       seperate the for loops and we can continue under the same loop

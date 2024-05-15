@@ -145,7 +145,7 @@ class Daemon(Loggable):
                     if self.triggers:
                         # pylint: disable-next=expression-not-assigned
                         [f.process(result) for f in self.triggers]
-
+            # TODO: not exitting system but instead closing the daemon here maybe a better approach
             except Exception as e:
                 self.start_flag.clear()
                 self.stop_flag.set()

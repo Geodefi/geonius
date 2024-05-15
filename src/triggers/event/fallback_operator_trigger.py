@@ -108,8 +108,6 @@ class FallbackOperatorTrigger(Trigger):
 
         all_pks: list[tuple] = []
         for pool_id in pool_ids:
-            # TODO: consider not checking fetching this, instead using from the filtered events
-            #       and also consider saving threshold value
             fallback: int = get_fallback_operator(pool_id)
 
             # check if the fallback id is OPERATOR_ID
@@ -117,6 +115,7 @@ class FallbackOperatorTrigger(Trigger):
             save_fallback_operator(pool_id, fallback == OPERATOR_ID)
 
             # if able to propose any new validators do so
+            # TODO: changed fix
             txs: list[tuple] = check_and_propose(pool_id)
             for tx_tuple in txs:
                 all_pks.extend(tx_tuple[1])  # tx[1] is the list of pubkeys

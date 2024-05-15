@@ -48,6 +48,7 @@ class FinalizeExitTrigger(Trigger):
         # TODO: check what the status is in the beacon chain
         if val.beacon_status != "exit":
             #  TODO: if it is too late from, after the initial delay is passed, we should raise an error
+            # Too late => 1 week raise an error and cathch and send mail to operator and us
             return
 
         with Database() as db:
@@ -59,7 +60,7 @@ class FinalizeExitTrigger(Trigger):
             )
             row: Any = db.fetchone()
             if not row:
-                # TODO: raise an error
+                # TODO: raise an error catch and exit deamon
                 pass
         pool_id: int = int(row[0])
         SDK.portal.finalizeExit(pool_id, self.pubkey)

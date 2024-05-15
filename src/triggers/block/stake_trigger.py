@@ -54,7 +54,7 @@ class StakeTrigger(Trigger):
             )
             approved_pks: list[str] = db.fetchall()
 
-        # TODO: handle tx receipt & errors
+        # TODO: changed fix
         tx_receipts: list[tuple] = check_and_stake(approved_pks)
 
         # TODO: may need to extend tx_receipts tuples[1] (pks) in a list
