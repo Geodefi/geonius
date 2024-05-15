@@ -8,10 +8,7 @@ from src.globals import SDK, ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE, CONFIG
 from src.exceptions import EthdoError
 
 
-def generate_deposit_data(
-    withdrawal_address: str,
-    deposit_value: str,
-) -> dict:
+def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int = None) -> dict:
     """Generates the deposit data for a new validator proposal.
 
     Args:
@@ -26,6 +23,9 @@ def generate_deposit_data(
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
+    account: str = CONFIG.ethdo.account
+    if index:
+        account += f"_{index}_"
 
     try:
         res: str = check_output(
@@ -33,7 +33,7 @@ def generate_deposit_data(
                 "ethdo",
                 "validator",
                 "depositdata",
-                f"--validatoraccount={CONFIG.ethdo.account}",
+                f"--validatoraccount={account}",
                 f"--passphrase={ACCOUNT_PASSPHRASE}",
                 f"--withdrawaladdress={withdrawal_address}",
                 f"--depositvalue={deposit_value}",
@@ -44,7 +44,7 @@ def generate_deposit_data(
 
     except Exception as e:
         raise EthdoError(
-            f"Failed to generate deposit data from account {CONFIG.ethdo.account} \
+            f"Failed to generate deposit data from account {account} \
                 with withdrawal address {withdrawal_address}, deposit value {deposit_value} \
                 and fork version {geodefi.globals.GENESIS_FORK_VERSION[SDK.network]}"
         ) from e
@@ -92,7 +92,7 @@ def create_wallet() -> dict:
         raise e
 
 
-def create_account() -> dict:
+def create_account(index: int = None) -> dict:
     """Creates a new account on given ethdo wallet
 
     Returns:
@@ -103,6 +103,9 @@ def create_account() -> dict:
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
+    account = CONFIG.ethdo.account
+    if index:
+        account += f"_{index}_"
 
     try:
         res: str = check_output(
@@ -110,14 +113,14 @@ def create_account() -> dict:
                 "ethdo",
                 "account",
                 "create",
-                f"--account={CONFIG.ethdo.account}",
+                f"--account={CONFIG.ethdo.wallet}/{account}",
                 f"--passphrase={ACCOUNT_PASSPHRASE}",
                 f"--wallet-passphrase={WALLET_PASSPHRASE}",
             ]
         )
 
     except Exception as e:
-        raise EthdoError(f"Failed to create account {CONFIG.ethdo.account}") from e
+        raise EthdoError(f"Failed to create account {account}") from e
 
     try:
         return json.loads(res)
