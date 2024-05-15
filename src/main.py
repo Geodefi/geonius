@@ -14,7 +14,6 @@ from src.triggers import (
     DepositTrigger,
     ExitRequestTrigger,
 )
-
 from src.helpers.db_events import find_latest_event_block
 from src.helpers.db_validators import (
     reinitialize_validators_table,
@@ -86,11 +85,11 @@ def setup_daemons():
         event=events.Alienated(),
         start_block=find_latest_event_block("Alienated"),
     )
-    exit_request_deamon: EventDaemon = EventDaemon(
-        triggers=[exit_request_trigger],
-        event=events.ExitRequest(),
-        start_block=find_latest_event_block("ExitRequest"),
-    )
+    # exit_request_deamon: EventDaemon = EventDaemon(
+    #     triggers=[exit_request_trigger],
+    #     event=events.ExitRequest(),
+    #     start_block=find_latest_event_block("ExitRequest"),
+    # )
     # pools_db_daemon: TimeDaemon = TimeDaemon(
     #     interval=21600, triggers=[pools_db_trigger]
     # )  # TODO: This will be removed after testing
@@ -103,7 +102,7 @@ def setup_daemons():
     delegation_daemon.run()
     fallback_operator_daemon.run()
     alienated_daemon.run()
-    exit_request_deamon.run()
+    # exit_request_deamon.run()
     stake_daemon.run()
 
 
