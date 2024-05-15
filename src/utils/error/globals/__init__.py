@@ -1,1 +1,1 @@
-from sdk import SDKException
+from sdk import SDKError, PrivateKeyMissingError

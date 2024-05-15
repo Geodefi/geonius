@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import sys
 
 from src.utils.attribute_dict import AttributeDict, convert_recursive
 from src.globals.flags import flags
@@ -78,8 +79,8 @@ def __init_config() -> AttributeDict:
             raise TypeError("Config file should be a dict after loading from json, but it is not.")
 
     except Exception as e:
-        # TODO: sys exit the program HERE
-        pass
+        # TODO: log error
+        sys.exit(e)
 
     config: AttributeDict = convert_recursive(config_dict)
 

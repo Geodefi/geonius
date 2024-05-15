@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import sys
 from geodefi import Geode
 from web3.middleware import construct_sign_and_send_raw_middleware
 
 from src.globals.env import EXECUTION_API, CONSENSUS_API, PRIVATE_KEY
-from src.utils.error import SDKException
+from src.utils.error import PrivateKeyMissingError
 
 
 def __set_web3_account(sdk: Geode, private_key: str) -> Geode:
@@ -46,20 +47,18 @@ def __init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
     try:
         sdk: Geode = Geode(exec_api=exec_api, cons_api=cons_api)
         if not priv_key:
-            # TODO: create a new exception for value missing error
-            raise SDKException(
-                "Problem occured while connecting to SDK, failed to initialize SDK. \
-                with execution API: {exec_api} and consensus API: {cons_api}"
-            ) from e
+            raise PrivateKeyMissingError(
+                "Problem occured while connecting to SDK, private key is missing in .env file."
+            )
         sdk = __set_web3_account(sdk, priv_key)
         return sdk
 
+    except PrivateKeyMissingError as e:
+        # TODO: log the error
+        sys.exit(e)
     except Exception as e:
-        # TODO: sys exit the program HERE no raise, divide exceptions to two SDKException and Exception while catching
-        raise SDKException(
-            "Problem occured while connecting to SDK, failed to initialize SDK. \
-                with execution API: {exec_api} and consensus API: {cons_api}"
-        ) from e
+        # TODO: log the error
+        sys.exit(e)
 
 
 # global SDK

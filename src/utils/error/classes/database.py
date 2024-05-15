@@ -7,7 +7,7 @@ class DatabaseError(CustomException):
     pass
 
 
-class DatabaseMismatchError(CustomException):
+class DatabaseMismatchError(DatabaseError):
     """Exception raised for errors related with Database mismatches."""
 
     pass

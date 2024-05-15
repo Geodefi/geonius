@@ -7,4 +7,4 @@ from error.classes.daemon import DaemonError
 from error.classes.database import DatabaseError, DatabaseMismatchError
 from error.classes.trigger import TriggerError
 
-from error.globals.sdk import SDKException
+from error.globals.sdk import SDKError, PrivateKeyMissingError
