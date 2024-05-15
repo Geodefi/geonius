@@ -17,6 +17,8 @@ We can easily install geth by:
 sudo add-apt-repository -y ppa:ethereum/ethereum
 sudo apt-get update
 sudo apt-get install ethereum
+TODO: sudo apt install golang-go
+TODO: sudo apt-get update
 ```
 
 #### Build from source
@@ -30,7 +32,7 @@ We will use some [tricks](https://tecadmin.net/install-go-on-centos/) to install
 # install golang
 sudo dnf update
 wget https://go.dev/dl/go1.21.6.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz 
+sudo tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
@@ -40,14 +42,17 @@ go version
 
 # install deps
 sudo yum -y update
-sudo yum -y install gmp-devel
-sudo yum -y install git git-lfs
+sudo yum -y install gmp-devel TODO: || sudo apt-get install libgmp3-dev
+sudo yum -y install git git-lfs TODO: || sudo apt-get install git git-lfs
 
 # clone
 
 git clone https://github.com/ethereum/go-ethereum
 # build
 cd go-ethereum
+
+TODO: sudo apt install make
+
 make geth
 # test
 geth version
@@ -57,8 +62,13 @@ geth version
 > DO NOT run your geth node yet since you did not generate jwt.hex file yet. Geth and Prysm will communicate vie JWT token.
 
 ## Nethermind
+
 <!-- TODO -->
+
 ## Besu
+
 <!-- TODO -->
+
 ## Erigon
+
 <!-- TODO -->

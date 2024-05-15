@@ -9,6 +9,7 @@ This post is written on `May 2024`. The systems you need to use may vary dependi
 ### Step 1
 
 Navigate to `EC2` > `Instances` > `Launch instances`.
+TODO: WRONG AMI TYPE, SHOULD SELECT UBUNTU
 ![aws launch](../img/aws_launch.png)
 
 ### Step 2
@@ -20,7 +21,7 @@ Select the **m5.xlarge** instance type, featuring 16 GiB RAM and 4 vCPUs.
 
 If you do not already have a key-pair, click create key pair and create a file with the .pem extension.
 
->Use the .pem file only for this instance and never share or lose it!
+> Use the .pem file only for this instance and never share or lose it!
 
 ![aws key](../img/aws_key.png)
 ![aws ssh](../img/aws_ssh.png)

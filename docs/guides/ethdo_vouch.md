@@ -11,12 +11,14 @@ Here is a helper article that explains the setup we are going for.
 
 ```bash
 go install github.com/wealdtech/ethdo@latest
+TODO: export PATH=$PATH:$(go env GOPATH)/bin --> for ubuntu
 ethdo version
 ```
 
 #### Configuration
 
 Create a wallet:
+
 > `wallet-passphrase` is optional
 
 ```bash
@@ -54,19 +56,19 @@ Example:
 
 ```yml
 log-file: /home/ec2-user/vouch.log
-log-level: 'debug'
+log-level: "debug"
 graffiti:
   static:
-    value: 'IceBear strikes again'
-beacon-node-addresses: ['localhost:5052']
+    value: "IceBear strikes again"
+beacon-node-addresses: ["localhost:5052"]
 accountmanager:
   wallet:
     accounts:
-    - geonius/validators
+      - geonius/validators
     passphrases:
-    - Aid7nisaej9shoodohyaec4o
+      - Aid7nisaej9shoodohyaec4o
 blockrelay:
-  fallback-fee-recipient: '0x0000000000000000000000000000000000000000'
+  fallback-fee-recipient: "0x0000000000000000000000000000000000000000"
 ```
 
 ## Dirk

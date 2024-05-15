@@ -3,7 +3,7 @@
 # Nimbus
 
 > [The helper documentation](https://nimbus.guide) where you can find all the guides and answers you need.
->
+
 ### Installing
 
 We can easily install nimbus by:
@@ -28,12 +28,17 @@ cd nimbus-eth2
 make -j4 nimbus_beacon_node
 # test
 build/nimbus_beacon_node --help
-# 
+#
 ```
 
 # Lighthouse
+
 <!-- TODO -->
+
 # Prysm
+
 <!-- TODO -->
+
 # Teku
+
 <!-- TODO -->

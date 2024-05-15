@@ -12,18 +12,16 @@
 
 ## Prerequisites
 
->
 > ### Do not use MEV clients
 >
 > Currently Geodefi Staking Library does not support MEV income.
 > However, it will be supported on the mainnet launch.
->
 
 ### 1. Join Operator Marketplace
 
-To be able to utilize staking pools as a Node Operator and create validators, you will need to join [geodefi marketplace](https://www.info.geode.fi/operators). Visit [onboarding page](join.geode.fi) to initialize your Node Operator after being onboarded by the government.
+To be able to utilize staking pools as a Node Operator and create validators, you will need to join [geodefi marketplace](https://www.info.geode.fi/operators). Visit [onboarding page](join.geode.fi) to initialize your Node Operator after being onboarded by Geodefi government.
 
-> Here, you will obtain a `OPERATOR_ID` that will define your Node Operator. Note it!
+> Here, you will obtain an `OPERATOR_ID` that will define your Node Operator. Note it!
 
 #### Set a maintainer
 
@@ -55,7 +53,7 @@ You will be reimbursed after activating the validator. However, this amount limi
 - [etherscan on holesky](https://holesky.etherscan.io/address/0x181C0F3103116Cc02665365c7a5E5574db011D38#writeProxyContract#F12).
 <!-- TODO below script -->
 - geonius deposit-portal <_eth_amount_>
-  
+
 > Similarly, `decreaseWalletBalance` can be called by:
 >
 > - etherscan
@@ -94,7 +92,9 @@ Checkout [this guide](./docs/guides/consensus_clients.md) for more.
 Checkout [this guide](./docs/guides/ethdo_vouch.md) for more.
 
 ## Running Geonius
+
 <!-- TODO -->
+
 ```bash
 geth  --holesky --authrpc.addr localhost --authrpc.port 8551 --authrpc.vhosts localhost --authrpc.jwtsecret /tmp/jwtsecret --http --http.api eth,net,engine,admin --snapshot=false
 ```
@@ -105,14 +105,14 @@ geth  --holesky --authrpc.addr localhost --authrpc.port 8551 --authrpc.vhosts lo
 - HTTP port : 8545
 
 ```bash
-build/nimbus_beacon_node trustedNodeSync  --network:holesky    --data-dir=build/data/shared_holesky_0    --trusted-node-url=<https://checkpoint-sync.holesky.ethpandaops.io>
+build/nimbus_beacon_node trustedNodeSync  --network:holesky    --data-dir=build/data/shared_holesky_0    --trusted-node-url="https://checkpoint-sync.holesky.ethpandaops.io"
 ```
 
 - Sync nimbus with trusted node (faster)
 
 ```bash
 ./run-holesky-beacon-node.sh \
-  --el=<http://127.0.0.1:8551> \
+  --el="http://127.0.0.1:8551" \
   --jwt-secret=/tmp/jwtsecret --rest
 ```
 
