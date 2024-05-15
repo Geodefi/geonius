@@ -1,10 +1,4 @@
-from error import CustomException
-
-from error.actions.ethdo import EthdoError
-from error.actions.portal import CannotStakeError, CallFailedError
-
-from error.classes.daemon import DaemonError
-from error.classes.database import DatabaseError, DatabaseMismatchError
-from error.classes.trigger import TriggerError
-
-from error.globals.sdk import SDKError, PrivateKeyMissingError
+from .custom_exception import CustomException
+from .actions import EthdoError, CannotStakeError, CallFailedError
+from .classes import DaemonError, DatabaseError, DatabaseMismatchError, TriggerError
+from .globals import SDKError, PrivateKeyMissingError
