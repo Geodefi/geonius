@@ -24,7 +24,7 @@ def call_proposeStake(
         sig31s (list): A list of corresponding sigs to be used when activating the validator with 31 ETH.
 
     Returns:
-        TxReceipt: The receipt of the stake call returned to be handled accordingly.
+        bool: True if the proposeStake call is successful, False otherwise.
 
     Raises:
         TimeExhausted: Raised if the transaction takes too long to be mined.
@@ -61,7 +61,7 @@ def call_stake(pubkeys: list[str]) -> bool:
         pubkeys (list[str]): list of public keys of the approved validators.
 
     Returns:
-        TxReceipt: Receipt of the stake call returned to be handled accordingly.
+        bool: True if the stake call is successful, False otherwise.
 
     Raises:
         CannotStakeError: Raised if any of the validators cannot stake.

@@ -43,6 +43,8 @@ class StakeTrigger(Trigger):
         verification_index: int = get_StakeParams()[4]
 
         # check if there are any pending validator proposals.
+        # TODO: dicuss if keep these db interactions in this function and
+        #       handle the try except here or move them to a helper function.
         with Database() as db:
             db.execute(
                 f"""

@@ -67,7 +67,7 @@ def check_and_propose(pool_id: int) -> list[str]:
         pool_id (int): ID of the pool to propose for
 
     Returns:
-        list[tuple]: list of tuples containing tx_receipt and pks
+        list[str]: list of pubkeys proposed
     """
 
     max_allowed: int = max_proposals_count(pool_id)
@@ -114,7 +114,7 @@ def check_and_stake(pks: list[str]) -> list[str]:
         pks (list[str]): pubkeys to stake for
 
     Returns:
-        list[tuple]: list of tuples containing tx_receipt and pks
+        list[str]: list of pubkeys staked
     """
 
     # TODO: current implementation is not considering last bunch of
