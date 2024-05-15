@@ -5,7 +5,7 @@ from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE
 from geodefi.utils import to_bytes32
 
 from src.classes import Database
-from src.globals import pools_table, validators_table, SDK, OPERATOR_ID, CONFIG
+from src.globals import SDK, OPERATOR_ID, CONFIG
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.daemons.time_daemon import TimeDaemon
 from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
@@ -33,16 +33,14 @@ def max_proposals_count(pool_id: int) -> int:
         with Database() as db:
             db.execute(
                 f"""
-                    SELECT surplus FROM {pools_table} 
+                    SELECT surplus FROM Pools 
                     WHERE id = {pool_id}  
                 """
             )
             surplus: str = db.fetchone()  # surplus is a TEXT field
             surplus = int(surplus)
     except Exception as e:
-        raise DatabaseError(
-            f"Error fetching surplus for pool {pool_id} from table {pools_table}"
-        ) from e
+        raise DatabaseError(f"Error fetching surplus for pool {pool_id} from table Pools") from e
 
     if allowance > 0:
         # every 32 ether is 1 validator.
@@ -141,14 +139,14 @@ def run_finalize_exit_triggers():
         with Database() as db:
             db.execute(
                 f"""
-                    SELECT pubkey,exit_epoch  FROM {validators_table} 
+                    SELECT pubkey,exit_epoch  FROM Validators 
                     WHERE portal_state = 'EXIT_REQUESTED'
                 """
             )
             pks: list[str] = db.fetchall()
     except Exception as e:
         raise DatabaseError(
-            f"Error fetching validators in EXIT_REQUESTED state from table {validators_table}"
+            f"Error fetching validators in EXIT_REQUESTED state from table Validators"
         ) from e
 
     for pk, exit_epoch in pks:

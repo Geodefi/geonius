@@ -4,7 +4,7 @@ from typing import Any
 from geodefi.classes import Validator
 from geodefi.globals import VALIDATOR_STATE
 
-from src.globals import SDK, validators_table
+from src.globals import SDK
 from src.classes import Database, Trigger
 from src.daemons import TimeDaemon
 from src.helpers import save_portal_state, save_local_state
@@ -54,7 +54,7 @@ class FinalizeExitTrigger(Trigger):
         with Database() as db:
             db.execute(
                 f"""
-                    SELECT pool_id FROM {validators_table}
+                    SELECT pool_id FROM Validators
                     WHERE pubkey = {self.pubkey}
                 """
             )

@@ -4,7 +4,7 @@ from typing import Callable, Iterable
 from web3.types import EventData
 
 from src.classes import Database
-from src.globals import SDK, CONFIG, pools_table
+from src.globals import SDK, CONFIG
 from src.exceptions import DatabaseError
 
 
@@ -63,7 +63,7 @@ def create_delegation_table() -> None:
                         block_number INTEGER NOT NULL,
                         transaction_index INTEGER NOT NULL,
                         log_index INTEGER NOT NULL,
-                        FOREIGN KEY (pool_id) REFERENCES {pools_table}(id),
+                        FOREIGN KEY (pool_id) REFERENCES Pools (id),
                         PRIMARY KEY (pool_id, operator_id)
                     )
             """
@@ -90,7 +90,7 @@ def create_deposit_table() -> None:
                         block_number INTEGER NOT NULL,
                         transaction_index INTEGER NOT NULL,
                         log_index INTEGER NOT NULL,
-                        FOREIGN KEY (pool_id) REFERENCES {pools_table}(id),
+                        FOREIGN KEY (pool_id) REFERENCES Pools (id),
                         PRIMARY KEY (pool_id)
                     )
             """
@@ -116,7 +116,7 @@ def create_fallback_operator_table() -> None:
                         block_number INTEGER NOT NULL,
                         transaction_index INTEGER NOT NULL,
                         log_index INTEGER NOT NULL,
-                        FOREIGN KEY (pool_id) REFERENCES {pools_table}(id),
+                        FOREIGN KEY (pool_id) REFERENCES Pools (id),
                         PRIMARY KEY (pool_id)
                     )
             """

@@ -7,7 +7,7 @@ from geodefi.classes import Validator
 
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
-from src.globals import SDK, CONFIG, validators_table
+from src.globals import SDK, CONFIG
 from src.helpers import (
     create_exit_request_table,
     event_handler,
@@ -41,7 +41,7 @@ class ExitRequestTrigger(Trigger):
         with Database() as db:
             db.execute(
                 f"""
-                    SELECT pubkey FROM {validators_table}
+                    SELECT pubkey FROM Validators
                     WHERE pubkey = {event.args.pubkey}
                 """
             )
