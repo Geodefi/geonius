@@ -5,7 +5,7 @@ from web3.types import TxReceipt
 from geodefi.globals import DEPOSIT_SIZE
 from geodefi.utils import to_bytes32
 from src.classes.database import Database
-from src.globals import pools_table, SDK, OPERATOR_ID
+from src.globals import SDK, OPERATOR_ID
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.helpers import get_withdrawal_address
 
@@ -23,7 +23,7 @@ def max_proposals_count(pool_id: int) -> int:
     with Database() as db:
         db.execute(
             f"""
-                SELECT allowance,surplus FROM {pools_table} 
+                SELECT allowance,surplus FROM Pools 
                 WHERE id = {pool_id.PROPOSED}  
             """
         )

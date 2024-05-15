@@ -11,7 +11,7 @@ class Database:
     Example:
         with Database() as db:
             db.execute(
-                f'''CREATE TABLE IF NOT EXISTS {db_name} (
+                '''CREATE TABLE IF NOT EXISTS {db_name} (
                     column_name TEXT NOT NULL
                 )
             ''')

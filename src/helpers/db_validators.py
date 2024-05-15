@@ -14,7 +14,7 @@ def create_validators_table() -> None:
         # fallback just records if operator is set as fallback.
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS {validators_table} (
+                CREATE TABLE IF NOT EXISTS Validators (
                     portal_index INTEGER NOT NULL UNIQUE,
                     beacon_index INTEGER NOT NULL UNIQUE,
                     pubkey TEXT NOT NULL PRIMARY KEY,
@@ -33,7 +33,7 @@ def drop_validators_table() -> None:
     """Removes Validators table from the database."""
 
     with Database() as db:
-        db.execute(f"""DROP TABLE IF EXISTS {validators_table}""")
+        db.execute(f"""DROP TABLE IF EXISTS Validators""")
 
 
 def reinitialize_validators_table() -> None:
@@ -90,7 +90,7 @@ def insert_many_validators(new_validators: list[dict]) -> None:
 
     with Database() as db:
         db.executemany(
-            f"INSERT INTO {validators_table} VALUES (?,?,?,?,?,?,?,?,?)",
+            f"INSERT INTO Validators VALUES (?,?,?,?,?,?,?,?,?)",
             [
                 (
                     a["portal_index"],
@@ -128,7 +128,7 @@ def save_local_state(pubkey: int, local_state: VALIDATOR_STATE) -> None:
     with Database() as db:
         db.execute(
             f"""
-                UPDATE {validators_table} 
+                UPDATE Validators 
                 SET beacon_state = {local_state}
                 WHERE pubkey = {pubkey}
             """
@@ -147,7 +147,7 @@ def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE) -> None:
     with Database() as db:
         db.execute(
             f"""
-                UPDATE {validators_table} 
+                UPDATE Validators 
                 SET portal_state = {portal_state}
                 WHERE pubkey = {pubkey}
             """
@@ -165,7 +165,7 @@ def save_exit_epoch(pubkey: int, exit_epoch: str) -> None:
     with Database() as db:
         db.execute(
             f"""
-                UPDATE {validators_table} 
+                UPDATE Validators 
                 SET exit_epoch = {exit_epoch}
                 WHERE pubkey = {pubkey}
             """

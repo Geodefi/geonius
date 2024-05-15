@@ -8,7 +8,6 @@ from src.helpers.db_validators import (
     save_local_state,
     save_portal_state,
 )
-from src.globals import pools_table
 from src.helpers.portal import get_StakeParams
 from src.helpers.validator import check_and_stake
 from src.utils import multithread
@@ -46,7 +45,7 @@ class StakeTrigger(Trigger):
         with Database() as db:
             db.execute(
                 f"""
-                    SELECT pubkey FROM {pools_table} 
+                    SELECT pubkey FROM Pools 
                     WHERE internal_state = {VALIDATOR_STATE.PROPOSED}  
                     AND portal_index < {verification_index}
                     ORDER BY id

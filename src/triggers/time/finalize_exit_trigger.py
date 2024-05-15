@@ -53,7 +53,7 @@ class FinalizeExitTrigger(Trigger):
         with Database() as db:
             db.execute(
                 f"""
-                    SELECT pool_id FROM {validators_table}
+                    SELECT pool_id FROM Validators
                     WHERE pubkey = {self.pubkey}
                 """
             )

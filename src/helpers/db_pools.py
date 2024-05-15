@@ -3,7 +3,7 @@
 from src.helpers.portal import get_surplus, get_operatorAllowance, get_fallback_operator
 from src.classes import Database
 from src.utils import multithread
-from src.globals import pools_table, OPERATOR_ID
+from src.globals import OPERATOR_ID
 
 
 def create_pools_table() -> None:
@@ -13,7 +13,7 @@ def create_pools_table() -> None:
         # fallback just records if operator is set as fallback.
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS {pools_table} (
+                CREATE TABLE IF NOT EXISTS Pools (
                     id TEXT NOT NULL PRIMARY KEY,
                     surplus TEXT ,
                     allowance TEXT ,
@@ -27,7 +27,7 @@ def drop_pools_table() -> None:
     """Removes Pools table from the database."""
 
     with Database() as db:
-        db.execute(f"""DROP TABLE IF EXISTS {pools_table}""")
+        db.execute(f"""DROP TABLE IF EXISTS Pools""")
 
 
 def reinitialize_pools_table() -> None:
@@ -75,7 +75,7 @@ def insert_many_pools(new_pools: list[dict]) -> None:
 
     with Database() as db:
         db.executemany(
-            f"INSERT INTO {pools_table} VALUES (?,?,?,?)",
+            f"INSERT INTO Pools VALUES (?,?,?,?)",
             [
                 (
                     a["id"],
@@ -109,7 +109,7 @@ def save_surplus(pool_id: int, surplus: int) -> None:
     with Database() as db:
         db.execute(
             f"""
-                UPDATE {pools_table} 
+                UPDATE Pools 
                 SET surplus = {surplus}
                 WHERE Id = {pool_id}
             """
@@ -127,7 +127,7 @@ def save_fallback_operator(pool_id: int, value: bool) -> None:
     with Database() as db:
         db.execute(
             f"""
-            UPDATE {pools_table} 
+            UPDATE Pools 
             SET fallback = {1 if value else 0}
             WHERE Id = {pool_id}
             """
@@ -145,7 +145,7 @@ def save_allowance(pool_id: int, allowance: int) -> None:
     with Database() as db:
         db.execute(
             f"""
-                UPDATE {pools_table} 
+                UPDATE Pools 
                 SET allowance = {allowance}
                 WHERE Id = {pool_id}
             """

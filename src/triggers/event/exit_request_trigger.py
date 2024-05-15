@@ -31,7 +31,7 @@ class ExitRequestTrigger(Trigger):
         with Database() as db:
             db.execute(
                 f"""
-                    SELECT pubkey FROM {validators_table}
+                    SELECT pubkey FROM Validators
                     WHERE pubkey = {event.args.pubkey}
                 """
             )

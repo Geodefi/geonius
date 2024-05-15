@@ -4,7 +4,6 @@ from typing import Any, Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Trigger, Database
-from src.globals import validators_table
 from src.helpers.db_events import create_alienated_table, event_handler
 from src.helpers.db_validators import (
     create_validators_table,
@@ -47,7 +46,7 @@ class AlienatedTrigger(Trigger):
         with Database() as db:
             db.execute(
                 f"""
-                    SELECT pubkey FROM {validators_table}
+                    SELECT pubkey FROM Validators
                     WHERE pubkey = {event.args.pubkey}
                 """
             )
