@@ -18,6 +18,7 @@ def find_latest_event_block(event_name: str) -> int:
     """
 
     # TODO: check db for given event_name
+
     return CONFIG.chains[SDK.network.name].start
 
 
@@ -27,12 +28,12 @@ def create_alienated_table() -> None:
     with Database() as db:
         db.execute(
             """
-                CREATE TABLE IF NOT EXISTS Alienated (
-                    pk TEXT NOT NULL PRIMARY KEY,
-                    block_number INTEGER NOT NULL,
-                    transaction_index INTEGER NOT NULL,
-                    log_index INTEGER NOT NULL
-                )
+            CREATE TABLE IF NOT EXISTS Alienated (
+                pk TEXT NOT NULL PRIMARY KEY,
+                block_number INTEGER NOT NULL,
+                transaction_index INTEGER NOT NULL,
+                log_index INTEGER NOT NULL
+            )
             """
         )
 
@@ -43,16 +44,16 @@ def create_delegation_table() -> None:
     with Database() as db:
         db.execute(
             """
-                CREATE TABLE IF NOT EXISTS Delegation (
-                    pool_id TEXT NOT NULL,
-                    operator_id TEXT NOT NULL,
-                    allowance TEXT NOT NULL,
-                    block_number INTEGER NOT NULL,
-                    transaction_index INTEGER NOT NULL,
-                    log_index INTEGER NOT NULL,
-                    FOREIGN KEY (pool_id) REFERENCES Pools(id),
-                    PRIMARY KEY (pool_id, operator_id)
-                )
+            CREATE TABLE IF NOT EXISTS Delegation (
+                pool_id TEXT NOT NULL,
+                operator_id TEXT NOT NULL,
+                allowance TEXT NOT NULL,
+                block_number INTEGER NOT NULL,
+                transaction_index INTEGER NOT NULL,
+                log_index INTEGER NOT NULL,
+                FOREIGN KEY (pool_id) REFERENCES Pools(id),
+                PRIMARY KEY (pool_id, operator_id)
+            )
             """
         )
 
@@ -63,17 +64,17 @@ def create_deposit_table() -> None:
     with Database() as db:
         db.execute(
             """
-                CREATE TABLE IF NOT EXISTS Deposit (
-                    pool_id TEXT NOT NULL,
-                    bought_amount TEXT NOT NULL,
-                    minted_amount TEXT NOT NULL,
-                    block_number INTEGER NOT NULL,
-                    transaction_index INTEGER NOT NULL,
-                    log_index INTEGER NOT NULL,
-                    FOREIGN KEY (pool_id) REFERENCES Pools(id),
-                    PRIMARY KEY (pool_id)
-                )
-        """
+            CREATE TABLE IF NOT EXISTS Deposit (
+                pool_id TEXT NOT NULL,
+                bought_amount TEXT NOT NULL,
+                minted_amount TEXT NOT NULL,
+                block_number INTEGER NOT NULL,
+                transaction_index INTEGER NOT NULL,
+                log_index INTEGER NOT NULL,
+                FOREIGN KEY (pool_id) REFERENCES Pools(id),
+                PRIMARY KEY (pool_id)
+            )
+            """
         )
 
 
@@ -83,16 +84,16 @@ def create_fallback_operator_table() -> None:
     with Database() as db:
         db.execute(
             """
-                CREATE TABLE IF NOT EXISTS FallbackOperator (
-                    pool_id TEXT NOT NULL,
-                    fallback_threshold INTEGER NOT NULL,
-                    block_number INTEGER NOT NULL,
-                    transaction_index INTEGER NOT NULL,
-                    log_index INTEGER NOT NULL,
-                    FOREIGN KEY (pool_id) REFERENCES Pools(id),
-                    PRIMARY KEY (pool_id)
-                )
-        """
+            CREATE TABLE IF NOT EXISTS FallbackOperator (
+                pool_id TEXT NOT NULL,
+                fallback_threshold INTEGER NOT NULL,
+                block_number INTEGER NOT NULL,
+                transaction_index INTEGER NOT NULL,
+                log_index INTEGER NOT NULL,
+                FOREIGN KEY (pool_id) REFERENCES Pools(id),
+                PRIMARY KEY (pool_id)
+            )
+            """
         )
 
 
@@ -102,14 +103,14 @@ def create_id_initiated_table() -> None:
     with Database() as db:
         db.execute(
             """
-                CREATE TABLE IF NOT EXISTS IdInitiated (
-                    pool_id TEXT NOT NULL,
-                    block_number INTEGER NOT NULL,
-                    transaction_index INTEGER NOT NULL,
-                    log_index INTEGER NOT NULL,
-                    PRIMARY KEY (pool_id)
-                )
-        """
+            CREATE TABLE IF NOT EXISTS IdInitiated (
+                pool_id TEXT NOT NULL,
+                block_number INTEGER NOT NULL,
+                transaction_index INTEGER NOT NULL,
+                log_index INTEGER NOT NULL,
+                PRIMARY KEY (pool_id)
+            )
+            """
         )
 
 
@@ -119,15 +120,15 @@ def create_exit_request_table() -> None:
     with Database() as db:
         db.execute(
             """
-                CREATE TABLE IF NOT EXISTS ExitRequest (
-                    pk TEXT NOT NULL,
-                    block_number INTEGER NOT NULL,
-                    transaction_index INTEGER NOT NULL,
-                    log_index INTEGER NOT NULL,
-                    FOREIGN KEY (pk) REFERENCES Validators(pk),
-                    PRIMARY KEY (pk)
-                )
-        """
+            CREATE TABLE IF NOT EXISTS ExitRequest (
+                pk TEXT NOT NULL,
+                block_number INTEGER NOT NULL,
+                transaction_index INTEGER NOT NULL,
+                log_index INTEGER NOT NULL,
+                FOREIGN KEY (pk) REFERENCES Validators(pk),
+                PRIMARY KEY (pk)
+            )
+            """
         )
 
 

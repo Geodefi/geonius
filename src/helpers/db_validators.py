@@ -128,9 +128,9 @@ def save_local_state(pubkey: int, local_state: VALIDATOR_STATE) -> None:
     with Database() as db:
         db.execute(
             """
-                UPDATE Validators 
-                SET beacon_state = ?
-                WHERE pubkey = ?
+            UPDATE Validators 
+            SET beacon_state = ?
+            WHERE pubkey = ?
             """,
             (local_state, pubkey),
         )
@@ -148,9 +148,9 @@ def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE) -> None:
     with Database() as db:
         db.execute(
             """
-                UPDATE Validators 
-                SET portal_state = ?
-                WHERE pubkey = ?
+            UPDATE Validators 
+            SET portal_state = ?
+            WHERE pubkey = ?
             """,
             (portal_state, pubkey),
         )
