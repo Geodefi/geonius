@@ -7,10 +7,7 @@ from src.globals.env import ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE
 from src.globals.config import CONFIG
 
 
-def generate_deposit_data(
-    withdrawal_address: str,
-    deposit_value: str,
-) -> dict:
+def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int = None) -> dict:
     """Generates the deposit data for a new validator proposal.
 
     Args:
@@ -20,20 +17,33 @@ def generate_deposit_data(
     Returns:
         dict: Returns the deposit data in JSON format.
     """
+    account: str = CONFIG.ethdo.account
+    if index:
+        account += f"_{index}_"
 
-    res: str = check_output(
-        [
-            "ethdo",
-            "validator",
-            "depositdata",
-            f"--validatoraccount={CONFIG.ethdo.account}",
-            f"--passphrase={ACCOUNT_PASSPHRASE}",
-            f"--withdrawaladdress={withdrawal_address}",
-            f"--depositvalue={deposit_value}",
-            f"--forkversion={geodefi.globals.GENESIS_FORK_VERSION[SDK.network]}",
-            "--launchpad",
-        ]
+    print(
+        "info",
+        f"Generating deposit data for {account} with withdrawal address : {withdrawal_address}",
     )
+    try:
+        res: str = check_output(
+            [
+                "ethdo",
+                "validator",
+                "depositdata",
+                f"--validatoraccount={account}",
+                f"--passphrase={ACCOUNT_PASSPHRASE}",
+                f"--withdrawaladdress={withdrawal_address}",
+                f"--depositvalue={deposit_value}",
+                f"--forkversion={geodefi.globals.GENESIS_FORK_VERSION[SDK.network]}",
+                "--launchpad",
+            ]
+        )
+
+    except Exception as e:
+        print("error", f"Failed deposit data generation for account: {account}")
+        print("debug", e)
+        raise
 
     return json.loads(res)
 
@@ -44,37 +54,62 @@ def create_wallet() -> dict:
     Returns:
         dict: Returns the wallet data in JSON format.
     """
-
-    res: str = check_output(
-        [
-            "ethdo",
-            "wallet",
-            "create",
-            f"--wallet={CONFIG.ethdo.wallet}",
-            f"--wallet-passphrase={WALLET_PASSPHRASE}",
-            f"-type=hd",
-        ]
+    print(
+        "info",
+        f"Creating a new wallet on ethdo : {CONFIG.ethdo.wallet}",
     )
+
+    try:
+        res: str = check_output(
+            [
+                "ethdo",
+                "wallet",
+                "create",
+                f"--wallet={CONFIG.ethdo.wallet}",
+                f"--wallet-passphrase={WALLET_PASSPHRASE}",
+                f"-type=hd",
+            ]
+        )
+
+    except Exception as e:
+        print("error", f"Failed wallet creation on ethdo")
+        print("debug", e)
+        raise
+
     return json.loads(res)
 
 
-def create_account() -> dict:
+def create_account(index: int = None) -> dict:
     """Creates a new account on given ethdo wallet
 
     Returns:
         dict: Returns the account data in JSON format.
     """
-
-    res: str = check_output(
-        [
-            "ethdo",
-            "account",
-            "create",
-            f"--account={CONFIG.ethdo.account}",
-            f"--passphrase={ACCOUNT_PASSPHRASE}",
-            f"--wallet-passphrase={WALLET_PASSPHRASE}",
-        ]
+    print(
+        "info",
+        f"Creating a new account on ethdo : {CONFIG.ethdo.account}",
     )
+
+    account = CONFIG.ethdo.account
+    if index:
+        account += f"_{index}_"
+
+    try:
+        res: str = check_output(
+            [
+                "ethdo",
+                "account",
+                "create",
+                f"--account={CONFIG.ethdo.wallet}/{account}",
+                f"--passphrase={ACCOUNT_PASSPHRASE}",
+                f"--wallet-passphrase={WALLET_PASSPHRASE}",
+            ]
+        )
+
+    except Exception as e:
+        print("error", f"Failed wallet creation on ethdo")
+        print("debug", e)
+        raise
 
     return json.loads(res)
 
@@ -88,16 +123,25 @@ def exit_validator(pubkey: str) -> dict:
     Returns:
         dict: Returns the exit data in JSON format.
     """
-
-    res: str = check_output(
-        [
-            "ethdo",
-            "validator",
-            "exit",
-            f"----validator={pubkey}",
-            f"--passphrase={ACCOUNT_PASSPHRASE}",
-            f"--wallet-passphrase={WALLET_PASSPHRASE}",
-        ]
+    print(
+        "info",
+        f"Exiting from a validator : {pubkey}",
     )
 
+    try:
+        res: str = check_output(
+            [
+                "ethdo",
+                "validator",
+                "exit",
+                f"----validator={pubkey}",
+                f"--passphrase={ACCOUNT_PASSPHRASE}",
+                f"--wallet-passphrase={WALLET_PASSPHRASE}",
+            ]
+        )
+
+    except Exception as e:
+        print("error", f"Failed wallet creation on ethdo")
+        print("debug", e)
+        raise
     return json.loads(res)
