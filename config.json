@@ -1,6 +1,7 @@
 {
   "directory": "geonius",
   "logger": {
+    "verbose": "False",
     "file": "True",
     "stream": "True",
     "directory": "logs",

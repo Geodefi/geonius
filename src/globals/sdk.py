@@ -15,6 +15,7 @@ def __set_web3_account(sdk: Geode) -> Geode:
     Returns:
         Geode: Initialized Geode SDK instance.
     """
+    print("info", "Connecting an account to web3.py")
 
     # Create account on Geode's web3py instance
     acct = sdk.w3.eth.account.from_key(PRIVATE_KEY)
@@ -40,6 +41,7 @@ def __init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
         Geode: Initialized Geode SDK instance.
     """
     try:
+        print("info", "Initializing geodefi SDK")
         sdk: Geode = Geode(exec_api=exec_api, cons_api=cons_api)
         if priv_key:
             sdk = __set_web3_account(sdk)

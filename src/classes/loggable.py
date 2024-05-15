@@ -98,7 +98,7 @@ class Loggable:
         """
         # TODO: save thread referances somehow and map it to __logger_name if its not found then
         return Formatter(
-            fmt=f"[%(asctime)s] | %(thread)d | {self.__logger_name} | %(levelname)-8s :: %(message)s",
+            fmt=f"[%(asctime)s] | %(thread)d %(threadName)d | {self.__logger_name} | %(levelname)-8s :: %(message)s",
             datefmt="%H:%M:%S",
         )
 
@@ -132,7 +132,7 @@ class Loggable:
             os.makedirs(path)
         fh: TimedRotatingFileHandler = TimedRotatingFileHandler(
             os.path.join(path, "log."),
-            when=CONFIG.logger.when,
+            when=CONFIG.l ogger.when,
             interval=CONFIG.logger.interval,
             backupCount=CONFIG.logger.backup,
         )
@@ -142,3 +142,15 @@ class Loggable:
         fh.setFormatter(self.__file_formatter)
         fh.setLevel(self.__level)
         return fh
+
+    # def __getattr__(self, attr: str) -> Any:
+    #     """Added so, `Logger.log()` can be used instead of `Logger.logger.log()`
+
+    #     Args:
+    #         attr (str): Attribute to be get.
+
+    #     Returns:
+    #         Any: Attribute of the object.
+    #     """
+
+    #     return getattr(self.logger, attr)

@@ -7,6 +7,7 @@ from src.globals.env import ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE
 from src.globals.config import CONFIG
 
 
+# TODO: ADD Path flag to account and depositdata creations : --path=m/12381/3600/0/0
 def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int = None) -> dict:
     """Generates the deposit data for a new validator proposal.
 
