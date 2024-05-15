@@ -140,7 +140,7 @@ class Loggable:
             interval=CONFIG.logger.interval,
             backupCount=CONFIG.logger.backup,
         )
-        fh.suffix = "%Y-%m-%d"
+        fh.suffix = ".%Y-%m-%d"
 
         fh.setFormatter(self.__file_formatter)
         fh.setLevel(self.__level)
