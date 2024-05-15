@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from src.classes import Daemon, Trigger
 from typing_extensions import Self
+from src.classes import Daemon, Trigger
 
 
 class TimeDaemon(Daemon):
