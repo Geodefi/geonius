@@ -45,10 +45,11 @@ class AlienatedTrigger(Trigger):
         # if pk is in db (validators table), then continue
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT pubkey FROM Validators
-                    WHERE pubkey = {event.args.pubkey}
                 """
+                SELECT pubkey FROM Validators
+                WHERE pubkey = ?
+                """,
+                (event.args.pubkey),
             )
             res: Any = db.fetchone()  # returns None if not found
         if res:

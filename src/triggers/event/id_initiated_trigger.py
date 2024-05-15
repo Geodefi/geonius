@@ -78,7 +78,7 @@ class IdInitiatedTrigger(Trigger):
         """
 
         with Database() as db:
-            db.execute(f"INSERT INTO IdInitiated VALUES (?,?,?,?,?,?,?)", events)
+            db.execute("INSERT INTO IdInitiated VALUES (?,?,?,?,?,?,?)", events)
 
     def insert_pool(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Creates a new pool and fills it with data

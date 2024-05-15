@@ -22,10 +22,11 @@ def max_proposals_count(pool_id: int) -> int:
     # TODO: remove allowance from database and call get_operatorAllowance
     with Database() as db:
         db.execute(
-            f"""
-                SELECT allowance,surplus FROM Pools 
-                WHERE id = {pool_id.PROPOSED}  
             """
+            SELECT allowance,surplus FROM Pools 
+            WHERE id = ?
+            """,
+            (pool_id.PROPOSED),
         )
         allowance, surplus = db.fetchall()
 

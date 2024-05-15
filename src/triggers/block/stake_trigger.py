@@ -44,12 +44,13 @@ class StakeTrigger(Trigger):
         # check if there are any pending validator proposals.
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT pubkey FROM Pools 
-                    WHERE internal_state = {VALIDATOR_STATE.PROPOSED}  
-                    AND portal_index < {verification_index}
-                    ORDER BY id
                 """
+                SELECT pubkey FROM Pools 
+                WHERE internal_state = ?
+                AND portal_index < ?
+                ORDER BY id
+                """,
+                (VALIDATOR_STATE.PROPOSED, verification_index),
             )
             approved_pks: list[str] = db.fetchall()
 

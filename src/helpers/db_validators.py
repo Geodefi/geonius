@@ -2,7 +2,7 @@
 
 from geodefi.globals import VALIDATOR_STATE
 from src.classes import Database
-from src.globals import SDK, validators_table
+from src.globals import SDK
 from src.utils import multithread
 
 
@@ -13,19 +13,19 @@ def create_validators_table() -> None:
 
         # fallback just records if operator is set as fallback.
         db.execute(
-            f"""
-                CREATE TABLE IF NOT EXISTS Validators (
-                    portal_index INTEGER NOT NULL UNIQUE,
-                    beacon_index INTEGER NOT NULL UNIQUE,
-                    pubkey TEXT NOT NULL PRIMARY KEY,
-                    pool_id TEXT NOT NULL,
-                    local_state TEXT NOT NULL,
-                    portal_state TEXT NOT NULL,
-                    signature31 INTEGER NOT NULL,
-                    withdrawal_credentials TEXT NOT NULL,
-                    exit_epoch INTEGER
-                )
-        """
+            """
+            CREATE TABLE IF NOT EXISTS Validators (
+                portal_index INTEGER NOT NULL UNIQUE,
+                beacon_index INTEGER NOT NULL UNIQUE,
+                pubkey TEXT NOT NULL PRIMARY KEY,
+                pool_id TEXT NOT NULL,
+                local_state TEXT NOT NULL,
+                portal_state TEXT NOT NULL,
+                signature31 INTEGER NOT NULL,
+                withdrawal_credentials TEXT NOT NULL,
+                exit_epoch INTEGER
+            )
+            """
         )
 
 
@@ -33,7 +33,7 @@ def drop_validators_table() -> None:
     """Removes Validators table from the database."""
 
     with Database() as db:
-        db.execute(f"""DROP TABLE IF EXISTS Validators""")
+        db.execute("DROP TABLE IF EXISTS Validators")
 
 
 def reinitialize_validators_table() -> None:
@@ -127,11 +127,12 @@ def save_local_state(pubkey: int, local_state: VALIDATOR_STATE) -> None:
 
     with Database() as db:
         db.execute(
-            f"""
-                UPDATE Validators 
-                SET beacon_state = {local_state}
-                WHERE pubkey = {pubkey}
             """
+                UPDATE Validators 
+                SET beacon_state = ?
+                WHERE pubkey = ?
+            """,
+            (local_state, pubkey),
         )
 
 
@@ -146,11 +147,12 @@ def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE) -> None:
 
     with Database() as db:
         db.execute(
-            f"""
-                UPDATE Validators 
-                SET portal_state = {portal_state}
-                WHERE pubkey = {pubkey}
             """
+                UPDATE Validators 
+                SET portal_state = ?
+                WHERE pubkey = ?
+            """,
+            (portal_state, pubkey),
         )
 
 
@@ -164,9 +166,10 @@ def save_exit_epoch(pubkey: int, exit_epoch: str) -> None:
 
     with Database() as db:
         db.execute(
-            f"""
-                UPDATE Validators 
-                SET exit_epoch = {exit_epoch}
-                WHERE pubkey = {pubkey}
             """
+            UPDATE Validators 
+            SET exit_epoch = ?
+            WHERE pubkey = ?
+            """,
+            (exit_epoch, pubkey),
         )

@@ -12,14 +12,14 @@ def create_pools_table() -> None:
     with Database() as db:
         # fallback just records if operator is set as fallback.
         db.execute(
-            f"""
-                CREATE TABLE IF NOT EXISTS Pools (
-                    id TEXT NOT NULL PRIMARY KEY,
-                    surplus TEXT ,
-                    allowance TEXT ,
-                    fallback INTEGER DEFAULT 0
-                )
-        """
+            """
+            CREATE TABLE IF NOT EXISTS Pools (
+                id TEXT NOT NULL PRIMARY KEY,
+                surplus TEXT ,
+                allowance TEXT ,
+                fallback INTEGER DEFAULT 0
+            )
+            """
         )
 
 
@@ -27,7 +27,7 @@ def drop_pools_table() -> None:
     """Removes Pools table from the database."""
 
     with Database() as db:
-        db.execute(f"""DROP TABLE IF EXISTS Pools""")
+        db.execute("DROP TABLE IF EXISTS Pools")
 
 
 def reinitialize_pools_table() -> None:
@@ -75,7 +75,7 @@ def insert_many_pools(new_pools: list[dict]) -> None:
 
     with Database() as db:
         db.executemany(
-            f"INSERT INTO Pools VALUES (?,?,?,?)",
+            "INSERT INTO Pools VALUES(?,?,?,?)",
             [
                 (
                     a["id"],
@@ -108,11 +108,12 @@ def save_surplus(pool_id: int, surplus: int) -> None:
 
     with Database() as db:
         db.execute(
-            f"""
-                UPDATE Pools 
-                SET surplus = {surplus}
-                WHERE Id = {pool_id}
             """
+            UPDATE Pools 
+            SET surplus = ?
+            WHERE id = ?
+            """,
+            (surplus, pool_id),
         )
 
 
@@ -126,11 +127,12 @@ def save_fallback_operator(pool_id: int, value: bool) -> None:
 
     with Database() as db:
         db.execute(
-            f"""
-            UPDATE Pools 
-            SET fallback = {1 if value else 0}
-            WHERE Id = {pool_id}
             """
+            UPDATE Pools 
+            SET fallback = ?
+            WHERE id = ?
+            """,
+            (1 if value else 0, pool_id),
         )
 
 
@@ -138,15 +140,16 @@ def save_allowance(pool_id: int, allowance: int) -> None:
     """Sets allowance for pool on database to provided value
 
     Args:
-        pool_id (int): pool ID
+        pool_id (int): pool id
         allowance (int): allowance value to be updated
     """
 
     with Database() as db:
         db.execute(
-            f"""
-                UPDATE Pools 
-                SET allowance = {allowance}
-                WHERE Id = {pool_id}
             """
+            UPDATE Pools 
+            SET allowance = ?
+            WHERE id = ?
+            """,
+            (allowance, pool_id),
         )

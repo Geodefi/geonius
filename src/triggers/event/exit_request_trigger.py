@@ -6,7 +6,7 @@ from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
-from src.globals import SDK, CONFIG, validators_table
+from src.globals import SDK, CONFIG
 from src.helpers.db_events import create_exit_request_table, event_handler
 from src.helpers.db_validators import save_portal_state, save_local_state, save_exit_epoch
 from src.actions.ethdo import exit_validator
@@ -30,10 +30,11 @@ class ExitRequestTrigger(Trigger):
     def __filter_events(self, event: EventData) -> bool:
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT pubkey FROM Validators
-                    WHERE pubkey = {event.args.pubkey}
                 """
+                SELECT pubkey FROM Validators
+                WHERE pubkey = ?
+                """,
+                (event.args.pubkey),
             )
             res: Any = db.fetchone()  # returns None if not found
         if res:

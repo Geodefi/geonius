@@ -4,7 +4,7 @@ from typing import Callable, Iterable
 from web3.types import EventData
 
 from src.classes import Database
-from src.globals import SDK, CONFIG, pools_table
+from src.globals import SDK, CONFIG
 
 
 def find_latest_event_block(event_name: str) -> int:
@@ -62,7 +62,7 @@ def create_deposit_table() -> None:
 
     with Database() as db:
         db.execute(
-            f"""
+            """
                 CREATE TABLE IF NOT EXISTS Deposit (
                     pool_id TEXT NOT NULL,
                     bought_amount TEXT NOT NULL,
@@ -82,7 +82,7 @@ def create_fallback_operator_table() -> None:
 
     with Database() as db:
         db.execute(
-            f"""
+            """
                 CREATE TABLE IF NOT EXISTS FallbackOperator (
                     pool_id TEXT NOT NULL,
                     fallback_threshold INTEGER NOT NULL,
@@ -101,7 +101,7 @@ def create_id_initiated_table() -> None:
 
     with Database() as db:
         db.execute(
-            f"""
+            """
                 CREATE TABLE IF NOT EXISTS IdInitiated (
                     pool_id TEXT NOT NULL,
                     block_number INTEGER NOT NULL,
@@ -118,7 +118,7 @@ def create_exit_request_table() -> None:
 
     with Database() as db:
         db.execute(
-            f"""
+            """
                 CREATE TABLE IF NOT EXISTS ExitRequest (
                     pk TEXT NOT NULL,
                     block_number INTEGER NOT NULL,
