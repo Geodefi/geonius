@@ -53,7 +53,6 @@ def generate_deposit_data(
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
         raise e
-    # TODO: add this to others too
     except Exception as e:
         raise e
 
@@ -89,6 +88,8 @@ def create_wallet() -> dict:
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
         raise e
+    except Exception as e:
+        raise e
 
 
 def create_account() -> dict:
@@ -121,6 +122,8 @@ def create_account() -> dict:
     try:
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
+        raise e
+    except Exception as e:
         raise e
 
 
@@ -157,4 +160,6 @@ def exit_validator(pubkey: str) -> dict:
     try:
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
+        raise e
+    except Exception as e:
         raise e
