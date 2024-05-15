@@ -10,7 +10,7 @@ from src.globals import SDK, CONFIG, validators_table
 from src.helpers.db_events import create_exit_request_table, event_handler
 from src.helpers.db_validators import save_portal_state, save_local_state, save_exit_epoch
 from src.actions.ethdo import exit_validator
-from src.triggers import FinalizeExitTrigger
+from ..time import FinalizeExitTrigger
 
 
 class ExitRequestTrigger(Trigger):
