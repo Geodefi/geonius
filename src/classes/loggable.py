@@ -32,7 +32,7 @@ class Loggable:
         __name_len = 25
         if len(name) > __name_len:
             raise Exception
-        self.__logger_name: str = f"{name:<__name_len}"
+        self.__logger_name: str = f'{name:<{__name_len}}'
 
         self.logger: logging.Logger = self.__get_logger(name)
 
@@ -80,6 +80,7 @@ class Loggable:
             Formatter: Formatter object to be used in the logger.
         """
 
+        # TODO: save thread referances somehow and map it to __logger_name if its not found then don't put in a file?
         return Formatter(
             fmt=f"[%(asctime)s] %(levelname)-8s :: %(message)s",
             datefmt="%H:%M:%S",
@@ -95,9 +96,9 @@ class Loggable:
         Returns:
             Formatter: Formatter object to be used in the logger.
         """
-
+        # TODO: save thread referances somehow and map it to __logger_name if its not found then
         return Formatter(
-            fmt=f"[%(asctime)s] {self.__logger_name} | %(levelname)-8s :: %(message)s",
+            fmt=f"[%(asctime)s] | %(thread)d | {self.__logger_name} | %(levelname)-8s :: %(message)s",
             datefmt="%H:%M:%S",
         )
 
@@ -125,15 +126,17 @@ class Loggable:
 
         main_dir: str = CONFIG.directory
         log_dir: str = CONFIG.logger.directory
+        # TODO : this somehow should handle the name as the second it is created.
         path: str = os.path.join(main_dir, log_dir, name)
         if not os.path.exists(path):
             os.makedirs(path)
         fh: TimedRotatingFileHandler = TimedRotatingFileHandler(
-            os.path.join(path, "log"),
+            os.path.join(path, "log."),
             when=CONFIG.logger.when,
             interval=CONFIG.logger.interval,
             backupCount=CONFIG.logger.backup,
         )
+        # TODO : prefix?
         fh.suffix = "%Y-%m-%d"
 
         fh.setFormatter(self.__file_formatter)
