@@ -10,5 +10,4 @@ from .env import (
     ACCOUNT_PASSPHRASE,
     WALLET_PASSPHRASE,
 )
-from .exceptions import *
 from .sdk import SDK

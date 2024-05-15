@@ -5,7 +5,7 @@ from geodefi.globals import VALIDATOR_STATE
 from src.classes import Database
 from src.globals import SDK, validators_table
 from src.utils import multithread
-from src.utils.error import DatabaseError
+from src.exceptions import DatabaseError
 
 
 def create_validators_table() -> None:

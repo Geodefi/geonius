@@ -5,7 +5,7 @@ from web3.types import EventData
 
 from src.classes import Database
 from src.globals import SDK, CONFIG, pools_table
-from src.utils.error import DatabaseError
+from src.exceptions import DatabaseError
 
 
 def find_latest_event_block(event_name: str) -> int:

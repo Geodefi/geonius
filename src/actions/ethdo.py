@@ -1,11 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import json
-from subprocess import CalledProcessError, check_output
+from subprocess import CalledProcessError, check_output  # TODO: will we utilize CalledProcessError?
 import geodefi
 
-from src.globals.sdk import SDK
-from src.globals.env import ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE
-from src.globals.config import CONFIG
-from src.utils.error import EthdoError
+from src.globals import SDK, ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE, CONFIG
+from src.exceptions import EthdoError
 
 
 def generate_deposit_data(

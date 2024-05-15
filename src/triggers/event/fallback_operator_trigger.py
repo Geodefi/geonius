@@ -5,11 +5,15 @@ from web3.types import EventData
 
 from src.classes import Trigger, Database
 from src.globals import OPERATOR_ID
-from src.helpers.db_events import create_fallback_operator_table, event_handler
-from src.helpers.db_validators import fill_validators_table
-from src.helpers.portal import get_fallback_operator
-from src.helpers.db_pools import create_pools_table, save_fallback_operator
-from src.helpers.validator import check_and_propose
+from src.helpers import (
+    create_fallback_operator_table,
+    event_handler,
+    fill_validators_table,
+    get_fallback_operator,
+    create_pools_table,
+    save_fallback_operator,
+    check_and_propose,
+)
 
 
 class FallbackOperatorTrigger(Trigger):

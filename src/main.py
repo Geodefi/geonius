@@ -15,11 +15,8 @@ from src.triggers import (
     ExitRequestTrigger,
 )
 
-from src.helpers.db_events import find_latest_event_block
-from src.helpers.db_validators import (
-    reinitialize_validators_table,
-    fill_validators_table,
-)
+from src.helpers import find_latest_event_block
+from src.helpers import reinitialize_validators_table, fill_validators_table
 from src.helpers.db_pools import reinitialize_pools_table, fill_pools_table
 from src.helpers.portal import get_all_owned_pubkeys, get_all_pool_ids
 from src.globals.constants import hour_blocks

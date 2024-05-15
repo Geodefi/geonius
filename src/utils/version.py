@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from src.globals.exceptions import PythonVersionException
+from src.exceptions import PythonVersionException
 
 
 def check_python_version() -> None:

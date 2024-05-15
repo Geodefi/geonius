@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from src.helpers.portal import get_surplus, get_fallback_operator
 from src.classes import Database
 from src.utils import multithread
 from src.globals import pools_table, OPERATOR_ID
-from src.utils.error import DatabaseError
+from src.exceptions import DatabaseError
+
+from .portal import get_surplus, get_fallback_operator
 
 
 def create_pools_table() -> None:
@@ -90,7 +91,7 @@ def insert_many_pools(new_pools: list[dict]) -> None:
     try:
         with Database() as db:
             db.executemany(
-                f"INSERT INTO {pools_table} VALUES (?,?,?,?)",
+                f"INSERT INTO {pools_table} VALUES (?,?,?)",
                 [
                     (
                         a["id"],

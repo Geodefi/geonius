@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any
-from web3.types import TxReceipt
 from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE
 from geodefi.utils import to_bytes32
 
-from src.classes.database import Database
+from src.classes import Database
 from src.globals import pools_table, validators_table, SDK, OPERATOR_ID, CONFIG
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
-from src.daemons import TimeDaemon
-from src.triggers import FinalizeExitTrigger
-from src.utils.error import DatabaseError, DatabaseMismatchError
+from src.daemons.time_daemon import TimeDaemon
+from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
+from src.exceptions import DatabaseError, DatabaseMismatchError
+
 from .portal import get_operatorAllowance, get_withdrawal_address
 from .db_validators import save_local_state
-from geodefi.classes.beacon import Beacon
 
 
 def max_proposals_count(pool_id: int) -> int:
@@ -29,7 +28,7 @@ def max_proposals_count(pool_id: int) -> int:
         DatabaseError: Error fetching allowance and surplus for pool from table
     """
 
-    allowance: int = get_operatorAllowance(pool_id, OPERATOR_ID)
+    allowance: int = get_operatorAllowance(pool_id)
     try:
         with Database() as db:
             db.execute(
@@ -143,7 +142,7 @@ def run_finalize_exit_triggers():
             db.execute(
                 f"""
                     SELECT pubkey,exit_epoch  FROM {validators_table} 
-                    WHERE state = 'EXIT_REQUESTED'
+                    WHERE portal_state = 'EXIT_REQUESTED'
                 """
             )
             pks: list[str] = db.fetchall()
@@ -154,7 +153,7 @@ def run_finalize_exit_triggers():
 
     for pk, exit_epoch in pks:
         # check portal status, if it is not EXITTED or EXIT_REQUESTED raise an error
-        chain_val_status: str = SDK.portal.validator(pk).status
+        chain_val_status: str = SDK.portal.validator(pk).state
         if chain_val_status not in ["EXIT_REQUESTED", "EXITTED"]:
             raise DatabaseMismatchError(
                 f"Validator status mismatch in chain and database for pubkey {pk}"

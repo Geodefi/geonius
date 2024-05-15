@@ -4,8 +4,9 @@ import sys
 from geodefi import Geode
 from web3.middleware import construct_sign_and_send_raw_middleware
 
-from src.globals.env import EXECUTION_API, CONSENSUS_API, PRIVATE_KEY
-from src.utils.error import PrivateKeyMissingError
+from src.exceptions import PrivateKeyMissingError
+
+from .env import EXECUTION_API, CONSENSUS_API, PRIVATE_KEY
 
 
 def __set_web3_account(sdk: Geode, private_key: str) -> Geode:

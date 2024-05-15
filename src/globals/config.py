@@ -4,10 +4,11 @@ import json
 import sys
 
 from src.utils.attribute_dict import AttributeDict, convert_recursive
-from src.globals.flags import flags
-from src.globals.sdk import SDK
 
-# from src.utils.error import MissingConfigError
+from .sdk import SDK
+from .flags import flags
+
+# from src.exceptions import MissingConfigError
 
 
 def __apply_flags(config: AttributeDict):

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from src.classes import Trigger
-from src.helpers.portal import get_all_pool_ids
-from src.helpers.db_pools import (
+from src.helpers import (
+    get_all_pool_ids,
     reinitialize_pools_table,
     fill_pools_table,
     create_pools_table,

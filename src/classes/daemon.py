@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
+
 from time import sleep
 from typing import Callable
 from threading import Thread, Event
-from src.classes.trigger import Trigger
-from src.classes.loggable import Loggable
-from src.utils.error import DaemonError
+from src.exceptions import DaemonError
+
+from .loggable import Loggable
+from .trigger import Trigger
 
 
 class Daemon(Loggable):

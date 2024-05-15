@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+
 import os
 import sqlite3 as sql
 from typing import Any
 from src.globals import CONFIG
-from src.utils.error import DatabaseError
+from src.exceptions import DatabaseError
 
 
 class Database:
