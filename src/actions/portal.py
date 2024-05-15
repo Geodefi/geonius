@@ -10,7 +10,7 @@ def call_proposeStake(
     pubkeys: list,
     sig1s: list,
     sig31s: list,
-) -> None:
+) -> bool:
     """Transact on proposeStake function with given pubkeys, sigs, and pool_id.
 
     This function initiates a transaction to propose new validators for a given pool_id.
@@ -40,14 +40,16 @@ def call_proposeStake(
         tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
         # TODO: log tx_receipt
 
+        return True
+
     except TimeExhausted as e:
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call proposeStake on portal contract") from e
-    # TODO: sys exit if this fails while handling
+        # TODO: sys exit if this fails while handling
 
 
-def call_stake(pubkeys: list[str]) -> None:
+def call_stake(pubkeys: list[str]) -> bool:
     """Transact on stake function with given pubkeys, activating the approved validators.
 
     This function initiates a transaction to stake the approved validators. It takes a list of
@@ -83,9 +85,11 @@ def call_stake(pubkeys: list[str]) -> None:
             tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
             # TODO: log tx_receipt
 
+            return True
+
     except CannotStakeError as e:
         # TODO: send mail both to us and them about this anomaly
-        pass
+        return False
     except TimeExhausted as e:
         raise e
     except Exception as e:

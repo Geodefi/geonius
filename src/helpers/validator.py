@@ -96,8 +96,13 @@ def check_and_propose(pool_id: int) -> list[str]:
         temp_sigs1: list[str] = signatures1[i : i + 50]
         temp_sigs31: list[str] = signatures31[i : i + 50]
 
-        call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
-        pks.extend(temp_pks)
+        # TODO: either need to put try except here and catch and return pks from here and save on trigger and find
+        #      a way to handle the error or raise the error here and handle it on trigger but then we need to
+        #      find a way to save the pks which are proposed before the error.
+        #      Saving here after each call is an option
+        success: bool = call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
+        if success:
+            pks.extend(temp_pks)
 
     return pks
 
@@ -119,8 +124,13 @@ def check_and_stake(pks: list[str]) -> list[str]:
     for i in range(0, len(pks), 50):
         temp_pks: list[str] = pks[i : i + 50]
 
-        call_stake(temp_pks)
-        pks.extend(temp_pks)
+        # TODO: either need to put try except here and catch and return pks from here and save on trigger and find
+        #      a way to handle the error or raise the error here and handle it on trigger but then we need to
+        #      find a way to save the pks which are proposed before the error.
+        #      Saving here after each call is an option
+        success: bool = call_stake(temp_pks)
+        if success:
+            pks.extend(temp_pks)
 
     return pks
 

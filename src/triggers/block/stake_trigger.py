@@ -54,11 +54,9 @@ class StakeTrigger(Trigger):
             )
             approved_pks: list[str] = db.fetchall()
 
-        # TODO: changed fix
-        tx_receipts: list[tuple] = check_and_stake(approved_pks)
+        staked_pks: list[str] = check_and_stake(approved_pks)
 
-        # TODO: may need to extend tx_receipts tuples[1] (pks) in a list
-        #       instead of approved_pks
-        # update db after a succesful call
-        multithread(save_local_state, approved_pks, repeat(VALIDATOR_STATE.ACTIVE))
-        multithread(save_portal_state, approved_pks, repeat(VALIDATOR_STATE.ACTIVE))
+        # update db after succesful call
+        if len(staked_pks) > 0:
+            multithread(save_local_state, staked_pks, repeat(VALIDATOR_STATE.ACTIVE))
+            multithread(save_portal_state, staked_pks, repeat(VALIDATOR_STATE.ACTIVE))

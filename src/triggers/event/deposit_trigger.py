@@ -92,17 +92,15 @@ class DepositTrigger(Trigger):
 
         pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        all_pks: list[tuple] = []
+        all_proposed_pks: list[str] = []
         for pool_id in pool_ids:
             # save to db
             surplus: int = get_surplus(pool_id)
             save_surplus(pool_id, surplus)
 
             # if able to propose any new validators do so
-            # TODO: changed fix
-            txs: list[tuple] = check_and_propose(pool_id)
-            for tx_tuple in txs:
-                all_pks.extend(tx_tuple[1])  # tx[1] is the list of pubkeys
+            proposed_pks: list[str] = check_and_propose(pool_id)
+            all_proposed_pks.extend(proposed_pks)
 
-        if len(all_pks) > 0:
-            fill_validators_table(all_pks)
+        if len(all_proposed_pks) > 0:
+            fill_validators_table(all_proposed_pks)
