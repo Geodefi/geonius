@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from web3.types import TxReceipt
+from web3.exceptions import TimeExhausted
 from src.globals import SDK, OPERATOR_ID
+from src.exceptions import CannotStakeError, CallFailedError
 
 
 # pylint: disable-next=invalid-name
@@ -8,55 +12,88 @@ def call_proposeStake(
     pubkeys: list,
     sig1s: list,
     sig31s: list,
-):
-    """_summary_
+) -> bool:
+    """Transact on proposeStake function with given pubkeys, sigs, and pool_id.
+
+    This function initiates a transaction to propose new validators for a given pool_id.
+    It takes the pool_id, a list of pubkeys, sigs for initiating the validator with 1 ETH,
+    and sigs for activating the validator with 31 ETH as input parameters.
 
     Args:
-        pool_id (int): pool id to propose new validators
-        pubkeys (list): list of pubkeys that will be proposed for given pool_id
-        sig1s (list): corresponding sigs to be used when initiating the validator with 1 ETH
-        sig31 (list): corresponding sigs to be used when activating the validator WİTH 31 ETH
+        pool_id (int): The pool id to propose new validators.
+        pubkeys (list): A list of pubkeys that will be proposed for the given pool_id.
+        sig1s (list): A list of corresponding sigs to be used when initiating the validator with 1 ETH.
+        sig31s (list): A list of corresponding sigs to be used when activating the validator with 31 ETH.
 
     Returns:
-        TxReceipt: receipt of the stake calli returned to be handled accordingly
+        bool: True if the proposeStake call is successful, False otherwise.
+
+    Raises:
+        TimeExhausted: Raised if the transaction takes too long to be mined.
+        CallFailedError: Raised if the proposeStake call fails.
     """
 
-    # todo: pubkeys len is limited to 50 but dividing it into multiple or just send some and continue waiting?
-    tx_hash = SDK.portal.functions.call_proposeStake(
-        pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
-    ).transact({"from": SDK.w3.eth.defaultAccount})
+    try:
+        tx_hash: str = SDK.portal.functions.proposeStake(
+            pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
+        ).transact({"from": SDK.w3.eth.defaultAccount})
 
-    # Wait for the transaction to be mined, and get the transaction receipt
-    tx_receipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
-    return tx_receipt
+        # Wait for the transaction to be mined, and get the transaction receipt
+        tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
+        # TODO: log tx_receipt
+
+        return True
+
+    except TimeExhausted as e:
+        raise e
+    except Exception as e:
+        raise CallFailedError("Failed to call proposeStake on portal contract") from e
+        # TODO: sys exit if this fails while handling
 
 
-def call_stake(pubkeys: list[str]) -> TxReceipt:
-    """
-    Transact on stake function with given pubkeys, activating the approved validators.
+def call_stake(pubkeys: list[str]) -> bool:
+    """Transact on stake function with given pubkeys, activating the approved validators.
+
+    This function initiates a transaction to stake the approved validators. It takes a list of
+    public keys of the approved validators as input parameters. It confirms all the validators
+    can stake before calling the stake function. If any of the validators cannot stake, it raises
+    an exception. If all validators can stake, it initiates the transaction and returns the receipt.
+
+    Args:
+        pubkeys (list[str]): list of public keys of the approved validators.
 
     Returns:
-        TxReceipt: receipt of the stake calli returned to be handled accordingly
+        bool: True if the stake call is successful, False otherwise.
+
+    Raises:
+        CannotStakeError: Raised if any of the validators cannot stake.
+        TimeExhausted: Raised if the transaction takes too long to be mined.
+        CallFailedError: Raised if the stake call fails.
     """
 
     try:
         if len(pubkeys) > 0:
-            # confirm all approves canStake before calling stake
+            # Confirm all approves canStake before calling stake
 
-            for key in pubkeys:
-                if not SDK.portal.functions.canStake(key).call():
-                    # again placeholder, maybe pass or update the db and try again?
-                    raise Exception
+            for pubkey in pubkeys:
+                if not SDK.portal.functions.canStake(pubkey).call():
+                    raise CannotStakeError(f"Validator with pubkey {pubkey} cannot stake")
 
-            tx_hash = SDK.portal.functions.stake(pubkeys).transact(
+            tx_hash: str = SDK.portal.functions.stake(pubkeys).transact(
                 {"from": SDK.w3.eth.defaultAccount}
             )
 
             # Wait for the transaction to be mined, and get the transaction receipt
-            tx_receipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
-            return tx_receipt
+            tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
+            # TODO: log tx_receipt
 
-    except Exception as e:
-        # just a place holder.
-        # most of the exceptions and error handling are TODO rn.
+            return True
+
+    except CannotStakeError as e:
+        # TODO: send mail both to us and them about this anomaly
+        return False
+    except TimeExhausted as e:
         raise e
+    except Exception as e:
+        raise CallFailedError("Failed to call stake on portal contract") from e
+        # TODO: sys exit if this fails while handling

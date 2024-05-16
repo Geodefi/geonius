@@ -1,52 +1,72 @@
 # -*- coding: utf-8 -*-
 
 from geodefi.globals import VALIDATOR_STATE
+
 from src.classes import Database
-from src.globals import SDK, CONFIG
+from src.globals import SDK
 from src.utils import multithread
+from src.exceptions import DatabaseError
 
-validators_table: str = CONFIG.database.tables.pools.name
 
+def create_validators_table() -> None:
+    """Creates the sql database table for Validators.
 
-def create_validators_table():
-    """Creates the sql database table for Pools."""
+    Raises:
+        DatabaseError: Error creating Validators table
+    """
 
-    with Database() as db:
-
-        # fallback just records if operator is set as fallback.
-        db.execute(
-            f"""
-                CREATE TABLE IF NOT EXISTS {validators_table} (
+    try:
+        with Database() as db:
+            # fallback just records if operator is set as fallback.
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS Validators (
                     portal_index INTEGER NOT NULL UNIQUE,
                     beacon_index INTEGER NOT NULL UNIQUE,
                     pubkey TEXT NOT NULL PRIMARY KEY,
-                    pool_id TEXT NOT NULL PRIMARY KEY,
-                    local_state TEXT NOT NULL,
-                    portal_state TEXT NOT NULL,
+                    pool_id TEXT NOT NULL,
+                    local_state INT NOT NULL,
+                    portal_state INT NOT NULL,
                     signature31 INTEGER NOT NULL,
                     withdrawal_credentials TEXT NOT NULL,
-                    exit_epoch INTEGER,
+                    exit_epoch INTEGER
                 )
-        """
-        )
+                """
+            )
+    except Exception as e:
+        raise DatabaseError(f"Error creating Validators table with name Validators") from e
 
 
-def drop_validators_table():
-    """Removes Pools the table from database"""
+def drop_validators_table() -> None:
+    """Removes Validators table from the database.
 
-    with Database() as db:
-        db.execute(f"""DROP TABLE IF EXISTS {validators_table}""")
+    Raises:
+        DatabaseError: Error dropping Validators table
+    """
+
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS Validators""")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping Validators table with name Validators") from e
 
 
-def reinitialize_validators_table():
+def reinitialize_validators_table() -> None:
     """Removes validators table and creates an empty one."""
 
-    create_validators_table()
     drop_validators_table()
+    create_validators_table()
 
 
-def fetch_validator(pubkey: str) -> list:
-    """Gathers and returns all the fresh data from chain without saving it to db."""
+def fetch_validator(pubkey: str) -> dict:
+    """Fetches the data for a validator with the given pubkey. Returns the gathered data.
+
+    Args:
+        pubkey (str): public key of the validator
+
+    Returns:
+        dict: dictionary containing the validator info
+    """
 
     val = SDK.portal.validator(pubkey)
 
@@ -63,64 +83,140 @@ def fetch_validator(pubkey: str) -> list:
     }
 
 
-def fetch_validators_batch(pks: list[str]) -> list:
-    """Gathers and returns all the fresh data from chain without saving it to db."""
+def fetch_validators_batch(pks: list[str]) -> list[dict]:
+    """Fetches the data for validators within the given pks list. Returns the gathered data.
+
+    Args:
+        pks (list[str]): pubkeys that will be fetched
+
+    Returns:
+        list[dict]: list of dictionaries containing the validator info
+    """
+
     return multithread(fetch_validator, pks)
 
 
-def insert_many_validators(new_validators: list[dict]):
-    """Creates a new row with given id and info for a given list of dicts."""
-
-    with Database() as db:
-        db.executemany(
-            f"INSERT INTO {validators_table} VALUES (?,?,?,?,?)",
-            [
-                (
-                    a["portal_index"],
-                    a["beacon_index"],
-                    a["pubkey"],
-                    a["pool_id"],
-                    a["local_state"],
-                    a["portal_state"],
-                    a["signature31"],
-                    a["withdrawal_credentials"],
-                    a["exit_epoch"],
-                )
-                for a in new_validators
-            ],
-        )
-
-
-def fill_validators_table(pks: list[int]):
-    """Updates the validators table for Operator' owned validators.
+def insert_many_validators(new_validators: list[dict]) -> None:
+    """Inserts the given validators data into the database.
 
     Args:
-        pks (list[int]): list of pubkeys to be filled
+        new_validators (list[dict]): list of dictionaries containing the validator info
+
+    Raises:
+        DatabaseError: Error inserting many validators into table
+    """
+
+    try:
+        with Database() as db:
+            db.executemany(
+                "INSERT INTO Validators VALUES (?,?,?,?,?,?,?,?,?)",
+                [
+                    (
+                        a["portal_index"],
+                        a["beacon_index"],
+                        a["pubkey"],
+                        a["pool_id"],
+                        int(a["local_state"]),
+                        int(a["portal_state"]),
+                        a["signature31"],
+                        a["withdrawal_credentials"],
+                        a["exit_epoch"],
+                    )
+                    for a in new_validators
+                ],
+            )
+    except Exception as e:
+        raise DatabaseError(f"Error inserting many validators into table Validators") from e
+
+
+def fill_validators_table(pks: list[int]) -> None:
+    """Fills the validators table with the data of the given pubkeys.
+
+    Args:
+        pks (list[int]): pubkeys that will be fetched and inserted
     """
     insert_many_validators(fetch_validators_batch(pks))
 
 
-def save_local_state(pubkey: int, local_state: VALIDATOR_STATE):
-    """Sets local_state on db, which will be useful in the future bebek"""
+def save_local_state(pubkey: int, local_state: VALIDATOR_STATE) -> None:
+    """Sets local_state on db when it changes.
 
-    with Database() as db:
-        db.execute(
-            f"""
-                UPDATE {validators_table} 
-                SET beacon_state = {local_state}
-                WHERE pubkey = {pubkey}
-            """
-        )
+    Args:
+        pubkey (int): public key of the validator
+        local_state (VALIDATOR_STATE): new local state of the validator
+
+    Raises:
+        DatabaseError: Error updating local state of validator
+    """
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                UPDATE Validators 
+                SET beacon_state = ?
+                WHERE pubkey = ?
+                """,
+                (int(local_state), pubkey),
+            )
+    except Exception as e:
+        raise DatabaseError(
+            f"Error updating local state of validator with pubkey {pubkey} \
+                            and state {local_state} to table Validators"
+        ) from e
 
 
-def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE):
-    """Sets portal_state on db when it changes on chain"""
+def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE) -> None:
+    """Sets portal_state on db when it changes on chain.
 
-    with Database() as db:
-        db.execute(
-            f"""
-                UPDATE {validators_table} 
-                SET portal_state = {portal_state}
-                WHERE pubkey = {pubkey}
-            """
-        )
+    Args:
+        pubkey (int): public key of the validator
+        portal_state (VALIDATOR_STATE): new portal state of the validator
+
+    Raises:
+        DatabaseError: Error updating portal state of validator
+    """
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                UPDATE Validators 
+                SET portal_state = ?
+                WHERE pubkey = ?
+                """,
+                (int(portal_state), pubkey),
+            )
+    except Exception as e:
+        raise DatabaseError(
+            f"Error updating portal state of validator with pubkey {pubkey} \
+                            and state {portal_state} to table Validators"
+        ) from e
+
+
+def save_exit_epoch(pubkey: int, exit_epoch: str) -> None:
+    """Sets exit_epoch on db when it changes on chain.
+
+    Args:
+        pubkey (int): public key of the validator
+        exit_epoch (str): new exit epoch of the validator
+
+    Raises:
+        DatabaseError: Error updating exit epoch of validator
+    """
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                UPDATE Validators 
+                SET exit_epoch = ?
+                WHERE pubkey = ?
+                """,
+                (exit_epoch, pubkey),
+            )
+    except Exception as e:
+        raise DatabaseError(
+            f"Error updating exit epoch of validator with pubkey {pubkey} \
+                            and epoch {exit_epoch} to table Validators"
+        ) from e

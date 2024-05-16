@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+
 import os
+from typing import Any
 import logging
 from logging import StreamHandler, Formatter
 from logging.handlers import TimedRotatingFileHandler
@@ -7,114 +9,117 @@ from src.globals import CONFIG
 
 
 class Loggable:
-    """
-    A helper class to print console statements to a file and/or a stream.
+    """A helper class to make logging easier for other classes. It initializes a logger object with given streams and files.
+    It uses the configuration file to set the log level, log directory, log file name, log file rotation interval, etc.
 
-    ...
+    Example:
+        class MyClass(Loggable):
+            def __init__(self):
+                Loggable.__init__(self)
+                self.logger.info("This is an info message.")
+                self.logger.error("This is an error message.")
 
     Attributes:
-        name (str): Unique name of the logger, log file and object instance using given streams.
-        logger (:obj:`Logger`): Logger instance to be utilized.
+        logger (obj): Logger object to be used in the class.
 
     """
 
-    def __init__(self, name: str):
+    def __init__(self) -> None:
+        """Initializes a Loggable object."""
+
+        self.logger: logging.Logger = self.__get_logger()
+
+    def __get_logger(self) -> logging.Logger:
+        """Initializes and returns a logger object with given streams and files.
+
+        Returns:
+            logging.Logger: Logger object to be used in the class.
         """
-        Initializes a helper loggable instance.
+        logging.basicConfig(level=self.__level)
 
-        Args:
-                name (str): Unique name for the logger, max 18 char.
-        """
-
-        if len(name) > 18:
-            raise Exception
-
-        self.__logger_name: str = f"{name:<18}"
-        self.logger: logging.Logger = self.__get_logger(name)
-
-    def __get_logger(self, name: str) -> logging.Logger:
-        """Initializes and configures a Logger object.
-
-        Args:
-                name (str): Unique name of the logger, log file and object instance using given streams.
-        """
-
-        logger = logging.getLogger(name=name)
-        logging.basicConfig()
+        logger: logging.Logger = logging.getLogger()
+        logger.setLevel(self.__level)
         logger.propagate = False
 
-        # TODO add flag for --no-log-stream
-        logger.addHandler(self.__get_stream_handler())
-        # TODO add flag for --no-log-file
-        logger.addHandler(self.__get_file_handler(name=name))
+        if CONFIG.logger.stream:
+            logger.addHandler(self.__get_stream_handler())
+
+        if CONFIG.logger.file:
+            logger.addHandler(self.__get_file_handler())
 
         return logger
 
     @property
-    def __level(self):
-        """Returns the logger level: DEBUG, INFO, WARNING, ERROR, CRITICAL"""
+    def __level(self) -> str:
+        """Returns the logger level from user configuration.
 
-        # TODO add flag for --log-level
-        level_name = CONFIG.logger.level
-        return logging.getLevelName(level_name)
-
-    @property
-    def __file_formatter(self):
-        """Returns the logger formatter for file as a property.
-
-        Example formatted msg for BLOCK_DAEMON file:
-                [09:28:05] CRITICAL :: critical message
+        Returns:
+            str: Logger level name
         """
-
-        return Formatter(
-            fmt=f"[%(asctime)s] %(levelname)-8s :: %(message)s",
-            datefmt="%H:%M:%S",
-        )
+        return CONFIG.logger.level
 
     @property
-    def __stream_formatter(self):
-        """Returns the logger formatter for stream as a property.
+    def __formatter(self) -> Formatter:
+        """Returns the logger formatter with Multithread support.
 
         Example formatted msg for stream:
-                [09:28:05] BLOCK_DAEMON | CRITICAL ::critical message
+            [09:28:05] BLOCK_DAEMON | CRITICAL ::critical message
+
+        Returns:
+            Formatter: Formatter object to be used in the logger.
         """
 
         return Formatter(
-            fmt=f"[%(asctime)s] {self.__logger_name} | %(levelname)-8s :: %(message)s",
+            fmt=f"[%(asctime)s] {'%(threadName)s':<25} | %(levelname)-8s :: %(message)s",
             datefmt="%H:%M:%S",
         )
 
-    def __get_stream_handler(self):
-        """
+    def __get_stream_handler(self) -> StreamHandler:
+        """Returns an initialized Stream Handler.
+
         Returns:
-                sh (obj): Initialized Stream Handler
+            StreamHandler: Initialized and Configured Stream Handler
         """
 
-        sh = StreamHandler()
-        sh.setFormatter(self.__stream_formatter)
+        sh: StreamHandler = StreamHandler()
+        sh.setFormatter(self.__formatter)
         sh.setLevel(self.__level)
         return sh
 
-    def __get_file_handler(self, name: str):
-        """
+    def __get_file_handler(self) -> TimedRotatingFileHandler:
+        """Returns an initialized File Handler.
+
         Returns:
-                fh (obj): Initialized and Configured File Handler
-                name (str): will be used as a file name.
+            TimedRotatingFileHandler: Initialized and Configured File Handler
         """
 
-        main_dir = CONFIG.directory
-        log_dir = CONFIG.logger.directory
-        path = os.path.join(main_dir, log_dir, name)
+        main_dir: str = CONFIG.directory
+        log_dir: str = CONFIG.logger.directory
+        path: str = os.path.join(main_dir, log_dir)
         if not os.path.exists(path):
             os.makedirs(path)
-        fh = TimedRotatingFileHandler(
-            os.path.join(path, "log"),
+        print(CONFIG.logger)
+        prefix: str = "log"
+        filename: str = os.path.join(path, prefix)
+        fh: TimedRotatingFileHandler = TimedRotatingFileHandler(
+            filename,
             when=CONFIG.logger.when,
             interval=CONFIG.logger.interval,
-            backupCount=CONFIG.logger.backupCount,
+            backupCount=CONFIG.logger.backup,
         )
-        fh.suffix = "%Y-%m-%d"
 
-        fh.setFormatter(self.__file_formatter)
+        fh.setFormatter(self.__formatter)
         fh.setLevel(self.__level)
         return fh
+
+    def __getattr__(self, attr: str) -> Any:
+        """Added so, `self.info()` can be used instead of `self.logger.<log_level>()`
+
+        Args:
+            attr (str): Attribute to be get.
+
+        Returns:
+            Any: Attribute of the object.
+        """
+
+        return getattr(self.logger, attr)

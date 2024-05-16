@@ -1,80 +1,123 @@
 # -*- coding: utf-8 -*-
 
-from src.globals import SDK
-from src.classes import Trigger, Daemon
-from src.daemons import BlockDaemon, EventDaemon, TimeDaemon
+from web3.contract.contract import ContractEvent
+
+from src.globals import SDK, hour_blocks, log
+from src.daemons import BlockDaemon, EventDaemon
 from src.triggers import (
-    AlienationTrigger,
+    AlienatedTrigger,
     DelegationTrigger,
-    FallbackTrigger,
-    InitiationTrigger,
+    FallbackOperatorTrigger,
+    IdInitiatedTrigger,
     PoolsDBTrigger,
     StakeTrigger,
-    SurplusTrigger,
+    DepositTrigger,
+    ExitRequestTrigger,
 )
-
-from src.utils import set_web3_account
-from src.helpers.db_validators import (
+from src.helpers import (
+    find_latest_event_block,
     reinitialize_validators_table,
     fill_validators_table,
+    reinitialize_pools_table,
+    fill_pools_table,
+    get_all_owned_pubkeys,
+    get_all_pool_ids,
 )
-from src.helpers.db_pools import reinitialize_pools_table, fill_pools_table
-from src.helpers.portal import get_all_owned_pubkeys, get_all_pool_ids
 
 
 def init_dbs():
+    """Initializes the databases and fills them with the current data.
+
+    This function is called at the beginning of the program to make sure the
+    databases are up to date.
+    """
+    log.debug("Initializing ")
+    log.info("Initializing info")
+
     # initialize pools table and fill it with current data
-    reinitialize_pools_table()
+    reinitialize_pools_table()  # TODO: This will be removed after testing
     fill_pools_table(get_all_pool_ids())
 
     # initialize validators table and fill it with current data
-    reinitialize_validators_table()
+    reinitialize_validators_table()  # TODO: This will be removed after testing
     fill_validators_table(get_all_owned_pubkeys())
 
 
 def setup_daemons():
-    # Triggers
-    pools_db_trigger = PoolsDBTrigger()
-    initiation_trigger = InitiationTrigger()
-    surplus_trigger = SurplusTrigger()
-    delegation_trigger = DelegationTrigger()
-    fallback_trigger = FallbackTrigger()
-    alienation_trigger = AlienationTrigger()
-    stake_trigger = StakeTrigger()
+    """Initializes and runs the daemons for the triggers.
 
-    events = SDK.portal.events
+    This function is called at the beginning of the program to make sure the
+    daemons are running.
+    """
+
+    # Triggers
+    pools_db_trigger: PoolsDBTrigger = (
+        PoolsDBTrigger()
+    )  # TODO: This will be removed and db setup will be initialized on here.
+    id_initiated_trigger: IdInitiatedTrigger = IdInitiatedTrigger()
+    deposit_trigger: DepositTrigger = DepositTrigger()
+    delegation_trigger: DelegationTrigger = DelegationTrigger()
+    fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
+    alienated_trigger: AlienatedTrigger = AlienatedTrigger()
+    stake_trigger: StakeTrigger = StakeTrigger()
+    exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
+
+    events: ContractEvent = SDK.portal.contract.events
 
     # Create appropriate type of Daemons for the triggers
-    # pools_db_daemon should run every 6 hours and update all the pools data
-    initiation_daemon = EventDaemon(
-        triggers=[initiation_trigger], event=events.IdInitiated()
+    id_initiated_daemon: EventDaemon = EventDaemon(
+        trigger=id_initiated_trigger,
+        event=events.IdInitiated(),
+        start_block=find_latest_event_block("IdInitiated"),
     )
-    surplus_daemon = EventDaemon(triggers=[surplus_trigger], event=events.Deposit())
-    delegation_daemon = EventDaemon(
-        triggers=[delegation_trigger], event=events.Delegation()
+    deposit_deamon: EventDaemon = EventDaemon(
+        trigger=deposit_trigger,
+        event=events.Deposit(),
+        start_block=find_latest_event_block("Deposit"),
     )
-    fallback_daemon = EventDaemon(
-        triggers=[fallback_trigger], event=events.FallbackOperator()
+    delegation_daemon: EventDaemon = EventDaemon(
+        trigger=delegation_trigger,
+        event=events.Delegation(),
+        start_block=find_latest_event_block("Delegation"),
     )
-    alienation_daemon = EventDaemon(
-        triggers=[alienation_trigger], event=events.Alienated()
+    fallback_operator_daemon: EventDaemon = EventDaemon(
+        trigger=fallback_operator_trigger,
+        event=events.FallbackOperator(),
+        start_block=find_latest_event_block("FallbackOperator"),
     )
-    pools_db_daemon = TimeDaemon(interval=21600, triggers=[pools_db_trigger])
-    # stake_daemon = EventDaemon(triggers=[stake_trigger], event=events.IdInitiated()) todo
+    alienated_daemon: EventDaemon = EventDaemon(
+        trigger=alienated_trigger,
+        event=events.Alienated(),
+        start_block=find_latest_event_block("Alienated"),
+    )
+    exit_request_deamon: EventDaemon = EventDaemon(
+        trigger=exit_request_trigger,
+        event=events.ExitRequest(),
+        start_block=find_latest_event_block("ExitRequest"),
+    )
+    # pools_db_daemon: TimeDaemon = TimeDaemon(
+    #     interval=21600, trigger=pools_db_trigger
+    # )  # TODO: This will be removed after testing
+    stake_daemon: BlockDaemon = BlockDaemon(trigger=stake_trigger, block_period=1)
 
     # Run the daemons
-    pools_db_daemon.run()
-    initiation_daemon.run()
-    surplus_daemon.run()
+    # pools_db_daemon.run()
+    id_initiated_daemon.run()
+    deposit_deamon.run()
     delegation_daemon.run()
-    fallback_daemon.run()
-    alienation_daemon.run()
-    # stake_daemon.run()
+    fallback_operator_daemon.run()
+    alienated_daemon.run()
+    exit_request_deamon.run()
+    stake_daemon.run()
 
 
 def main():
-    # Utilize the SDK.w3 with privaded private key
-    set_web3_account()
+    """Main function of the program.
+
+    This function is called when the program is run.
+
+    initializes the databases and sets up the daemons.
+    """
 
     # make sure database is ok
     init_dbs()

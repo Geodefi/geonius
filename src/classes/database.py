@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+
 import os
 import sqlite3 as sql
+from typing import Any
 from src.globals import CONFIG
+from src.exceptions import DatabaseError
 
 
 class Database:
@@ -16,10 +19,16 @@ class Database:
             ''')
 
     Attributes:
-        main_dir (str): main directory for geonius folders, provided by config.json.
-        db_dir (str): database directory, provided by config.json.
-        db_ext (str): database name: operator
-        db_ext (str): database extension: .db
+        main_dir (str): Main directory of the project.
+        db_dir (str): Directory to store the database files.
+        db_name (str): Name of the database file.
+        db_ext (str): Extension of the database file.
+        path (str): Path of the database file.
+        connection (sqlite3.Connection): Connection object to the database file.
+        cursor (sqlite3.Cursor): Cursor object to the database file.
+
+    Raises:
+        DatabaseError: Error while connecting to the database.
     """
 
     main_dir: str = CONFIG.directory
@@ -27,37 +36,46 @@ class Database:
     db_name: str = "operator"
     db_ext: str = ".db"
 
-    def __init__(self, db_name: str = db_name):
+    def __init__(self, db_name: str = db_name) -> None:
         """Initializes a Database object.
 
         Args:
-            db_name (int): Optional name of the database
+            db_name (str, optional): Name of the database file. Defaults to `operator`.
+
+        Raises:
+            DatabaseError: Error while connecting to the database.
         """
 
-        self.path = os.path.join(self.main_dir, self.db_dir)
+        self.db_name: str = db_name
+        self.path: str = os.path.join(self.main_dir, self.db_dir)
         if not os.path.exists(self.path):
             os.makedirs(self.path)
+
+        connection_path: str = os.path.join(self.path, self.db_name + self.db_ext)
 
         try:
             # log(sql.version) #pyselite version
             # log(sql.sqlite_version) #SQLLite engine version
-            self.connection = sql.connect(
-                os.path.join(self.path, db_name + self.db_ext)
-            )
-            self.cursor = self.connection.cursor()
+            self.connection: sql.Connection = sql.connect(connection_path)
+            self.cursor: sql.Cursor = self.connection.cursor()
         except Exception as e:
-            raise e
+            raise DatabaseError(
+                f"Error while connecting to the database with database path {connection_path}"
+            ) from e
 
     def __enter__(self):
-        """Used when entering a `with` statement.
-        Which is safer when using database.
-        """
+        """Used when entering a `with` statement. Which is safer when using database."""
 
         return self
 
-    def __exit__(self, ext_type, exc_value, traceback):
+    def __exit__(self, ext_type, exc_value, traceback) -> None:
         """Used when exiting from a `with` statement.
         Disconnects from the Database file and closes.
+
+        Args:
+            ext_type (Type): Type of the exception.
+            exc_value (Exception): Exception object.
+            traceback (Traceback): Traceback object.
         """
 
         self.cursor.close()
@@ -67,7 +85,14 @@ class Database:
             self.connection.commit()
         self.connection.close()
 
-    def __getattr__(self, attr):
-        """Added so, `self.execute()` can be used instead of `self.cursor.execute()`"""
+    def __getattr__(self, attr: str) -> Any:
+        """Added so, `self.execute()` can be used instead of `self.cursor.execute()`
+
+        Args:
+            attr (str): Attribute to be get.
+
+        Returns:
+            Any: Attribute of the object.
+        """
 
         return getattr(self.cursor, attr)

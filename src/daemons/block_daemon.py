@@ -1,51 +1,58 @@
 # -*- coding: utf-8 -*-
 
-# TODO: search for 'from ..' and use module import with src.
 from src.classes import Daemon, Trigger
-from src.globals import SDK, CONFIG, block_seconds
+from src.globals import SDK, CONFIG
 
 
 class BlockDaemon(Daemon):
-    """
-    A Daemon that triggers provided actions on every X block on the blockchain.
+    """A Daemon that triggers provided actions on every X block on the blockchain.
     Interval is default block time (12s).
     Task returns: last block number which activates the triggers.
-    ...
+
+    Example:
+        def action():
+            print(datetime.datetime.now())
+
+        t = Trigger(action)
+        b = BlockDaemon(trigger=t)
 
     Attributes:
-        name (str): block_daemon
-        last_block (int): latest block that is checked.
+        __recent_block (int): recent block number to be processed.
+        block_period (int): number of blocks to wait before running the trigger.
+        block_identifier (int): block_identifier sets if we are looking for 'latest', 'earliest', 'pending', 'safe', 'finalized'.
     """
 
-    name: str = "BLOCK_DAEMON"
+    def __init__(
+        self,
+        trigger: Trigger,
+        block_period: int = int(CONFIG.chains[SDK.network.name].period),
+    ) -> None:
+        """Initializes a BlockDaemon object. The daemon will run the triggers on every X block.
 
-    def __init__(self, triggers: list[Trigger]):
-        """Initializes the configured daemon.
         Args:
-            triggers (list): List of initialized Trigger instances
-            event (str): event to be checked.
+            trigger (Trigger): an initialized Trigger instance.
+            block_period (int, optional): number of blocks to wait before running the triggers. Default is what is set in the config.
         """
         Daemon.__init__(
             self,
-            name=self.name,
-            interval=block_seconds,
+            interval=int(CONFIG.chains[SDK.network.name].interval),
             task=self.listen_blocks,
-            triggers=triggers,
+            trigger=trigger,
         )
 
         # block_identifier sets if we are looking for 'latest', 'earliest', 'pending', 'safe', 'finalized'.
         self.block_identifier: int = CONFIG.chains[SDK.network.name].identifier
-        self.block_period: int = int(CONFIG.chains[SDK.network.name].period)
 
-        self.__recent_block: int = CONFIG.chains[SDK.network.name].first_block
+        self.__recent_block: int = CONFIG.chains[SDK.network.name].start
+        self.block_period: int = block_period
 
     def listen_blocks(self) -> int:
         """The main task for the BlockDaemon.
         1. Checks for new blocks.
-        2. On every X block (period by config), runs the triggers.
+        2. On every X block (period by config), runs the trigger. Returns the last block number.
 
         Returns:
-            int : latest block.
+            int: last block number which activates the trigger.
         """
         # eth.block_number or eth.get_block_number() can also be used
         # but this allows block_identifier.

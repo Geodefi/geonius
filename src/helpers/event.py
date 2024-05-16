@@ -1,26 +1,34 @@
 # -*- coding: utf-8 -*-
 
+from typing import Any, Iterable
 from itertools import repeat
 from eth_abi import abi
-from geodefi.utils.wrappers import multiple_attempt
+from web3.types import EventData
+from web3.contract.contract import ContractEvent
+from geodefi.utils import multiple_attempt
+
 from src.utils import multithread
-from src.globals import MAX_BLOCK_RANGE
+from src.globals import CONFIG, SDK
+
+max_block_range = int(CONFIG.chains[SDK.network.name].range)
 
 
 @multiple_attempt
-def get_batch_events(event, from_block: int, limit: int) -> dict:
-    """Gathers the contract events for the given address within the range of fromBlock to limit
+def get_batch_events(event: ContractEvent, from_block: int, limit: int) -> Iterable[EventData]:
+    """Get events within a range of blocks.
 
     Args:
-        address(str) : contract address to be watched
-        signature: event sig
-        from_block: first block to cover
-        limit: last block to cover
+        event (ContractEvent): event to be checked.
+        from_block (int): starting block number.
+        limit (int): last block number to be checked.
+
+    Returns:
+        Iterable[EventData]: list of events.
     """
     # if range is like [0,7,3] -> 0, 3, 6
     # get_batch_events would search 0-3, 3-6 and 6-9
     # but we want 0-3, 3-6, 6-7
-    to_block: int = from_block + MAX_BLOCK_RANGE
+    to_block: int = from_block + max_block_range
     if to_block > limit:
         to_block = limit
 
@@ -28,36 +36,44 @@ def get_batch_events(event, from_block: int, limit: int) -> dict:
     return event.get_logs(fromBlock=from_block, toBlock=to_block)
 
 
-def get_all_events(event, first_block: int, last_block: int) -> list[dict]:
-    """Gathers all the events within the range of first_block to last_block, making use of multithreads.
+def get_all_events(event: ContractEvent, first_block: int, last_block: int) -> Iterable[EventData]:
+    """Get all events emitted within given range of blocks. It uses get_batch_events
+    to get events in batches within multhithread and then combines them.
 
     Args:
-        event: emits to be checked within given blocks: web3.contract.events.event_name()
-        first_block(str): first block to include
-        last_block(str): last block to cover
+        event (ContractEvent): event to be checked.
+        first_block (int): starting block number.
+        last_block (int): last block number to be checked.
 
     Returns:
-        logs(list): sorted list of all events emitted within given range
+        Iterable[EventData]: list of events.
     """
-    r = range(first_block, last_block, MAX_BLOCK_RANGE)
+    r: range = range(first_block, last_block, max_block_range)
     if first_block == last_block:
-        r = range(first_block, first_block + 1)
+        r: range = range(first_block, first_block + 1)
 
-    log_batches = multithread(get_batch_events, repeat(event), r, repeat(last_block))
+    log_batches: Iterable[EventData] = multithread(
+        get_batch_events, repeat(event), r, repeat(last_block)
+    )
 
     # convert list of list into a list
-    logs = [log for batch in log_batches for log in batch]
+    # TODO: consider using list.extend instead of list comprehension
+    logs: Iterable[EventData] = [log for batch in log_batches for log in batch]
 
-    # note that the events should be sorted as: blockNumber->transactionIndex->logIndex
+    # NOTE that the events should be sorted as: blockNumber->transactionIndex->logIndex
     # which persists here, so no need to sort again.
     return logs
 
 
-def decode_abi(types: list, data) -> tuple:
-    """Decode given data with list of solidity types
+def decode_abi(types: list, data: Any) -> tuple:
+    """Decode the given data using the given types. It uses eth-abi library to decode the data.
 
     Args:
-        types(list) : list of different solidity types like Uint, Bytes Array etc.
+        types (list): list of types to decode the data.
+        data (Any): data to be decoded.
+
+    Returns:
+        tuple: decoded data.
     """
 
     decoded: tuple = abi.decode(types, bytes.fromhex(str(data.hex())[2:]))

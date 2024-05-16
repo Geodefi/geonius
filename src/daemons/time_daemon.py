@@ -1,24 +1,34 @@
 # -*- coding: utf-8 -*-
 
+from typing_extensions import Self
 from src.classes import Daemon, Trigger
 
 
 class TimeDaemon(Daemon):
-    """Simplest Daemon that triggers an action every X second auto.
-    Task returns "True (boolean)". Simply, run.
+    """A Daemon that triggers provided actions on every X seconds. Task returns True, simply run.
+
+    Example:
+        def action():
+            print(datetime.datetime.now())
+
+        t = Trigger(action)
+        b = TimeDaemon(trigger=t)
     """
 
-    name: str = "TIME_DAEMON"
-
-    def __init__(self, interval: int, triggers: list[Trigger]):
+    def __init__(self, interval: int, trigger: Trigger, initial_delay: int) -> None:
         Daemon.__init__(
             self,
-            name=self.name,
             interval=interval,
-            task=self.trigger,
-            triggers=triggers,
+            task=self.reflect,
+            trigger=trigger,
+            initial_delay=initial_delay,
         )
 
-    def trigger(self) -> dict:
-        """Returns true and triggers the action."""
-        return True
+    def reflect(self) -> Self:
+        """Returns self. Self will be used to stop the deamon when needed by trigger itself
+        since return value will be passed to the trigger function.
+
+        Returns:
+            Self: self
+        """
+        return self

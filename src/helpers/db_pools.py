@@ -1,36 +1,49 @@
 # -*- coding: utf-8 -*-
 
-from src.helpers.portal import get_surplus, get_operatorAllowance, get_fallback_operator
 from src.classes import Database
 from src.utils import multithread
-from src.globals import CONFIG
+from src.globals import OPERATOR_ID
+from src.exceptions import DatabaseError
 
-pools_table: str = CONFIG.database.tables.pools.name
+from .portal import get_surplus, get_fallback_operator
 
 
 def create_pools_table() -> None:
-    """Creates the sql database table for Pools."""
+    """Creates the sql database table for Pools.
 
-    with Database() as db:
-        # fallback just records if operator is set as fallback.
-        db.execute(
-            f"""
-                CREATE TABLE IF NOT EXISTS {pools_table} (
-                    portal_index INTEGER NOT NULL UNIQUE,
+    Raises:
+        DatabaseError: Error creating Pools table
+    """
+
+    try:
+        with Database() as db:
+            # fallback just records if operator is set as fallback.
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS Pools (
                     id TEXT NOT NULL PRIMARY KEY,
                     surplus TEXT ,
-                    allowance TEXT ,
                     fallback INTEGER DEFAULT 0
                 )
-        """
-        )
+                """
+            )
+
+    except Exception as e:
+        raise DatabaseError(f"Error creating Pools table with name Pools") from e
 
 
 def drop_pools_table() -> None:
-    """Removes Pools the table from database"""
+    """Removes Pools table from the database.
 
-    with Database() as db:
-        db.execute(f"""DROP TABLE IF EXISTS {pools_table}""")
+    Raises:
+        DatabaseError: Error dropping Pools table
+    """
+
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS Pools""")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping Pools table with name Pools") from e
 
 
 def reinitialize_pools_table() -> None:
@@ -41,97 +54,118 @@ def reinitialize_pools_table() -> None:
 
 
 def fetch_pools_batch(ids: list[int]) -> list[dict]:
-    """Gathers all the fresh data from chain without saving it to db.
+    """Fetches the data for pools within the given ids list. Returns the gathered data.
+
     Args:
-        ids (list[int]): pool ids to fetch
+        ids (list[int]): pool IDs that will be fetched
 
     Returns:
-        list: gathered data in format of [{portal_index,id,...},...]
+        list[dict]: list of dictionaries containing the pool info, in format of [{id: val, surplus: val,...},...]
     """
 
     surpluses: list[int] = multithread(get_surplus, ids)
-    allowances: list[int] = multithread(get_operatorAllowance, ids)
     fallback_operators: list[int] = multithread(get_fallback_operator, ids)
 
     # transpose the info and insert all the pools
     pools_transposed: list[dict] = [
         {
-            "portal_index": portal_index,
-            "id": id,
-            "surplus": surplus,
-            "allowance": allowance,
-            "fallback": fallback,
+            "id": str(id),
+            "surplus": str(surplus),
+            "fallback": 1 if fallback == OPERATOR_ID else 0,
         }
-        for (portal_index, id, surplus, allowance, fallback) in zip(
-            ids, surpluses, allowances, fallback_operators
-        )
+        for (id, surplus, fallback) in zip(ids, surpluses, fallback_operators)
     ]
     return pools_transposed
 
 
 def insert_many_pools(new_pools: list[dict]) -> None:
-    """Creates a new row with given id and info for a given list of dicts."""
+    """Inserts the given pools data into the database.
 
-    with Database() as db:
-        db.executemany(
-            f"INSERT INTO {pools_table} VALUES (?,?,?,?,?)",
-            [
-                (
-                    a["portal_index"],
-                    a["id"],
-                    a["surplus"],
-                    a["allowance"],
-                    a["fallback"],
-                )
-                for a in new_pools
-            ],
-        )
+    Args:
+        new_pools (list[dict]): list of dictionaries containing the pool info, in format of [{id: val, surplus: val,...},...]
+
+    Raises:
+        DatabaseError: Error inserting many pools into table
+    """
+
+    try:
+        with Database() as db:
+            db.executemany(
+                "INSERT INTO Pools VALUES (?,?,?)",
+                [
+                    (
+                        a["id"],
+                        a["surplus"],
+                        a["fallback"],
+                    )
+                    for a in new_pools
+                ],
+            )
+    except Exception as e:
+        raise DatabaseError(f"Error inserting many pools into table Pools") from e
 
 
 def fill_pools_table(ids: list[int]) -> None:
-    """Updates all the data for pools within the given ids list.
+    """Fills the pools table with the data of the given pool IDs.
 
     Args:
-        ids (list[int]): pool IDs that will be updated
+        ids (list[int]): pool IDs that will be fetched and inserted into the database
     """
 
     insert_many_pools(fetch_pools_batch(ids))
 
 
 def save_surplus(pool_id: int, surplus: int) -> None:
-    """Sets surplus of pool on database to provided value"""
+    """Sets surplus of pool on database to provided value
 
-    with Database() as db:
-        db.execute(
-            f"""
-                UPDATE {pools_table} 
-                SET surplus = {surplus}
-                WHERE Id = {pool_id}
-            """
-        )
+    Args:
+        pool_id (int): pool ID
+        surplus (int): surplus value to be updated
+
+    Raises:
+        DatabaseError: Error updating surplus of pool
+    """
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                UPDATE Pools 
+                SET surplus = ?
+                WHERE Id =?
+                """,
+                (surplus, pool_id),
+            )
+    except Exception as e:
+        raise DatabaseError(
+            f"Error updating surplus of pool with id {pool_id} and surplus {surplus} \
+                in table Pools"
+        ) from e
 
 
 def save_fallback_operator(pool_id: int, value: bool) -> None:
-    """Sets fallback of pool on database to provided value"""
+    """Sets fallback of pool on database to provided value
 
-    with Database() as db:
-        db.execute(
-            f"""
-            UPDATE {pools_table} 
-            SET fallback = {1 if value else 0}
-            WHERE Id = {pool_id}
-            """
-        )
+    Args:
+        pool_id (int): pool ID
+        value (bool): fallback value to be updated
 
+    Raises:
+        DatabaseError: Error updating fallback of pool
+    """
 
-def save_allowance(pool_id: int, allowance: int) -> None:
-    """Sets allowance for pool on database to provided value"""
-
-    with Database() as db:
-        db.execute(
-            f"""
-                UPDATE {pools_table} 
-                SET allowance = {allowance}
-                WHERE Id = {pool_id}
-            """
-        )
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                UPDATE Pools 
+                SET fallback = ?
+                WHERE Id = ?
+                """,
+                (1 if value else 0, pool_id),
+            )
+    except Exception as e:
+        raise DatabaseError(
+            f"Error updating fallback of pool with id {pool_id} and value {value} \
+                in table Pools"
+        ) from e

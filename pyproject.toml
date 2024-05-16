@@ -2,7 +2,7 @@
 name = ""
 version = ""
 description = ""
-authors = ["StakeWise Labs <info@stakewise.io>"]
+authors = [""]
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.10"
