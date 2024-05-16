@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from subprocess import CalledProcessError, check_output  # TODO: will we utilize CalledProcessError?
+from subprocess import check_output
 import geodefi
 
 from src.globals import SDK, ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE, CONFIG

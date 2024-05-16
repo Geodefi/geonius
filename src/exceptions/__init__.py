@@ -5,3 +5,4 @@ from .actions import EthdoError, CannotStakeError, CallFailedError
 from .classes import DaemonError, DatabaseError, DatabaseMismatchError, TriggerError
 from .globals import SDKError, PrivateKeyMissingError
 from .utils import PythonVersionException
+from .triggers import BeaconStateMismatchError

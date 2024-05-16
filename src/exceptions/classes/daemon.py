@@ -7,5 +7,5 @@ class DaemonError(CustomException):
     """Exception raised for errors in the Daemon class."""
 
 
-class DaemonStoppedException(Exception):
+class DaemonStoppedException(DaemonError):
     "Exception in thread background"

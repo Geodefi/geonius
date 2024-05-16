@@ -4,6 +4,7 @@ from typing import Any
 from geodefi.classes import Validator
 from geodefi.globals import VALIDATOR_STATE
 
+from src.exceptions import DatabaseMismatchError
 from src.globals import SDK
 from src.classes import Database, Trigger
 from src.daemons import TimeDaemon
@@ -60,9 +61,10 @@ class FinalizeExitTrigger(Trigger):
                 (self.pubkey),
             )
             row: Any = db.fetchone()
-            if not row:
-                # TODO: raise an error catch and exit deamon
-                pass
+
+        if not row:
+            raise DatabaseMismatchError(f"Validator pubkey {self.pubkey} not found in the database")
+
         pool_id: int = int(row[0])
         SDK.portal.finalizeExit(pool_id, self.pubkey)
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 from typing import Any, Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
@@ -7,6 +8,7 @@ from geodefi.classes import Validator
 
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
+from src.exceptions import BeaconStateMismatchError
 from src.globals import SDK, CONFIG
 from src.helpers import (
     create_exit_request_table,
@@ -114,10 +116,12 @@ class ExitRequestTrigger(Trigger):
                     # write database the expected exit block
                     save_exit_epoch(pubkey, val.exit_epoch)
                 else:
-                    # TODO: error case, raise exception to be closed in except catch
-                    pass
+                    raise BeaconStateMismatchError(f"Beacon state mismatch for pubkey {pubkey}")
+            except BeaconStateMismatchError as e:
+                sys.exit(e)
             except Exception as e:
-                raise e
+                # TODO: log the error
+                pass
 
         # TODO: if exit_validator function (ethdo) is waiting for finalization, we do not need to
         #       seperate the for loops and we can continue under the same loop
