@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from src.helpers.portal import get_surplus, get_fallback_operator
 from src.classes import Database
 from src.utils import multithread
-from src.globals import pools_table, OPERATOR_ID
-from src.utils.error import DatabaseError
+from src.globals import OPERATOR_ID
+from src.exceptions import DatabaseError
+
+from .portal import get_surplus, get_fallback_operator
 
 
 def create_pools_table() -> None:
@@ -18,17 +19,17 @@ def create_pools_table() -> None:
         with Database() as db:
             # fallback just records if operator is set as fallback.
             db.execute(
-                f"""
-                    CREATE TABLE IF NOT EXISTS {pools_table} (
-                        id TEXT NOT NULL PRIMARY KEY,
-                        surplus TEXT ,
-                        fallback INTEGER DEFAULT 0
-                    )
-            """
+                """
+                CREATE TABLE IF NOT EXISTS Pools (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    surplus TEXT ,
+                    fallback INTEGER DEFAULT 0
+                )
+                """
             )
 
     except Exception as e:
-        raise DatabaseError(f"Error creating Pools table with name {pools_table}") from e
+        raise DatabaseError(f"Error creating Pools table with name Pools") from e
 
 
 def drop_pools_table() -> None:
@@ -40,9 +41,9 @@ def drop_pools_table() -> None:
 
     try:
         with Database() as db:
-            db.execute(f"""DROP TABLE IF EXISTS {pools_table}""")
+            db.execute("""DROP TABLE IF EXISTS Pools""")
     except Exception as e:
-        raise DatabaseError(f"Error dropping Pools table with name {pools_table}") from e
+        raise DatabaseError(f"Error dropping Pools table with name Pools") from e
 
 
 def reinitialize_pools_table() -> None:
@@ -90,7 +91,7 @@ def insert_many_pools(new_pools: list[dict]) -> None:
     try:
         with Database() as db:
             db.executemany(
-                f"INSERT INTO {pools_table} VALUES (?,?,?,?)",
+                "INSERT INTO Pools VALUES (?,?,?)",
                 [
                     (
                         a["id"],
@@ -101,7 +102,7 @@ def insert_many_pools(new_pools: list[dict]) -> None:
                 ],
             )
     except Exception as e:
-        raise DatabaseError(f"Error inserting many pools into table {pools_table}") from e
+        raise DatabaseError(f"Error inserting many pools into table Pools") from e
 
 
 def fill_pools_table(ids: list[int]) -> None:
@@ -128,16 +129,17 @@ def save_surplus(pool_id: int, surplus: int) -> None:
     try:
         with Database() as db:
             db.execute(
-                f"""
-                    UPDATE {pools_table} 
-                    SET surplus = {surplus}
-                    WHERE Id = {pool_id}
                 """
+                UPDATE Pools 
+                SET surplus = ?
+                WHERE Id =?
+                """,
+                (surplus, pool_id),
             )
     except Exception as e:
         raise DatabaseError(
             f"Error updating surplus of pool with id {pool_id} and surplus {surplus} \
-                in table {pools_table}"
+                in table Pools"
         ) from e
 
 
@@ -155,14 +157,15 @@ def save_fallback_operator(pool_id: int, value: bool) -> None:
     try:
         with Database() as db:
             db.execute(
-                f"""
-                UPDATE {pools_table} 
-                SET fallback = {1 if value else 0}
-                WHERE Id = {pool_id}
                 """
+                UPDATE Pools 
+                SET fallback = ?
+                WHERE Id = ?
+                """,
+                (1 if value else 0, pool_id),
             )
     except Exception as e:
         raise DatabaseError(
             f"Error updating fallback of pool with id {pool_id} and value {value} \
-                in table {pools_table}"
+                in table Pools"
         ) from e

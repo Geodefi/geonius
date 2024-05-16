@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
+
+
 class CustomException(Exception):
-    """A simple custom exception class.
+    """A simple custom exception class, that does TODO:?what.
 
     # Example:
     try:

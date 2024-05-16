@@ -4,21 +4,28 @@ from typing import Any, Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
+
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
-from src.globals import SDK, CONFIG, validators_table
-from src.helpers.db_events import create_exit_request_table, event_handler
-from src.helpers.db_validators import save_portal_state, save_local_state, save_exit_epoch
-from src.helpers.validator import run_finalize_exit_triggers
-from src.actions.ethdo import exit_validator
-from ..time import FinalizeExitTrigger
+from src.globals import SDK, CONFIG
+from src.helpers import (
+    create_exit_request_table,
+    event_handler,
+    save_portal_state,
+    save_local_state,
+    save_exit_epoch,
+    run_finalize_exit_triggers,
+)
+from src.actions import exit_validator
+
+from ..time.finalize_exit_trigger import FinalizeExitTrigger
 
 
 class ExitRequestTrigger(Trigger):
-    """Trigger for the EXIT_REQUEST event. This event is emitted when a validator requests to exit the network.
+    """Trigger for the EXIT_REQUEST event. This event is emitted when a validator requests to exit.
 
     Attributes:
-        name (str): The name of the trigger to be used when logging etc. (value: EXIT_REQUEST_TRIGGER)
+        name (str): The name of the trigger to be used when logging (value: EXIT_REQUEST_TRIGGER)
     """
 
     name: str = "EXIT_REQUEST_TRIGGER"
@@ -33,10 +40,11 @@ class ExitRequestTrigger(Trigger):
     def __filter_events(self, event: EventData) -> bool:
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT pubkey FROM {validators_table}
-                    WHERE pubkey = {event.args.pubkey}
                 """
+                SELECT pubkey FROM Validators
+                WHERE pubkey = ?
+                """,
+                (event.args.pubkey),
             )
             res: Any = db.fetchone()  # returns None if not found
         if res:
@@ -72,7 +80,7 @@ class ExitRequestTrigger(Trigger):
 
         with Database() as db:
             db.executemany(
-                f"INSERT INTO ExitRequest VALUES (?,?,?,?,?,?,?)",
+                "INSERT INTO ExitRequest VALUES (?,?,?,?,?,?,?)",
                 events,
             )
 

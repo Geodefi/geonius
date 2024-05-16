@@ -4,10 +4,13 @@ from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
-from src.helpers.db_events import create_delegation_table, event_handler
-from src.helpers.validator import check_and_propose
-from src.helpers.db_validators import fill_validators_table
-from src.helpers.db_pools import create_pools_table
+from src.helpers import (
+    create_delegation_table,
+    event_handler,
+    check_and_propose,
+    fill_validators_table,
+    create_pools_table,
+)
 from src.globals import OPERATOR_ID
 
 
@@ -86,7 +89,7 @@ class DelegationTrigger(Trigger):
 
         with Database() as db:
             db.executemany(
-                f"INSERT INTO Delegation VALUES (?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO Delegation VALUES (?,?,?,?,?,?,?,?,?)",
                 events,
             )
 

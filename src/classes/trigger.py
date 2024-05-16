@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+
 from typing import Callable
 
-from src.classes.loggable import Loggable
-from src.utils.error import TriggerError
+from src.exceptions import TriggerError
+
+from .loggable import Loggable
 
 
 class Trigger(Loggable):

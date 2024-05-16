@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+
 import os
+from typing import Any
 import logging
 from logging import StreamHandler, Formatter
 from logging.handlers import TimedRotatingFileHandler
-from typing import Any
 from src.globals import CONFIG
 
 
@@ -140,7 +141,7 @@ class Loggable:
             interval=CONFIG.logger.interval,
             backupCount=CONFIG.logger.backup,
         )
-        fh.suffix = "%Y-%m-%d"
+        fh.suffix = ".%Y-%m-%d"
 
         fh.setFormatter(self.__file_formatter)
         fh.setLevel(self.__level)

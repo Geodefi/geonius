@@ -3,10 +3,11 @@
 from typing import Any, Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
+
 from src.classes import Trigger, Database
-from src.globals import validators_table
-from src.helpers.db_events import create_alienated_table, event_handler
-from src.helpers.db_validators import (
+from src.helpers import (
+    create_alienated_table,
+    event_handler,
     create_validators_table,
     save_portal_state,
     save_local_state,
@@ -46,10 +47,11 @@ class AlienatedTrigger(Trigger):
         # if pk is in db (validators table), then continue
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT pubkey FROM {validators_table}
-                    WHERE pubkey = {event.args.pubkey}
                 """
+                SELECT pubkey FROM Validators
+                WHERE pubkey = ?
+                """,
+                (event.args.pubkey),
             )
             res: Any = db.fetchone()  # returns None if not found
         if res:
@@ -94,7 +96,7 @@ class AlienatedTrigger(Trigger):
 
         with Database() as db:
             db.executemany(
-                f"INSERT INTO Alienated VALUES (?,?,?,?,?,?,?)",
+                "INSERT INTO Alienated VALUES (?,?,?,?,?,?,?)",
                 events,
             )
 

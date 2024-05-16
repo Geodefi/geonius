@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .config import CONFIG
-from .constants import hour_blocks, pools_table, validators_table
+from .constants import hour_blocks
 from .env import (
     EXECUTION_API,
     CONSENSUS_API,
@@ -10,5 +10,4 @@ from .env import (
     ACCOUNT_PASSPHRASE,
     WALLET_PASSPHRASE,
 )
-from .exceptions import *
 from .sdk import SDK

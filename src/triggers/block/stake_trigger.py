@@ -2,15 +2,15 @@
 
 from itertools import repeat
 from geodefi.globals import VALIDATOR_STATE
+
 from src.classes import Trigger, Database
-from src.helpers.db_validators import (
+from src.helpers import (
     create_validators_table,
     save_local_state,
     save_portal_state,
+    get_StakeParams,
+    check_and_stake,
 )
-from src.globals import pools_table
-from src.helpers.portal import get_StakeParams
-from src.helpers.validator import check_and_stake
 from src.utils import multithread
 
 
@@ -47,12 +47,13 @@ class StakeTrigger(Trigger):
         #       handle the try except here or move them to a helper function.
         with Database() as db:
             db.execute(
-                f"""
-                    SELECT pubkey FROM {pools_table} 
-                    WHERE internal_state = {VALIDATOR_STATE.PROPOSED}  
-                    AND portal_index < {verification_index}
-                    ORDER BY id
                 """
+                SELECT pubkey FROM Validators 
+                WHERE local_state = ?  
+                AND portal_index < ?
+                ORDER BY pool_id
+                """,
+                (int(VALIDATOR_STATE.PROPOSED), verification_index),
             )
             approved_pks: list[str] = db.fetchall()
 

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+
 from typing import Any
 from itertools import repeat
 from geodefi.globals import ID_TYPE
 from geodefi.utils import to_bytes32, get_key
+
 from src.globals import SDK, OPERATOR_ID
 from src.utils import multithread
 

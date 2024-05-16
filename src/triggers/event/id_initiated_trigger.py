@@ -2,11 +2,15 @@
 
 from typing import Iterable
 from web3.types import EventData
-
 from geodefi.globals import ID_TYPE
+
 from src.classes import Trigger, Database
-from src.helpers.db_pools import create_pools_table, fill_pools_table
-from src.helpers.db_events import create_id_initiated_table, event_handler
+from src.helpers import (
+    create_pools_table,
+    fill_pools_table,
+    create_id_initiated_table,
+    event_handler,
+)
 
 
 class IdInitiatedTrigger(Trigger):
@@ -78,7 +82,7 @@ class IdInitiatedTrigger(Trigger):
         """
 
         with Database() as db:
-            db.execute(f"INSERT INTO IdInitiated VALUES (?,?,?,?,?,?,?)", events)
+            db.execute("INSERT INTO IdInitiated VALUES (?,?,?,?,?,?,?)", events)
 
     def insert_pool(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Creates a new pool and fills it with data

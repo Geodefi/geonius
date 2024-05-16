@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from web3.types import TxReceipt
-from src.globals import SDK, OPERATOR_ID
-from src.utils.error import CannotStakeError, CallFailedError
 from web3.exceptions import TimeExhausted
+from src.globals import SDK, OPERATOR_ID
+from src.exceptions import CannotStakeError, CallFailedError
 
 
 # pylint: disable-next=invalid-name

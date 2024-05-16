@@ -1,8 +1,8 @@
 {
-  "directory": "geonius",
+  "directory": ".geonius",
   "logger": {
-    "file": "True",
-    "stream": "True",
+    "file": true,
+    "stream": true,
     "directory": "logs",
     "level": "DEBUG",
     "when": "midnight",

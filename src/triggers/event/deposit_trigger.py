@@ -4,11 +4,15 @@ from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
-from src.helpers.db_events import create_deposit_table, event_handler
-from src.helpers.db_validators import fill_validators_table
-from src.helpers.portal import get_surplus
-from src.helpers.db_pools import create_pools_table, save_surplus
-from src.helpers.validator import check_and_propose
+from src.helpers import (
+    create_deposit_table,
+    event_handler,
+    fill_validators_table,
+    get_surplus,
+    create_pools_table,
+    save_surplus,
+    check_and_propose,
+)
 
 
 class DepositTrigger(Trigger):
@@ -71,7 +75,7 @@ class DepositTrigger(Trigger):
 
         with Database() as db:
             db.execute_many(
-                f"INSERT INTO Deposit VALUES (?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO Deposit VALUES (?,?,?,?,?,?,?,?,?)",
                 events,
             )
 
