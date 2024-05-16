@@ -1,6 +1,6 @@
 # Geonius
 
-Geonius is a deamonic python script that allows Node Operators to automate their operations on geodefi Operator Marketplace
+Geonius is a multi**daemon**tional daemonic python script that allows Node Operators to automate their operations on geodefi Operator Marketplace
 
 - [Geonius](#geonius)
   - [Validator Creation Explained](#validator-creation-explained)

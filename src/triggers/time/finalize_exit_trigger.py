@@ -48,8 +48,8 @@ class FinalizeExitTrigger(Trigger):
         val: Validator = SDK.portal.validator(self.pubkey)
         # TODO: check what the status is in the beacon chain
         if val.beacon_status != "exit":
-            #  TODO: if it is too late from, after the initial delay is passed, we should raise an error
-            # Too late => 1 week raise an error and cathch and send mail to operator and us
+            # TODO: if it is too late from, after the initial delay is passed
+            # Too late => 1 week send mail to operator and us no raise here
             return
 
         with Database() as db:

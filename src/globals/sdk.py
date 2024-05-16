@@ -4,7 +4,7 @@ import sys
 from geodefi import Geode
 from web3.middleware import construct_sign_and_send_raw_middleware
 
-from src.exceptions import PrivateKeyMissingError
+from src.exceptions import MissingPrivateKeyError
 
 from .env import EXECUTION_API, CONSENSUS_API, PRIVATE_KEY
 
@@ -48,13 +48,13 @@ def __init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
     try:
         sdk: Geode = Geode(exec_api=exec_api, cons_api=cons_api)
         if not priv_key:
-            raise PrivateKeyMissingError(
+            raise MissingPrivateKeyError(
                 "Problem occured while connecting to SDK, private key is missing in .env file."
             )
         sdk = __set_web3_account(sdk, priv_key)
         return sdk
 
-    except PrivateKeyMissingError as e:
+    except MissingPrivateKeyError as e:
         # TODO: log the error
         sys.exit(e)
     except Exception as e:

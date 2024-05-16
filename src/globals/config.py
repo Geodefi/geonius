@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import json
-import sys
 
 from src.utils.attribute_dict import AttributeDict, convert_recursive
+from src.exceptions import ConfigurationError
 
 from .sdk import SDK
 from .flags import flags
-
-# from src.exceptions import MissingConfigError
 
 
 def __apply_flags(config: AttributeDict):
@@ -64,7 +62,7 @@ def __apply_flags(config: AttributeDict):
 
 
 def __init_config() -> AttributeDict:
-    """Initializes the configuration from the config.json file.
+    """Initializes the configuration from the geonius.json file.
 
     Returns:
         AttributeDict: the configuration as an AttributeDict.
@@ -75,16 +73,15 @@ def __init_config() -> AttributeDict:
 
     try:
         # catch configuration variables
-        config_dict: dict = json.load(open("config.json", encoding="utf-8"))
+        config_dict: dict = json.load(open("geonius.json", encoding="utf-8"))
 
         if not isinstance(config_dict, dict):
             raise TypeError("Config file should be a dict after loading from json, but it is not.")
 
-    except Exception as e:
-        # TODO: log error
-        sys.exit(e)
+        config: AttributeDict = convert_recursive(config_dict)
 
-    config: AttributeDict = convert_recursive(config_dict)
+    except Exception as e:
+        raise ConfigurationError("Error loading configuration file `geonius.json`.") from e
 
     return config
 

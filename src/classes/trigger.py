@@ -2,8 +2,6 @@
 
 from typing import Callable
 
-from src.exceptions import TriggerError
-
 
 class Trigger:
     """Bound to a Daemon, a Trigger also processes the changes of the daemon after a loop.
@@ -55,7 +53,4 @@ class Trigger:
             **kwargs: Arbitrary keyword arguments.
         """
 
-        try:
-            self.__action(*args, **kwargs)
-        except Exception as e:
-            raise TriggerError(f"Error while processing the trigger, action failed") from e
+        self.__action(*args, **kwargs)

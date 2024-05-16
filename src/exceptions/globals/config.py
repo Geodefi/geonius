@@ -2,5 +2,6 @@
 from ..custom_exception import CustomException
 
 
-class MissingConfigException(CustomException):
-    "Config file is missing"
+# TODO: sys.exit at main
+class ConfigurationError(CustomException):
+    "An error occurred during configuration."

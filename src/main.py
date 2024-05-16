@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 
 from web3.contract.contract import ContractEvent
 
@@ -49,7 +50,6 @@ def setup_daemons():
     This function is called at the beginning of the program to make sure the
     daemons are running.
     """
-
     # Triggers
     pools_db_trigger: PoolsDBTrigger = (
         PoolsDBTrigger()
@@ -123,7 +123,13 @@ def main():
     init_dbs()
 
     # Initialize and run the daemons
-    setup_daemons()
+    try:
+        setup_daemons()
+
+    # pylint: disable-next=broad-exception-caught
+    except Exception as e:
+        # TODO: send mail.
+        sys.exit(e)
 
 
 if __name__ == "__main__":

@@ -29,7 +29,7 @@ class DelegationTrigger(Trigger):
         It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
         """
 
-        Trigger.__init__(self, name=self.name, action=self.update_allowance)
+        Trigger.__init__(self, name=self.name, action=self.consider_allowance)
         create_pools_table()
         create_delegation_table()
 
@@ -93,8 +93,7 @@ class DelegationTrigger(Trigger):
                 events,
             )
 
-    # TODO: naming may change?
-    def update_allowance(self, events: Iterable[EventData], *args, **kwargs) -> None:
+    def consider_allowance(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """If the allowance is changed, it proposes new validators for the pool if possible.
         If new validators are proposed, it also fills the validators table
         with the new validators data.

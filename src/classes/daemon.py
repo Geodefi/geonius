@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-
+import sys
 from time import sleep
 from typing import Callable
 from threading import Thread, Event
 
-from src.exceptions import DaemonError
+from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError
 from .trigger import Trigger
 
 
@@ -118,8 +118,10 @@ class Daemon:
         Args:
             trigger [Trigger] : an initialized Trigger instance
         """
-
-        self.trigger: list[Trigger] = trigger
+        if isinstance(trigger, Trigger):
+            self.trigger: list[Trigger] = trigger
+        else:
+            raise TypeError("Given trigger is not an instince of Trigger")
 
     def __loop(self) -> None:
         """Runs the loop, checks for the task and trigger on every iteration. Stops when stop_flag is set.
@@ -144,10 +146,13 @@ class Daemon:
                 else:
                     pass
 
-            # TODO: not exitting system but instead closing the daemon here maybe a better approach
-            except Exception as e:
+            except (CallFailedError, BeaconStateMismatchError) as e:
+                # not exitting system but instead closing the daemon here is a better approach
+                # TODO: log the error
                 self.start_flag.clear()
                 self.stop_flag.set()
+            except Exception as e:
+                # TODO: log the error
                 raise DaemonError("Daemon stopped due to an exception.") from e
 
     def run(self) -> None:

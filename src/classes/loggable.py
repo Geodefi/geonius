@@ -9,7 +9,8 @@ from src.globals import CONFIG
 
 
 class Loggable:
-    """A helper class to make logging easier for other classes. It initializes a logger object with given streams and files.
+    """TODO:
+    A helper class to make logging easier for other classes. It initializes a logger object with given streams and files.
     It uses the configuration file to set the log level, log directory, log file name, log file rotation interval, etc.
 
     Example:
