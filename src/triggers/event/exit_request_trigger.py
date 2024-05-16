@@ -38,7 +38,6 @@ class ExitRequestTrigger(Trigger):
         run_finalize_exit_triggers()
         create_exit_request_table()
 
-    # TODO: Same filter with alienation_trigger.py so it can be refactored to a common function in helpers like folder
     def __filter_events(self, event: EventData) -> bool:
         with Database() as db:
             db.execute(

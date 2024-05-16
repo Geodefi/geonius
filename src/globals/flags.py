@@ -124,7 +124,7 @@ parser.add_argument(
     help="deafult ethdo account name to be created/used",
 )
 parser.add_argument(
-    "--config-path",  # TODO:
+    "--config-path",
     action="store",
     dest="config_path",
     help="use a different config file than default geonius.json",

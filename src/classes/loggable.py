@@ -9,16 +9,21 @@ from src.globals import CONFIG
 
 
 class Loggable:
-    """TODO:
-    A helper class to make logging easier for other classes. It initializes a logger object with given streams and files.
-    It uses the configuration file to set the log level, log directory, log file name, log file rotation interval, etc.
+    """
+    A class to create a logger object with given streams and files. Supposed to be used as a
+    global var. Logger functions can also be directly reached.
 
     Example:
-        class MyClass(Loggable):
-            def __init__(self):
-                Loggable.__init__(self)
-                self.logger.info("This is an info message.")
-                self.logger.error("This is an error message.")
+        logger = Loggable()
+        logger.info("info message")
+        logger.error("error message")
+
+        OR
+
+        from src.global.logger import log
+        log.info("info message")
+        log.error("error message")
+
 
     Attributes:
         logger (obj): Logger object to be used in the class.

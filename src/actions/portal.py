@@ -48,7 +48,6 @@ def call_proposeStake(
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call proposeStake on portal contract") from e
-        # TODO: close daemon if this fails while handling
 
 
 def call_stake(pubkeys: list[str]) -> bool:
@@ -96,4 +95,3 @@ def call_stake(pubkeys: list[str]) -> bool:
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call stake on portal contract") from e
-        # TODO: close daemon if this fails while handling

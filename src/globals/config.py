@@ -72,8 +72,12 @@ def __init_config() -> AttributeDict:
     """
 
     try:
+        config_path = "geonius.json"
+        if flags.config_path:
+            config_path = flags.config_path
+
         # catch configuration variables
-        config_dict: dict = json.load(open("geonius.json", encoding="utf-8"))
+        config_dict: dict = json.load(open(config_path, encoding="utf-8"))
 
         if not isinstance(config_dict, dict):
             raise TypeError("Config file should be a dict after loading from json, but it is not.")
