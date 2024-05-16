@@ -3,15 +3,14 @@
 from time import sleep
 from typing import Callable
 from threading import Thread, Event
-from src.exceptions import DaemonError
 
-from .loggable import Loggable
+from src.exceptions import DaemonError
 from .trigger import Trigger
 
 
-class Daemon(Loggable):
+class Daemon:
     """A daemon repeats a specific task with given interval as a period.
-    Daemons use a single thread to run a loop at the background to run all the provided triggers,
+    Daemons use a single thread to run a loop at the background to run all the provided trigger,
     and check for tasks on every iteration.
 
     .. code-block:: python
@@ -31,7 +30,7 @@ class Daemon(Loggable):
         __initial_delay (int): Initial delay before starting the loop.
         __task (Callable): Work to be done after every iteration.
         __worker (Thread): Thread object to run the loop.
-        triggers (list[Trigger]): list of initialized Trigger instances.
+        trigger (Trigger): an initialized Trigger instance.
         start_flag (Event): Event flag to start the daemon.
         stop_flag (Event): Event flag to stop the daemon.
 
@@ -41,31 +40,27 @@ class Daemon(Loggable):
 
     def __init__(
         self,
-        name: str,
         interval: int,
         task: Callable,
-        triggers: list[Trigger],
+        trigger: Trigger,
         initial_delay: int = 0,
     ) -> None:
         """Initializes a Daemon object. The daemon will run the task with the given interval.
 
         Args:
-            name (str): name of the daemon to be used when logging etc.
             interval (int): Time duration between 2 tasks.
             task (Callable): Work to be done after every iteration
-            triggers (list[Trigger]): list of initialized Trigger instances
+            trigger (Trigger): an initialized Trigger instance
             initial_delay (int, optional): Initial delay before starting the loop. Defaults to 0.
         """
-
-        Loggable.__init__(self, name=name)
 
         self.__set_task(task)
         self.__set_interval(interval)
         self.__set_initial_delay(initial_delay)
-        self.__set_triggers(triggers)
+        self.__set_trigger(trigger)
 
         # TODO: should consider using daemon threads
-        self.__worker: Thread = Thread(name="background", target=self.__loop)
+        self.__worker: Thread = Thread(name=trigger.name, target=self.__loop)
         self.start_flag: Event = Event()
         self.stop_flag: Event = Event()
 
@@ -109,7 +104,7 @@ class Daemon(Loggable):
 
     def __set_task(self, task: Callable) -> None:
         """Sets the task for the deamon on initialization.
-        Tasks should return a dict of effects to be checked by triggers.
+        Tasks should return a dict of effects to be checked by trigger.
 
         Args:
             task (function): New task to be done after every period.
@@ -117,17 +112,17 @@ class Daemon(Loggable):
 
         self.__task: Callable = task
 
-    def __set_triggers(self, triggers: list[Trigger]) -> None:
-        """Sets list of triggers that will be checked on every iteration, called on initialization.
+    def __set_trigger(self, trigger: Trigger) -> None:
+        """Sets list of trigger that will be checked on every iteration, called on initialization.
 
         Args:
-            triggers (list[Trigger]): list of initialized Trigger instances
+            trigger [Trigger] : an initialized Trigger instance
         """
 
-        self.triggers: list[Trigger] = triggers
+        self.trigger: list[Trigger] = trigger
 
     def __loop(self) -> None:
-        """Runs the loop, checks for the task and triggers on every iteration. Stops when stop_flag is set.
+        """Runs the loop, checks for the task and trigger on every iteration. Stops when stop_flag is set.
 
         If the task raises an exception, the daemon stops and raises a DaemonStoppedException. This is to prevent
         the daemon from running with a broken task. The exception is raised to the caller to handle the error. The
@@ -144,10 +139,11 @@ class Daemon(Loggable):
                 result: bool = self.__task()
 
                 if result:
-                    # check for the triggers and run the actions
-                    if self.triggers:
-                        # pylint: disable-next=expression-not-assigned
-                        [f.process(result) for f in self.triggers]
+                    self.trigger.process(result)
+
+                else:
+                    pass
+
             # TODO: not exitting system but instead closing the daemon here maybe a better approach
             except Exception as e:
                 self.start_flag.clear()
@@ -168,7 +164,7 @@ class Daemon(Loggable):
 
         self.__worker.start()
 
-        self.logger.info(f"running. Use stop() to stop, and CTRL+Z to exit.")
+        # log.info("running. Use stop() to stop, and CTRL+Z to exit.")
         self.start_flag.set()
 
     def stop(self) -> None:

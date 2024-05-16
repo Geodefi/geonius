@@ -131,7 +131,7 @@ class ExitRequestTrigger(Trigger):
             # TODO: calculate initial delay related to the exit_epoch and the current block number and set it here
             finalize_exit_deamon: TimeDaemon = TimeDaemon(
                 interval=int(CONFIG.chains[SDK.network.name].interval) + 1,
-                triggers=[finalize_exit_trigger],
+                trigger=finalize_exit_trigger,
                 initial_delay=val.exit_epoch,
             )
 

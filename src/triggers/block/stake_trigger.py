@@ -4,6 +4,7 @@ from itertools import repeat
 from geodefi.globals import VALIDATOR_STATE
 
 from src.classes import Trigger, Database
+from src.globals import log
 from src.helpers import (
     create_validators_table,
     save_local_state,
@@ -39,6 +40,7 @@ class StakeTrigger(Trigger):
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
+        log.info("IM IN STAKETRIGGER BITCH")
         # TODO: utilize flags: --min-proposal-queue --max-proposal-delay
         verification_index: int = get_StakeParams()[4]
 

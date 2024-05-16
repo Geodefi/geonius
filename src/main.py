@@ -2,7 +2,7 @@
 
 from web3.contract.contract import ContractEvent
 
-from src.globals import SDK
+from src.globals import SDK, hour_blocks, log
 from src.daemons import BlockDaemon, EventDaemon
 from src.triggers import (
     AlienatedTrigger,
@@ -14,12 +14,15 @@ from src.triggers import (
     DepositTrigger,
     ExitRequestTrigger,
 )
-
-from src.helpers import find_latest_event_block
-from src.helpers import reinitialize_validators_table, fill_validators_table
-from src.helpers.db_pools import reinitialize_pools_table, fill_pools_table
-from src.helpers.portal import get_all_owned_pubkeys, get_all_pool_ids
-from src.globals.constants import hour_blocks
+from src.helpers import (
+    find_latest_event_block,
+    reinitialize_validators_table,
+    fill_validators_table,
+    reinitialize_pools_table,
+    fill_pools_table,
+    get_all_owned_pubkeys,
+    get_all_pool_ids,
+)
 
 
 def init_dbs():
@@ -28,6 +31,9 @@ def init_dbs():
     This function is called at the beginning of the program to make sure the
     databases are up to date.
     """
+    log.debug("Initializing ")
+    log.info("Initializing info")
+
     # initialize pools table and fill it with current data
     reinitialize_pools_table()  # TODO: This will be removed after testing
     fill_pools_table(get_all_pool_ids())
@@ -60,39 +66,39 @@ def setup_daemons():
 
     # Create appropriate type of Daemons for the triggers
     id_initiated_daemon: EventDaemon = EventDaemon(
-        triggers=[id_initiated_trigger],
+        trigger=id_initiated_trigger,
         event=events.IdInitiated(),
         start_block=find_latest_event_block("IdInitiated"),
     )
     deposit_deamon: EventDaemon = EventDaemon(
-        triggers=[deposit_trigger],
+        trigger=deposit_trigger,
         event=events.Deposit(),
         start_block=find_latest_event_block("Deposit"),
     )
     delegation_daemon: EventDaemon = EventDaemon(
-        triggers=[delegation_trigger],
+        trigger=delegation_trigger,
         event=events.Delegation(),
         start_block=find_latest_event_block("Delegation"),
     )
     fallback_operator_daemon: EventDaemon = EventDaemon(
-        triggers=[fallback_operator_trigger],
+        trigger=fallback_operator_trigger,
         event=events.FallbackOperator(),
         start_block=find_latest_event_block("FallbackOperator"),
     )
     alienated_daemon: EventDaemon = EventDaemon(
-        triggers=[alienated_trigger],
+        trigger=alienated_trigger,
         event=events.Alienated(),
         start_block=find_latest_event_block("Alienated"),
     )
     exit_request_deamon: EventDaemon = EventDaemon(
-        triggers=[exit_request_trigger],
+        trigger=exit_request_trigger,
         event=events.ExitRequest(),
         start_block=find_latest_event_block("ExitRequest"),
     )
     # pools_db_daemon: TimeDaemon = TimeDaemon(
-    #     interval=21600, triggers=[pools_db_trigger]
+    #     interval=21600, trigger=pools_db_trigger
     # )  # TODO: This will be removed after testing
-    stake_daemon: BlockDaemon = BlockDaemon(triggers=[stake_trigger], block_period=12 * hour_blocks)
+    stake_daemon: BlockDaemon = BlockDaemon(trigger=stake_trigger, block_period=1)
 
     # Run the daemons
     # pools_db_daemon.run()

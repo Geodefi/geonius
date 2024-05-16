@@ -11,3 +11,4 @@ from .env import (
     WALLET_PASSPHRASE,
 )
 from .sdk import SDK
+from .logger import log

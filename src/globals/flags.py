@@ -46,7 +46,6 @@ parser.add_argument(
     "--logger-level",
     action="store",
     dest="logger_level",
-    default="INFO",
     choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
     help="set log level to DEBUG, INFO, WARNING, ERROR, CRITICAL",
 )

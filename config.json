@@ -4,7 +4,7 @@
     "file": true,
     "stream": true,
     "directory": "logs",
-    "level": "DEBUG",
+    "level": "INFO",
     "when": "midnight",
     "interval": 1,
     "backup": 30

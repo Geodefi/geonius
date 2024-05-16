@@ -26,24 +26,23 @@ class EventDaemon(Daemon):
 
     def __init__(
         self,
-        triggers: list[Trigger],
+        trigger: Trigger,
         event: ContractEvent,
         start_block: int = CONFIG.chains[SDK.network.name].start,
     ) -> None:
-        """Initializes a EventDaemon object. The daemon will run the triggers on every event emitted.
+        """Initializes a EventDaemon object. The daemon will run the trigger on every event emitted.
 
         Args:
-            triggers (list[Trigger]): list of initialized Trigger instances.
+            trigger (Trigger): an initialized Trigger instance.
             event (ContractEvent): event to be checked.
             start_block (int, optional): block number to start checking for events. Default is what is set in the config.
         """
 
         Daemon.__init__(
             self,
-            name=self.name,
             interval=int(CONFIG.chains[SDK.network.name].interval) + 1,
             task=self.listen_events,
-            triggers=triggers,
+            trigger=trigger,
         )
         self.event = event
 
@@ -55,7 +54,7 @@ class EventDaemon(Daemon):
         self.__recent_block: int = start_block
 
     def listen_events(self) -> Iterable[EventData]:
-        """The main task for the EventDaemon. Checks for new events. If any, runs the triggers and returns the events.
+        """The main task for the EventDaemon. Checks for new events. If any, runs the trigger and returns the events.
         If no events are emitted, returns None.
 
         Returns:
