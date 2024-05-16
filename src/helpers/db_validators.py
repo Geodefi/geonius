@@ -5,7 +5,8 @@ from geodefi.globals import VALIDATOR_STATE
 from src.classes import Database
 from src.globals import SDK
 from src.utils import multithread
-from src.exceptions import DatabaseError
+from src.exceptions import DatabaseError, DatabaseMismatchError
+from src.helpers import get_StakeParams
 
 
 def create_validators_table() -> None:
@@ -220,3 +221,67 @@ def save_exit_epoch(pubkey: int, exit_epoch: str) -> None:
             f"Error updating exit epoch of validator with pubkey {pubkey} \
                             and epoch {exit_epoch} to table Validators"
         ) from e
+
+
+def fetch_verified_pks() -> list[str]:
+    """Fetches the data of the validators that are in the proposed state.
+
+    Returns:
+        list[str]: list of public keys of validators in proposed state
+
+    Raises:
+        DatabaseError: Error fetching validators from table
+    """
+    verification_index: int = get_StakeParams()[4]
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                SELECT pubkey FROM Validators 
+                WHERE local_state = ?  
+                AND portal_index < ?
+                ORDER BY pool_id
+                """,
+                (int(VALIDATOR_STATE.PROPOSED), verification_index),
+            )
+            approved_pks: list[str] = db.fetchall()
+            return approved_pks
+    except Exception as e:
+        raise DatabaseError(f"Error fetching validators from table Validators") from e
+
+
+def check_pk_in_db(pubkey: str) -> bool:
+    """Checks if the given public key is in the database.
+
+    Returns:
+        bool: True if the public key is in the database, False otherwise
+
+    Raises:
+        DatabaseError: Error checking if pubkey is in table Validators
+    """
+
+    try:
+        with Database() as db:
+            db.execute("SELECT * FROM Validators WHERE pubkey = ?", (pubkey))
+            return db.fetchone() is not None
+    except Exception as e:
+        raise DatabaseError(f"Error checking if pubkey {pubkey} is in table Validators") from e
+
+
+def fetch_pool_id(pubkey: str) -> str:
+    """Fetches the pool_id of the validator with the given pubkey.
+
+    Args:
+        pubkey (str): public key of the validator
+
+    Returns:
+        int: pool_id of the validator
+    """
+
+    try:
+        with Database() as db:
+            db.execute("SELECT pool_id FROM Validators WHERE pubkey = ?", (pubkey,))
+            return db.fetchone()[0]
+    except Exception as e:
+        raise DatabaseMismatchError(f"Validator pubkey {pubkey} not found in the database") from e

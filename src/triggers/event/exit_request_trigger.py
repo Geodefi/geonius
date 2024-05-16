@@ -8,7 +8,7 @@ from geodefi.classes import Validator
 
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
-from src.exceptions import BeaconStateMismatchError
+from src.exceptions import BeaconStateMismatchError, DatabaseError
 from src.globals import SDK, CONFIG
 from src.helpers import (
     create_exit_request_table,
@@ -17,6 +17,7 @@ from src.helpers import (
     save_local_state,
     save_exit_epoch,
     run_finalize_exit_triggers,
+    check_pk_in_db,
 )
 from src.actions import exit_validator
 
@@ -33,25 +34,27 @@ class ExitRequestTrigger(Trigger):
     name: str = "EXIT_REQUEST_TRIGGER"
 
     def __init__(self) -> None:
+        """Initializes an ExitRequestTrigger object. The trigger will process the changes of the daemon after a loop.
+        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """
+
         Trigger.__init__(self, name=self.name, action=self.update_validators_status)
         # Runs finalize exit triggers if there are any validators to be finalized
         run_finalize_exit_triggers()
         create_exit_request_table()
 
     def __filter_events(self, event: EventData) -> bool:
-        with Database() as db:
-            db.execute(
-                """
-                SELECT pubkey FROM Validators
-                WHERE pubkey = ?
-                """,
-                (event.args.pubkey),
-            )
-            res: Any = db.fetchone()  # returns None if not found
-        if res:
-            return True
-        else:
-            return False
+        """Filters the events to check if the event is in the validators table.
+
+        Args:
+            event (EventData): Event to be checked
+
+        Returns:
+            bool: True if the event is in the validators table, False otherwise
+        """
+
+        # if pk is in db (validators table), then continue
+        return check_pk_in_db(event.args.pubkey)
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         saveable_events: list[tuple] = []
@@ -78,12 +81,14 @@ class ExitRequestTrigger(Trigger):
         Args:
             events (list[tuple]): list of saveable events
         """
-
-        with Database() as db:
-            db.executemany(
-                "INSERT INTO ExitRequest VALUES (?,?,?,?,?,?,?)",
-                events,
-            )
+        try:
+            with Database() as db:
+                db.executemany(
+                    "INSERT INTO ExitRequest VALUES (?,?,?,?,?,?,?)",
+                    events,
+                )
+        except Exception as e:
+            raise DatabaseError(f"Error inserting events to table ExitRequest") from e
 
     def update_validators_status(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Updates the status of validators that have requested to exit the network.

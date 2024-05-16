@@ -5,6 +5,7 @@ from web3.types import EventData
 from geodefi.globals import ID_TYPE
 
 from src.classes import Trigger, Database
+from src.exceptions import DatabaseError
 from src.helpers import (
     create_pools_table,
     fill_pools_table,
@@ -80,9 +81,11 @@ class IdInitiatedTrigger(Trigger):
         Args:
             events (list[tuple]): list of IdInitiated emits
         """
-
-        with Database() as db:
-            db.execute("INSERT INTO IdInitiated VALUES (?,?,?,?,?,?,?)", events)
+        try:
+            with Database() as db:
+                db.execute("INSERT INTO IdInitiated VALUES (?,?,?,?,?,?,?)", events)
+        except Exception as e:
+            raise DatabaseError(f"Error inserting events to table IdInitiated") from e
 
     def insert_pool(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Creates a new pool and fills it with data

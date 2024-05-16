@@ -4,6 +4,7 @@ from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
+from src.exceptions import DatabaseError
 from src.globals import OPERATOR_ID
 from src.helpers import (
     create_fallback_operator_table,
@@ -86,12 +87,14 @@ class FallbackOperatorTrigger(Trigger):
         Args:
             events (list[tuple]): list of FallbackOperator emits
         """
-
-        with Database() as db:
-            db.executemany(
-                "INSERT INTO FallbackOperator VALUES (?,?,?,?,?,?,?,?)",
-                events,
-            )
+        try:
+            with Database() as db:
+                db.executemany(
+                    "INSERT INTO FallbackOperator VALUES (?,?,?,?,?,?,?,?)",
+                    events,
+                )
+        except Exception as e:
+            raise DatabaseError(f"Error inserting events to table FallbackOperator") from e
 
     def update_fallback_operator(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Checks if the fallback operator is set as script's OPERATOR_ID

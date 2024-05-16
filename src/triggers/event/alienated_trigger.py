@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, Iterable
+from typing import Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 
 from src.classes import Trigger, Database
+from src.exceptions import DatabaseError
 from src.helpers import (
     create_alienated_table,
     event_handler,
     create_validators_table,
     save_portal_state,
     save_local_state,
+    check_pk_in_db,
 )
 
 
@@ -45,19 +47,7 @@ class AlienatedTrigger(Trigger):
         """
 
         # if pk is in db (validators table), then continue
-        with Database() as db:
-            db.execute(
-                """
-                SELECT pubkey FROM Validators
-                WHERE pubkey = ?
-                """,
-                (event.args.pubkey),
-            )
-            res: Any = db.fetchone()  # returns None if not found
-        if res:
-            return True
-        else:
-            return False
+        return check_pk_in_db(event.args.pubkey)
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
@@ -94,11 +84,14 @@ class AlienatedTrigger(Trigger):
             events (list[tuple]): list of saveable events
         """
 
-        with Database() as db:
-            db.executemany(
-                "INSERT INTO Alienated VALUES (?,?,?,?,?,?,?)",
-                events,
-            )
+        try:
+            with Database() as db:
+                db.executemany(
+                    "INSERT INTO Alienated VALUES (?,?,?,?,?,?,?)",
+                    events,
+                )
+        except Exception as e:
+            raise DatabaseError(f"Error inserting events to table Alienated") from e
 
     def alienate_validators(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Alienates the validators in the database. Updates the database local and portal state of the validators to ALIENATED.

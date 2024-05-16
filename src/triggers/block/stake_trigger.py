@@ -3,14 +3,14 @@
 from itertools import repeat
 from geodefi.globals import VALIDATOR_STATE
 
-from src.classes import Trigger, Database
+from src.classes import Trigger
 from src.globals import log
 from src.helpers import (
     create_validators_table,
     save_local_state,
     save_portal_state,
-    get_StakeParams,
     check_and_stake,
+    fetch_verified_pks,
 )
 from src.utils import multithread
 
@@ -42,23 +42,9 @@ class StakeTrigger(Trigger):
         """
         log.info("IM IN STAKETRIGGER BITCH")
         # TODO: utilize flags: --min-proposal-queue --max-proposal-delay
-        verification_index: int = get_StakeParams()[4]
 
         # check if there are any pending validator proposals.
-        # TODO: move this and similars to helpers and make handling there sys.exit will be done during handling in main
-        with Database() as db:
-            db.execute(
-                """
-                SELECT pubkey FROM Validators 
-                WHERE local_state = ?  
-                AND portal_index < ?
-                ORDER BY pool_id
-                """,
-                (int(VALIDATOR_STATE.PROPOSED), verification_index),
-            )
-            approved_pks: list[str] = db.fetchall()
-
-        staked_pks: list[str] = check_and_stake(approved_pks)
+        staked_pks: list[str] = check_and_stake(fetch_verified_pks())
 
         # update db after succesful call
         if len(staked_pks) > 0:

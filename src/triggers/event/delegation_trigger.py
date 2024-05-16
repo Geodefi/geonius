@@ -4,6 +4,7 @@ from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
+from src.exceptions import DatabaseError
 from src.helpers import (
     create_delegation_table,
     event_handler,
@@ -87,11 +88,14 @@ class DelegationTrigger(Trigger):
             events (list[tuple]): list of Delegation emits
         """
 
-        with Database() as db:
-            db.executemany(
-                "INSERT INTO Delegation VALUES (?,?,?,?,?,?,?,?,?)",
-                events,
-            )
+        try:
+            with Database() as db:
+                db.executemany(
+                    "INSERT INTO Delegation VALUES (?,?,?,?,?,?,?,?,?)",
+                    events,
+                )
+        except Exception as e:
+            raise DatabaseError(f"Error inserting events to table Delegation") from e
 
     def consider_allowance(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """If the allowance is changed, it proposes new validators for the pool if possible.

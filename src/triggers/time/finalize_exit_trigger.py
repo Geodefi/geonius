@@ -8,7 +8,7 @@ from src.exceptions import DatabaseMismatchError
 from src.globals import SDK
 from src.classes import Database, Trigger
 from src.daemons import TimeDaemon
-from src.helpers import save_portal_state, save_local_state
+from src.helpers import save_portal_state, save_local_state, fetch_pool_id
 
 
 class FinalizeExitTrigger(Trigger):
@@ -50,22 +50,9 @@ class FinalizeExitTrigger(Trigger):
         if val.beacon_status != "exit":
             # TODO: if it is too late from, after the initial delay is passed
             # Too late => 1 week send mail to operator and us no raise here
-            return
+            pass
 
-        with Database() as db:
-            db.execute(
-                """
-                SELECT pool_id FROM Validators
-                WHERE pubkey = ?
-                """,
-                (self.pubkey),
-            )
-            row: Any = db.fetchone()
-
-        if not row:
-            raise DatabaseMismatchError(f"Validator pubkey {self.pubkey} not found in the database")
-
-        pool_id: int = int(row[0])
+        pool_id: int = int(fetch_pool_id(self.pubkey))
         SDK.portal.finalizeExit(pool_id, self.pubkey)
 
         # set db portal and local status to EXITED for validator

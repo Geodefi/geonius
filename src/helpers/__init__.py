@@ -32,6 +32,9 @@ from .db_validators import (
     save_local_state,
     save_portal_state,
     save_exit_epoch,
+    fetch_verified_pks,
+    check_pk_in_db,
+    fetch_pool_id,
 )
 from .event import get_batch_events, get_all_events, decode_abi
 from .portal import (

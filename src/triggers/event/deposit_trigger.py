@@ -4,6 +4,7 @@ from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
+from src.exceptions import DatabaseError
 from src.helpers import (
     create_deposit_table,
     event_handler,
@@ -72,12 +73,14 @@ class DepositTrigger(Trigger):
         Args:
             events (list[tuple]): list of Deposit emits
         """
-
-        with Database() as db:
-            db.execute_many(
-                "INSERT INTO Deposit VALUES (?,?,?,?,?,?,?,?,?)",
-                events,
-            )
+        try:
+            with Database() as db:
+                db.execute_many(
+                    "INSERT INTO Deposit VALUES (?,?,?,?,?,?,?,?,?)",
+                    events,
+                )
+        except Exception as e:
+            raise DatabaseError(f"Error inserting events to table Deposit") from e
 
     def update_surplus(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Updates the surplus for given pool with the current data.
