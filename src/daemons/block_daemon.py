@@ -14,34 +14,30 @@ class BlockDaemon(Daemon):
             print(datetime.datetime.now())
 
         t = Trigger(action)
-        b = BlockDaemon(triggers=[t])
+        b = BlockDaemon(trigger=t)
 
     Attributes:
         __recent_block (int): recent block number to be processed.
-        name (str): name of the daemon to be used when logging etc. (value: BLOCK_DAEMON)
-        block_period (int): number of blocks to wait before running the triggers.
+        block_period (int): number of blocks to wait before running the trigger.
         block_identifier (int): block_identifier sets if we are looking for 'latest', 'earliest', 'pending', 'safe', 'finalized'.
     """
 
-    name: str = "BLOCK_DAEMON"
-
     def __init__(
         self,
-        triggers: list[Trigger],
+        trigger: Trigger,
         block_period: int = int(CONFIG.chains[SDK.network.name].period),
     ) -> None:
         """Initializes a BlockDaemon object. The daemon will run the triggers on every X block.
 
         Args:
-            triggers (list[Trigger]): list of initialized Trigger instances.
+            trigger (Trigger): an initialized Trigger instance.
             block_period (int, optional): number of blocks to wait before running the triggers. Default is what is set in the config.
         """
         Daemon.__init__(
             self,
-            name=self.name,
             interval=int(CONFIG.chains[SDK.network.name].interval),
             task=self.listen_blocks,
-            triggers=triggers,
+            trigger=trigger,
         )
 
         # block_identifier sets if we are looking for 'latest', 'earliest', 'pending', 'safe', 'finalized'.
@@ -53,10 +49,10 @@ class BlockDaemon(Daemon):
     def listen_blocks(self) -> int:
         """The main task for the BlockDaemon.
         1. Checks for new blocks.
-        2. On every X block (period by config), runs the triggers. Returns the last block number.
+        2. On every X block (period by config), runs the trigger. Returns the last block number.
 
         Returns:
-            int: last block number which activates the triggers.
+            int: last block number which activates the trigger.
         """
         # eth.block_number or eth.get_block_number() can also be used
         # but this allows block_identifier.

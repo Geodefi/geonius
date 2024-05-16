@@ -12,25 +12,19 @@ class TimeDaemon(Daemon):
             print(datetime.datetime.now())
 
         t = Trigger(action)
-        b = TimeDaemon(triggers=[t])
-
-    Attributes:
-        name (str): name of the daemon to be used when logging etc. (value: TIME_DAEMON)
+        b = TimeDaemon(trigger=t)
     """
 
-    name: str = "TIME_DAEMON"
-
-    def __init__(self, interval: int, triggers: list[Trigger], initial_delay: int) -> None:
+    def __init__(self, interval: int, trigger: Trigger, initial_delay: int) -> None:
         Daemon.__init__(
             self,
-            name=self.name,
             interval=interval,
-            task=self.trigger,
-            triggers=triggers,
+            task=self.reflect,
+            trigger=trigger,
             initial_delay=initial_delay,
         )
 
-    def trigger(self) -> Self:
+    def reflect(self) -> Self:
         """Returns self. Self will be used to stop the deamon when needed by trigger itself
         since return value will be passed to the trigger function.
 
