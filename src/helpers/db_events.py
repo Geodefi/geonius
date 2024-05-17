@@ -15,10 +15,26 @@ def find_latest_event_block(event_name: str) -> int:
         event_name (str): Name of the event.
 
     Returns:
-        int: Latest saved block number for the given event_name.
+        int: Latest saved block number for the given event_name. If not found, returns the first block number.
     """
 
-    # TODO: check db for given event_name
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                SELECT block_number
+                FROM ?
+                ORDER BY block_number DESC
+                LIMIT 1
+                """,
+                (event_name),
+            )
+            latest_block = db.fetchone()
+            if latest_block:
+                return latest_block[0]
+    except Exception as e:
+        raise DatabaseError(f"Error finding latest block for {event_name}") from e
+
     return CONFIG.chains[SDK.network.name].start
 
 
