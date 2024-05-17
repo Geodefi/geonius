@@ -147,7 +147,6 @@ class Daemon:
                     pass
 
             except (CallFailedError, BeaconStateMismatchError) as e:
-                # not exitting system but instead closing the daemon here is a better approach
                 # TODO: log the error
                 self.start_flag.clear()
                 self.stop_flag.set()

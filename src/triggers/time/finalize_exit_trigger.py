@@ -44,12 +44,11 @@ class FinalizeExitTrigger(Trigger):
 
         # Check if the validator is in the exit state on the beacon chain
         val: Validator = SDK.portal.validator(self.pubkey)
-        # TODO: check what the status is in the beacon chain
-        if val.beacon_status != "exit":
+        if val.beacon_status == "active_exiting":  # TODO: discuss these statuses what to do when
             # TODO: if it is too late from, after the initial delay is passed
             #       check current epoch and compare with the exit epoch
             #       Too late => 1 week send mail to operator and us no raise here
-            pass
+            return
 
         pool_id: int = int(fetch_pool_id(self.pubkey))
         SDK.portal.finalizeExit(pool_id, self.pubkey)

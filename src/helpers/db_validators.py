@@ -130,11 +130,11 @@ def insert_many_validators(new_validators: list[dict]) -> None:
         raise DatabaseError(f"Error inserting many validators into table Validators") from e
 
 
-def fill_validators_table(pks: list[int]) -> None:
+def fill_validators_table(pks: list[str]) -> None:
     """Fills the validators table with the data of the given pubkeys.
 
     Args:
-        pks (list[int]): pubkeys that will be fetched and inserted
+        pks (list[str]): pubkeys that will be fetched and inserted
     """
     insert_many_validators(fetch_validators_batch(pks))
 

@@ -9,10 +9,10 @@ from src.globals import SDK, OPERATOR_ID, CONFIG
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.daemons.time_daemon import TimeDaemon
 from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
-from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError
+from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError, CallFailedError
 
 from .portal import get_operatorAllowance, get_withdrawal_address
-from .db_validators import save_local_state
+from .db_validators import fill_validators_table, save_local_state
 
 
 def max_proposals_count(pool_id: int) -> int:
@@ -98,8 +98,13 @@ def check_and_propose(pool_id: int) -> list[str]:
         temp_sigs1: list[str] = signatures1[i : i + 50]
         temp_sigs31: list[str] = signatures31[i : i + 50]
 
-        # TODO: save pks before raising error and then raise error and handle it on deamon by closing the deamon
-        success: bool = call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
+        try:
+            success: bool = call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
+        except CallFailedError as e:
+            if len(pks) > 0:
+                fill_validators_table(pks)
+            raise e
+
         if success:
             pks.extend(temp_pks)
 
@@ -123,8 +128,13 @@ def check_and_stake(pks: list[str]) -> list[str]:
     for i in range(0, len(pks), 50):
         temp_pks: list[str] = pks[i : i + 50]
 
-        # TODO: save pks before raising error and then raise error and handle it on deamon by closing the deamon
-        success: bool = call_stake(temp_pks)
+        try:
+            success: bool = call_stake(temp_pks)
+        except CallFailedError as e:
+            if len(pks) > 0:
+                fill_validators_table(pks)
+            raise e
+
         if success:
             pks.extend(temp_pks)
 
