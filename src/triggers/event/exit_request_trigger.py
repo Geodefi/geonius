@@ -8,7 +8,7 @@ from geodefi.classes import Validator
 
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
-from src.exceptions import BeaconStateMismatchError, DatabaseError
+from src.exceptions import BeaconStateMismatchError, DatabaseError, EthdoError
 from src.globals import SDK, CONFIG
 from src.helpers import (
     create_exit_request_table,
@@ -105,27 +105,30 @@ class ExitRequestTrigger(Trigger):
             self.__filter_events,
         )
 
+        exitted_pks: list[str] = []
         for event in filtered_events:
             pubkey: str = event.args.pubkey
             save_portal_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
 
             # TODO: if this is not waiting for tx to be mined, there should be a way to handle and check the beacon_status
-            exit_validator(pubkey)
+            try:
+                exit_validator(pubkey)
+            except EthdoError as e:
+                # TODO: send mail
+                continue
 
             val: Validator = SDK.portal.validator(pubkey)
             # TODO: check what the expected status below should be in the beacon chain
             if val.beacon_status == "exiting":
-
                 # write database the expected exit block
                 save_exit_epoch(pubkey, val.exit_epoch)
+                exitted_pks.append(pubkey)
             else:
                 raise BeaconStateMismatchError(f"Beacon state mismatch for pubkey {pubkey}")
 
         # TODO: if exit_validator function (ethdo) is waiting for finalization, we do not need to
         #       seperate the for loops and we can continue under the same loop
-        for event in filtered_events:
-            pubkey: str = event.args.pubkey
-
+        for pubkey in exitted_pks:
             save_local_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
 
             finalize_exit_trigger: FinalizeExitTrigger = FinalizeExitTrigger(pubkey)

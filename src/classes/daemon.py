@@ -126,7 +126,7 @@ class Daemon:
     def __loop(self) -> None:
         """Runs the loop, checks for the task and trigger on every iteration. Stops when stop_flag is set.
 
-        If the task raises an exception, the daemon stops and raises a DaemonStoppedException. This is to prevent
+        If the task raises an exception, the daemon stops and raises a DaemonError. This is to prevent
         the daemon from running with a broken task. The exception is raised to the caller to handle the error. The
         daemon can be restarted after the error is handled. The stop_flag is set to prevent the daemon from running again.
 

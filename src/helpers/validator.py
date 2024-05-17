@@ -9,7 +9,7 @@ from src.globals import SDK, OPERATOR_ID, CONFIG
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.daemons.time_daemon import TimeDaemon
 from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
-from src.exceptions import DatabaseError, DatabaseMismatchError
+from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError
 
 from .portal import get_operatorAllowance, get_withdrawal_address
 from .db_validators import save_local_state
@@ -70,16 +70,20 @@ def check_and_propose(pool_id: int) -> list[str]:
 
     max_allowed: int = max_proposals_count(pool_id)
 
-    for i in range(max_allowed):
-        proposal_data: list[Any] = generate_deposit_data(
-            withdrawal_address=get_withdrawal_address(pool_id),
-            deposit_value=DEPOSIT_SIZE.PROPOSAL,
-        )
+    try:
+        for i in range(max_allowed):
+            proposal_data: list[Any] = generate_deposit_data(
+                withdrawal_address=get_withdrawal_address(pool_id),
+                deposit_value=DEPOSIT_SIZE.PROPOSAL,
+            )
 
-        stake_data: list[Any] = generate_deposit_data(
-            withdrawal_address=get_withdrawal_address(pool_id),
-            deposit_value=DEPOSIT_SIZE.STAKE,
-        )
+            stake_data: list[Any] = generate_deposit_data(
+                withdrawal_address=get_withdrawal_address(pool_id),
+                deposit_value=DEPOSIT_SIZE.STAKE,
+            )
+    except EthdoError as e:
+        # TODO: send mail
+        return []
 
     pubkeys: list[bytes] = [bytes.fromhex(prop.pubkey) for prop in proposal_data]
     signatures1: list[bytes] = [bytes.fromhex(prop.signature) for prop in proposal_data]

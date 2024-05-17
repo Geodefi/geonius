@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any
 from geodefi.classes import Validator
 from geodefi.globals import VALIDATOR_STATE
 
-from src.exceptions import DatabaseMismatchError
 from src.globals import SDK
-from src.classes import Database, Trigger
+from src.classes import Trigger
 from src.daemons import TimeDaemon
 from src.helpers import save_portal_state, save_local_state, fetch_pool_id
 
@@ -49,7 +47,8 @@ class FinalizeExitTrigger(Trigger):
         # TODO: check what the status is in the beacon chain
         if val.beacon_status != "exit":
             # TODO: if it is too late from, after the initial delay is passed
-            # Too late => 1 week send mail to operator and us no raise here
+            #       check current epoch and compare with the exit epoch
+            #       Too late => 1 week send mail to operator and us no raise here
             pass
 
         pool_id: int = int(fetch_pool_id(self.pubkey))

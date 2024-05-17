@@ -108,7 +108,8 @@ class AlienatedTrigger(Trigger):
             self.__filter_events,
         )
 
-        # TODO: if there is any, sent an email to the validator to notify them and exit the program
         for event in filtered_events:
             save_portal_state(event.args.pubkey, VALIDATOR_STATE.ALIENATED)
             save_local_state(event.args.pubkey, VALIDATOR_STATE.ALIENATED)
+
+        # TODO: if there is any event, also sent an email to the validator to notify them and exit the program
