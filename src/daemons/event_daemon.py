@@ -7,6 +7,7 @@ from src.classes import Daemon, Trigger
 from src.globals import SDK, CONFIG
 
 from src.helpers import get_all_events
+from src.utils import send_email
 
 
 class EventDaemon(Daemon):
@@ -76,7 +77,7 @@ class EventDaemon(Daemon):
                 )
             except Exception as e:
                 # TODO: log error
-                # TODO: send mail to us and them to figure problem out
+                send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
                 events = []
 
             # save events to db

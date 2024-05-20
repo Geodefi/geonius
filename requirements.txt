@@ -68,6 +68,7 @@ pyrsistent==0.16.1
 pyspellchecker==0.8.1
 pytest==8.1.1
 python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
 pyunormalize==15.1.0
 pyzmq==25.1.2
 referencing==0.33.0

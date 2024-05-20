@@ -6,6 +6,7 @@ from geodefi.utils import to_bytes32
 
 from src.classes import Database
 from src.globals import SDK, OPERATOR_ID, CONFIG
+from src.utils import send_email
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.daemons.time_daemon import TimeDaemon
 from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
@@ -82,7 +83,7 @@ def check_and_propose(pool_id: int) -> list[str]:
                 deposit_value=DEPOSIT_SIZE.STAKE,
             )
     except EthdoError as e:
-        # TODO: send mail
+        send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
         return []
 
     pubkeys: list[bytes] = [bytes.fromhex(prop.pubkey) for prop in proposal_data]

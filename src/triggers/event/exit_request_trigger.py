@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys
-from typing import Any, Iterable
+from typing import Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
@@ -10,6 +9,8 @@ from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
 from src.exceptions import BeaconStateMismatchError, DatabaseError, EthdoError
 from src.globals import SDK, CONFIG
+from src.utils import send_email
+from src.actions import exit_validator
 from src.helpers import (
     create_exit_request_table,
     event_handler,
@@ -19,7 +20,6 @@ from src.helpers import (
     run_finalize_exit_triggers,
     check_pk_in_db,
 )
-from src.actions import exit_validator
 
 from ..time.finalize_exit_trigger import FinalizeExitTrigger
 
@@ -114,7 +114,7 @@ class ExitRequestTrigger(Trigger):
             try:
                 exit_validator(pubkey)
             except EthdoError as e:
-                # TODO: send mail
+                send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
                 continue
 
             val: Validator = SDK.portal.validator(pubkey)

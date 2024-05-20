@@ -6,6 +6,7 @@ from geodefi.globals import VALIDATOR_STATE
 
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
+from src.utils import send_email
 from src.helpers import (
     create_alienated_table,
     event_handler,
@@ -112,4 +113,8 @@ class AlienatedTrigger(Trigger):
             save_portal_state(event.args.pubkey, VALIDATOR_STATE.ALIENATED)
             save_local_state(event.args.pubkey, VALIDATOR_STATE.ALIENATED)
 
-        # TODO: if there is any event, also sent an email to the validator to notify them and exit the program
+        send_email(
+            "AlienatedAndPrisoned",
+            "Alienated event is triggered, you will be prisoned. Please contact the admin and exit the program.",
+            [("<file_path>", "<file_name>.log")],
+        )

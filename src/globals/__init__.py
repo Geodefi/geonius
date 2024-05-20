@@ -9,6 +9,9 @@ from .env import (
     OPERATOR_ID,
     ACCOUNT_PASSPHRASE,
     WALLET_PASSPHRASE,
+    SENDER_EMAIL,
+    SENDER_PASSWORD,
+    RECEIVER_EMAIL,
 )
 from .sdk import SDK
 from .logger import log

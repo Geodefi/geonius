@@ -15,6 +15,7 @@ from src.triggers import (
     DepositTrigger,
     ExitRequestTrigger,
 )
+from src.utils import send_email
 from src.helpers import (
     find_latest_event_block,
     reinitialize_validators_table,
@@ -128,7 +129,7 @@ def main():
 
     # pylint: disable-next=broad-exception-caught
     except Exception as e:
-        # TODO: send mail.
+        send_email(e.__class__.__name__, str(e), [("<log_file_path>", "<file_name>.log")])
         sys.exit(e)
 
 
