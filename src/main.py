@@ -71,7 +71,7 @@ def setup_daemons():
         event=events.IdInitiated(),
         start_block=find_latest_event_block("IdInitiated"),
     )
-    deposit_deamon: EventDaemon = EventDaemon(
+    deposit_daemon: EventDaemon = EventDaemon(
         trigger=deposit_trigger,
         event=events.Deposit(),
         start_block=find_latest_event_block("Deposit"),
@@ -91,7 +91,7 @@ def setup_daemons():
         event=events.Alienated(),
         start_block=find_latest_event_block("Alienated"),
     )
-    exit_request_deamon: EventDaemon = EventDaemon(
+    exit_request_daemon: EventDaemon = EventDaemon(
         trigger=exit_request_trigger,
         event=events.ExitRequest(),
         start_block=find_latest_event_block("ExitRequest"),
@@ -104,11 +104,11 @@ def setup_daemons():
     # Run the daemons
     # pools_db_daemon.run()
     id_initiated_daemon.run()
-    deposit_deamon.run()
+    deposit_daemon.run()
     delegation_daemon.run()
     fallback_operator_daemon.run()
     alienated_daemon.run()
-    exit_request_deamon.run()
+    exit_request_daemon.run()
     stake_daemon.run()
 
 

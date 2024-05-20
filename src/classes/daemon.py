@@ -103,7 +103,7 @@ class Daemon:
         self.__initial_delay: int = initial_delay
 
     def __set_task(self, task: Callable) -> None:
-        """Sets the task for the deamon on initialization.
+        """Sets the task for the daemon on initialization.
         Tasks should return a dict of effects to be checked by trigger.
 
         Args:

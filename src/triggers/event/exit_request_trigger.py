@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Iterable
+from typing import Any, Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
@@ -133,11 +133,27 @@ class ExitRequestTrigger(Trigger):
 
             finalize_exit_trigger: FinalizeExitTrigger = FinalizeExitTrigger(pubkey)
 
-            # TODO: calculate initial delay related to the exit_epoch and the current block number and set it here
-            finalize_exit_deamon: TimeDaemon = TimeDaemon(
-                interval=int(CONFIG.chains[SDK.network.name].interval) + 1,
+            # calculate the delay for the daemon to run
+            res: dict[str, Any] = SDK.beacon.beacon_headers_id("head")
+            # pylint: disable=E1126:invalid-sequence-index
+            slots_per_epoch: int = CONFIG.chains[SDK.network.name].slots_per_epoch
+            slot_interval: int = int(CONFIG.chains[SDK.network.name].interval)
+
+            current_slot: int = int(res["header"]["message"]["slot"])
+            current_epoch: int = current_slot // slots_per_epoch
+
+            if current_epoch >= val.exit_epoch:
+                init_delay: int = 0
+            else:
+                epoch_diff: int = val.exit_epoch - current_epoch
+                seconds_per_epoch: int = slots_per_epoch * slot_interval
+                init_delay: int = epoch_diff * seconds_per_epoch
+
+            # initialize and run the daemon
+            finalize_exit_daemon: TimeDaemon = TimeDaemon(
+                interval=slot_interval + 1,
                 trigger=finalize_exit_trigger,
-                initial_delay=val.exit_epoch,
+                initial_delay=init_delay,
             )
 
-            finalize_exit_deamon.run()
+            finalize_exit_daemon.run()

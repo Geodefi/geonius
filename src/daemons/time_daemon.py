@@ -25,7 +25,7 @@ class TimeDaemon(Daemon):
         )
 
     def reflect(self) -> Self:
-        """Returns self. Self will be used to stop the deamon when needed by trigger itself
+        """Returns self. Self will be used to stop the daemon when needed by trigger itself
         since return value will be passed to the trigger function.
 
         Returns:
