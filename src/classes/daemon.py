@@ -3,6 +3,7 @@
 from time import sleep
 from typing import Callable
 from threading import Thread, Event
+from web3.exceptions import TimeExhausted
 
 from src.globals import log
 from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError
@@ -137,7 +138,6 @@ class Daemon:
         Raises:
             DaemonError: Raised if the daemon stops due to an exception.
         """
-        log.debug(f"")
         sleep(self.__initial_delay)
 
         while not self.stop_flag.wait(self.interval):
@@ -150,7 +150,7 @@ class Daemon:
                 else:
                     pass
 
-            except (CallFailedError, BeaconStateMismatchError):
+            except (CallFailedError, TimeExhausted, BeaconStateMismatchError):
                 log.exception(
                     f"Stopping the Daemon for {self.trigger.name} due to unhandled condition:",
                     exc_info=True,
@@ -158,7 +158,7 @@ class Daemon:
                 self.start_flag.clear()
                 self.stop_flag.set()
             except Exception as e:
-                log.exception("Stopping Geonius", exc_info=True)
+                log.error("Stopping Geonius")
                 raise DaemonError("Daemon stopped due to an exception.") from e
 
     def run(self) -> None:
@@ -168,7 +168,7 @@ class Daemon:
             DaemonError: Raised if the daemon is already running.
         """
         if self.start_flag.is_set():
-            log.exception("Stopping Geonius", exc_info=True)
+            log.error("Stopping Geonius")
             raise DaemonError("Daemon is already running.")
         self.stop_flag.clear()
 
@@ -188,7 +188,7 @@ class Daemon:
 
         # if already stopped
         if not self.start_flag.is_set() or self.stop_flag.is_set():
-            log.exception("Stopping Geonius", exc_info=True)
+            log.error("Stopping Geonius")
             raise DaemonError("Daemon is already stopped.")
 
         self.stop_flag.set()

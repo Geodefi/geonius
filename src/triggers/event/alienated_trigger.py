@@ -64,17 +64,12 @@ class AlienatedTrigger(Trigger):
 
         saveable_events: list[tuple] = []
         for event in events:
-            pubkey: int = event.args.pubkey
-            block_number: int = event.blockNumber
-            transaction_index: int = event.transactionIndex
-            log_index: int = event.logIndex
-
             saveable_events.append(
                 (
-                    pubkey,
-                    block_number,
-                    transaction_index,
-                    log_index,
+                    event.args.pubkey,
+                    event.blockNumber,
+                    event.transactionIndex,
+                    event.logIndex,
                 )
             )
 

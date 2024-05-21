@@ -81,7 +81,7 @@ class IdInitiatedTrigger(Trigger):
         try:
             with Database() as db:
                 db.execute("INSERT INTO IdInitiated VALUES (?,?,?,?,?,?,?)", events)
-            log.debug(f"Inserted {len(events)} events into FallbackOperator table")
+            log.debug(f"Inserted {len(events)} events into IdInitiated table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table IdInitiated") from e
 

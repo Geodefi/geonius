@@ -105,8 +105,6 @@ def insert_many_pools(new_pools: list[dict]) -> None:
                 ],
             )
     except Exception as e:
-        log.exception(f"Encountered an error while insterting new pools", exc_info=True)
-
         raise DatabaseError(f"Error inserting many pools into table Pools") from e
 
 

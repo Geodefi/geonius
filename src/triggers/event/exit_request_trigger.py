@@ -58,19 +58,22 @@ class ExitRequestTrigger(Trigger):
         return check_pk_in_db(event.args.pubkey)
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
+        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
+
+        Args:
+            events (Iterable[EventData]): list of ExitRequest emits
+
+        Returns:
+            list[tuple]: list of saveable events
+        """
         saveable_events: list[tuple] = []
         for event in events:
-            pubkey: int = event.args.pubkey
-            block_number: int = event.blockNumber
-            transaction_index: int = event.transactionIndex
-            log_index: int = event.logIndex
-
             saveable_events.append(
                 (
-                    pubkey,
-                    block_number,
-                    transaction_index,
-                    log_index,
+                    event.args.pubkey,
+                    event.blockNumber,
+                    event.transactionIndex,
+                    event.logIndex,
                 )
             )
 

@@ -58,9 +58,6 @@ class Database:
             self.connection: sql.Connection = sql.connect(connection_path)
             self.cursor: sql.Cursor = self.connection.cursor()
         except Exception as e:
-            log.error(
-                f"Error while connecting to the database with database path {connection_path}"
-            )
             log.debug(f"SQL version: {sql.version}")
             log.debug(f"sqlite version: {sql.sqlite_version}")
             raise DatabaseError(

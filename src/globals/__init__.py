@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from .logger import log
 from .config import CONFIG
+from .logger import log
 from .constants import hour_blocks
 from .env import (
     EXECUTION_API,

@@ -147,7 +147,7 @@ def check_and_stake(pks: list[str]) -> list[str]:
 
         try:
             success: bool = call_stake(temp_pks)
-        except CallFailedError as e:
+        except (CallFailedError, TimeExhausted) as e:
             if len(pks) > 0:
                 fill_validators_table(pks)
             raise e

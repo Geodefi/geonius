@@ -3,7 +3,7 @@
 from geodefi.classes import Validator
 from geodefi.globals import VALIDATOR_STATE
 
-from src.globals import SDK
+from src.globals import SDK, log
 from src.classes import Trigger
 from src.daemons import TimeDaemon
 from src.helpers import save_portal_state, save_local_state, fetch_pool_id

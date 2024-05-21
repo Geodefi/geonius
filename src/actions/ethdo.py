@@ -23,7 +23,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
-    log.debug(f"Generating deposit data{f'index: {index}'if index else '' }")
+    log.info(f"Generating deposit data{f'index: {index}'if index else '' }")
 
     account: str = CONFIG.ethdo.account
     if index:
@@ -71,7 +71,7 @@ def create_wallet() -> dict:
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
-    log.debug(f"Creating a new wallet: {CONFIG.ethdo.wallet}")
+    log.info(f"Creating a new wallet: {CONFIG.ethdo.wallet}")
 
     try:
         res: str = check_output(
@@ -113,7 +113,7 @@ def create_account(index: int = None) -> dict:
     if index:
         account += f"_{index}_"
 
-    log.debug(f"Creating a new account: {account} on wallet: {CONFIG.ethdo.wallet}")
+    log.info(f"Creating a new account: {account} on wallet: {CONFIG.ethdo.wallet}")
 
     try:
         res: str = check_output(
@@ -153,7 +153,7 @@ def exit_validator(pubkey: str) -> dict:
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
-    log.debug(f"Exiting from a validator: {pubkey}")
+    log.info(f"Exiting from a validator: {pubkey}")
 
     try:
         res: str = check_output(

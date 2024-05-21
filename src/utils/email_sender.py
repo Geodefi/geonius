@@ -4,16 +4,16 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-# from src.globals import CONFIG, OPERATOR_ID, SENDER_EMAIL, SENDER_PASSWORD, RECEIVER_EMAIL
+from src.globals import CONFIG, OPERATOR_ID, SENDER_EMAIL, SENDER_PASSWORD, RECEIVER_EMAIL
 
 
 def send_email(subject, body, attachments=None):
 
     msg = MIMEMultipart()
-    # msg['From'] = SENDER_EMAIL
-    # msg['To'] = RECEIVER_EMAIL if RECEIVER_EMAIL else SENDER_EMAIL
-    # msg['Cc'] = CONFIG.email.admin_email
-    # msg['Subject'] = f"GEONIUS - {OPERATOR_ID}: {subject}"
+    msg['From'] = SENDER_EMAIL
+    msg['To'] = RECEIVER_EMAIL if RECEIVER_EMAIL else SENDER_EMAIL
+    msg['Cc'] = CONFIG.email.admin_email
+    msg['Subject'] = f"GEONIUS - {OPERATOR_ID}: {subject}"
 
     msg.attach(MIMEText(body, 'plain'))
 
