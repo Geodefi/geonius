@@ -3,7 +3,7 @@
 import os
 import sqlite3 as sql
 from typing import Any
-from src.globals import CONFIG
+from src.globals import CONFIG, log
 from src.exceptions import DatabaseError
 
 
@@ -31,6 +31,7 @@ class Database:
         DatabaseError: Error while connecting to the database.
     """
 
+    # TODO (delete this) should not utilize log much, to reduce overhead while using "with" notation.
     main_dir: str = CONFIG.directory
     db_dir: str = CONFIG.database.directory
     db_name: str = "operator"
@@ -54,11 +55,11 @@ class Database:
         connection_path: str = os.path.join(self.path, self.db_name + self.db_ext)
 
         try:
-            # log(sql.version) #pyselite version
-            # log(sql.sqlite_version) #SQLLite engine version
             self.connection: sql.Connection = sql.connect(connection_path)
             self.cursor: sql.Cursor = self.connection.cursor()
         except Exception as e:
+            log.debug(f"SQL version: {sql.version}")
+            log.debug(f"sqlite version: {sql.sqlite_version}")
             raise DatabaseError(
                 f"Error while connecting to the database with database path {connection_path}"
             ) from e

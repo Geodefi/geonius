@@ -3,8 +3,8 @@
 from itertools import repeat
 from geodefi.globals import VALIDATOR_STATE
 
-from src.classes import Trigger
 from src.globals import log
+from src.classes import Trigger
 from src.helpers import (
     create_validators_table,
     save_local_state,
@@ -32,6 +32,7 @@ class StakeTrigger(Trigger):
 
         Trigger.__init__(self, name=self.name, action=self.activate_validators)
         create_validators_table()
+        log.debug(f"{self.name} is initated.")
 
     def activate_validators(self, *args, **kwargs) -> None:
         """Checks for approved proposals and calls portal.stake() for them. Finalizes the validator creation.
@@ -40,7 +41,7 @@ class StakeTrigger(Trigger):
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
-        log.info("IM IN STAKETRIGGER BITCH")
+        log.info(f"{self.name} is triggered.")
         # TODO: utilize flags: --min-proposal-queue --max-proposal-delay
 
         # check if there are any pending validator proposals.

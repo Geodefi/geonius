@@ -3,7 +3,7 @@
 from geodefi.classes import Validator
 from geodefi.globals import VALIDATOR_STATE
 
-from src.globals import SDK
+from src.globals import SDK, log
 from src.classes import Trigger
 from src.daemons import TimeDaemon
 from src.helpers import save_portal_state, save_local_state, fetch_pool_id
@@ -31,6 +31,7 @@ class FinalizeExitTrigger(Trigger):
 
         Trigger.__init__(self, name=self.name, action=self.finalize_exit)
         self.pubkey: str = pubkey
+        log.debug(f"{self.name} is initated for pubkey: {pubkey}")
 
     def finalize_exit(self, daemon: TimeDaemon, *args, **kwargs) -> None:
         """Finalizes the exit of the validator. Stops the daemon after the exit is finalized.
@@ -41,6 +42,7 @@ class FinalizeExitTrigger(Trigger):
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
+        log.info(f"{self.name} is triggered.")
 
         # Check if the validator is in the exit state on the beacon chain
         val: Validator = SDK.portal.validator(self.pubkey)

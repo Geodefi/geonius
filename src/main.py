@@ -3,7 +3,7 @@ import sys
 
 from web3.contract.contract import ContractEvent
 
-from src.globals import SDK, hour_blocks, log
+from src.globals import SDK, hour_blocks
 from src.daemons import BlockDaemon, EventDaemon
 from src.triggers import (
     AlienatedTrigger,
@@ -33,8 +33,8 @@ def init_dbs():
     This function is called at the beginning of the program to make sure the
     databases are up to date.
     """
-    log.debug("Initializing ")
-    log.info("Initializing info")
+    # log.debug("Initializing.")
+    # log.info("Initializing info")
 
     # initialize pools table and fill it with current data
     reinitialize_pools_table()  # TODO: This will be removed after testing

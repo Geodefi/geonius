@@ -8,7 +8,7 @@ from web3.contract.contract import ContractEvent
 from geodefi.utils import multiple_attempt
 
 from src.utils import multithread
-from src.globals import CONFIG, SDK
+from src.globals import CONFIG, SDK, log
 
 max_block_range = int(CONFIG.chains[SDK.network.name].range)
 
@@ -33,7 +33,9 @@ def get_batch_events(event: ContractEvent, from_block: int, limit: int) -> Itera
         to_block = limit
 
     # @dev do not use filters instead, some providers do not support it.
-    return event.get_logs(fromBlock=from_block, toBlock=to_block)
+    logs = event.get_logs(fromBlock=from_block, toBlock=to_block)
+    log(f"Found {event} event logs between {from_block}-{to_block} blocks:{len(logs)}")
+    return
 
 
 def get_all_events(event: ContractEvent, first_block: int, last_block: int) -> Iterable[EventData]:

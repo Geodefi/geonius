@@ -3,9 +3,9 @@
 from typing import Iterable
 from web3.types import EventData
 
+from src.globals import OPERATOR_ID, log
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
-from src.globals import OPERATOR_ID
 from src.helpers import (
     create_fallback_operator_table,
     event_handler,
@@ -35,6 +35,7 @@ class FallbackOperatorTrigger(Trigger):
         Trigger.__init__(self, name=self.name, action=self.update_fallback_operator)
         create_pools_table()
         create_fallback_operator_table()
+        log.debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is for the script's OPERATOR_ID.
@@ -63,19 +64,13 @@ class FallbackOperatorTrigger(Trigger):
 
         saveable_events: list[tuple] = []
         for event in events:
-            pool_id: int = event.args.poolId
-            fallback_threshold: int = event.args.threshold
-            block_number: int = event.blockNumber
-            transaction_index: int = event.transactionIndex
-            log_index: int = event.logIndex
-
             saveable_events.append(
                 (
-                    pool_id,
-                    fallback_threshold,
-                    block_number,
-                    transaction_index,
-                    log_index,
+                    event.args.poolId,
+                    event.args.threshold,
+                    event.blockNumber,
+                    event.transactionIndex,
+                    event.logIndex,
                 )
             )
 
@@ -93,6 +88,7 @@ class FallbackOperatorTrigger(Trigger):
                     "INSERT INTO FallbackOperator VALUES (?,?,?,?,?,?,?,?)",
                     events,
                 )
+            log.debug(f"Inserted {len(events)} events into FallbackOperator table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table FallbackOperator") from e
 
@@ -105,6 +101,7 @@ class FallbackOperatorTrigger(Trigger):
             *args: Variable length argument list
             **kwargs: Arbitrary keyword arguments
         """
+        log.info(f"{self.name} is triggered.")
 
         filtered_events: Iterable[EventData] = event_handler(
             events, self.__parse_events, self.__save_events, self.__filter_events

@@ -4,18 +4,20 @@ from typing import Callable, Iterable
 from web3.types import EventData
 
 from src.classes import Database
-from src.globals import SDK, CONFIG
+from src.globals import SDK, CONFIG, log
 from src.exceptions import DatabaseError
 
 
 def find_latest_event_block(event_name: str) -> int:
-    """Finds the latest block number for the given event_name in the database. If not found, returns the first block number.
+    """Finds the latest block number for the given event_name in the database. \
+        If not found, returns the first block number.
 
     Args:
         event_name (str): Name of the event.
 
     Returns:
-        int: Latest saved block number for the given event_name. If not found, returns the first block number.
+        int: Latest saved block number for the given event_name. If not found, \
+        returns the first block number.
     """
 
     try:
@@ -30,11 +32,18 @@ def find_latest_event_block(event_name: str) -> int:
                 (event_name),
             )
             latest_block = db.fetchone()
+
             if latest_block:
+                log.debug(f"Found the event:{event_name} on database: {latest_block}")
                 return latest_block[0]
     except Exception as e:
         raise DatabaseError(f"Error finding latest block for {event_name}") from e
 
+    start: int = int(CONFIG.chains[SDK.network.name].start)
+    log.debug(
+        f"Could not find the event:{event_name} on database. \
+            Proceeding with default initial block:{start}"
+    )
     return CONFIG.chains[SDK.network.name].start
 
 
@@ -57,6 +66,7 @@ def create_alienated_table() -> None:
                 )
                 """
             )
+        log.debug(f"Created a new table: Alienated")
     except Exception as e:
         raise DatabaseError("Error creating Alienated table") from e
 
@@ -84,6 +94,7 @@ def create_delegation_table() -> None:
                 )
                 """
             )
+        log.debug(f"Created a new table: Delegation")
     except Exception as e:
         raise DatabaseError("Error creating Delegation table") from e
 
@@ -111,6 +122,7 @@ def create_deposit_table() -> None:
                 )
                 """
             )
+        log.debug(f"Created a new table: Deposit")
     except Exception as e:
         raise DatabaseError("Error creating Deposit table") from e
 
@@ -137,6 +149,7 @@ def create_fallback_operator_table() -> None:
                 )
                 """
             )
+        log.debug(f"Created a new table: FallbackOperator")
     except Exception as e:
         raise DatabaseError("Error creating FallbackOperator table") from e
 
@@ -161,6 +174,7 @@ def create_id_initiated_table() -> None:
                 )
                 """
             )
+        log.debug(f"Created a new table: IdInitiated")
     except Exception as e:
         raise DatabaseError("Error creating IdInitiated table") from e
 
@@ -186,6 +200,7 @@ def create_exit_request_table() -> None:
                  )
                 """
             )
+        log.debug(f"Created a new table: ExitRequest")
     except Exception as e:
         raise DatabaseError("Error creating ExitRequest table") from e
 

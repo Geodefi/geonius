@@ -4,6 +4,7 @@ from typing import Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 
+from src.globals import log
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
 from src.utils import send_email
@@ -36,6 +37,7 @@ class AlienatedTrigger(Trigger):
         Trigger.__init__(self, name=self.name, action=self.alienate_validators)
         create_validators_table()
         create_alienated_table()
+        log.debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is in the validators table.
@@ -62,17 +64,12 @@ class AlienatedTrigger(Trigger):
 
         saveable_events: list[tuple] = []
         for event in events:
-            pubkey: int = event.args.pubkey
-            block_number: int = event.blockNumber
-            transaction_index: int = event.transactionIndex
-            log_index: int = event.logIndex
-
             saveable_events.append(
                 (
-                    pubkey,
-                    block_number,
-                    transaction_index,
-                    log_index,
+                    event.args.pubkey,
+                    event.blockNumber,
+                    event.transactionIndex,
+                    event.logIndex,
                 )
             )
 
@@ -91,6 +88,7 @@ class AlienatedTrigger(Trigger):
                     "INSERT INTO Alienated VALUES (?,?,?,?,?,?,?)",
                     events,
                 )
+            log.debug(f"Inserted {len(events)} events into Alienated table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Alienated") from e
 
@@ -100,6 +98,7 @@ class AlienatedTrigger(Trigger):
         Args:
             events (Iterable[EventData]): list of events
         """
+        log.info(f"{self.name} is triggered.")
 
         # filter, parse and save events
         filtered_events: Iterable[EventData] = event_handler(
@@ -109,12 +108,17 @@ class AlienatedTrigger(Trigger):
             self.__filter_events,
         )
 
-        for event in filtered_events:
-            save_portal_state(event.args.pubkey, VALIDATOR_STATE.ALIENATED)
-            save_local_state(event.args.pubkey, VALIDATOR_STATE.ALIENATED)
+        if filtered_events:
+            log.critical("You are possibly prisoned!")
 
-        send_email(
-            "AlienatedAndPrisoned",
-            "Alienated event is triggered, you will be prisoned. Please contact the admin and exit the program.",
-            [("<file_path>", "<file_name>.log")],
-        )
+            for event in filtered_events:
+                pubkey: str = event.args.pubkey
+                log.critical(f"Your validator is alienated: {pubkey}")
+                save_portal_state(pubkey, VALIDATOR_STATE.ALIENATED)
+                save_local_state(pubkey, VALIDATOR_STATE.ALIENATED)
+
+            send_email(
+                "AlienatedAndPrisoned",
+                "Alienated event is triggered, you will be prisoned. Please contact the admin and exit the program.",
+                [("<file_path>", "<file_name>.log")],
+            )

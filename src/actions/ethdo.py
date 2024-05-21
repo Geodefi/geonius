@@ -4,7 +4,7 @@ import json
 from subprocess import check_output
 import geodefi
 
-from src.globals import SDK, ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE, CONFIG
+from src.globals import SDK, ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE, CONFIG, log
 from src.exceptions import EthdoError
 
 
@@ -23,6 +23,8 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
+    log.info(f"Generating deposit data{f'index: {index}'if index else '' }")
+
     account: str = CONFIG.ethdo.account
     if index:
         account += f"_{index}_"
@@ -52,6 +54,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
     try:
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
+        log.error(f"Failed to interpret the response from ethdo: {res}")
         raise e
     except Exception as e:
         raise e
@@ -68,6 +71,7 @@ def create_wallet() -> dict:
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
+    log.info(f"Creating a new wallet: {CONFIG.ethdo.wallet}")
 
     try:
         res: str = check_output(
@@ -87,6 +91,7 @@ def create_wallet() -> dict:
     try:
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
+        log.error(f"Failed to interpret the response from ethdo: {res}")
         raise e
     except Exception as e:
         raise e
@@ -103,9 +108,12 @@ def create_account(index: int = None) -> dict:
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
+
     account = CONFIG.ethdo.account
     if index:
         account += f"_{index}_"
+
+    log.info(f"Creating a new account: {account} on wallet: {CONFIG.ethdo.wallet}")
 
     try:
         res: str = check_output(
@@ -125,6 +133,7 @@ def create_account(index: int = None) -> dict:
     try:
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
+        log.error(f"Failed to interpret the response from ethdo: {res}")
         raise e
     except Exception as e:
         raise e
@@ -144,6 +153,7 @@ def exit_validator(pubkey: str) -> dict:
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
+    log.info(f"Exiting from a validator: {pubkey}")
 
     try:
         res: str = check_output(
@@ -163,6 +173,7 @@ def exit_validator(pubkey: str) -> dict:
     try:
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
+        log.error(f"Failed to interpret the response from ethdo")
         raise e
     except Exception as e:
         raise e

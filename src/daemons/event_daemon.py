@@ -4,7 +4,7 @@ from typing import Iterable
 from web3.types import EventData
 from web3.contract.contract import ContractEvent
 from src.classes import Daemon, Trigger
-from src.globals import SDK, CONFIG
+from src.globals import SDK, CONFIG, log
 
 from src.helpers import get_all_events
 from src.utils import send_email
@@ -51,8 +51,8 @@ class EventDaemon(Daemon):
         # 'latest', 'earliest', 'pending', 'safe', 'finalized'.
         self.block_identifier: str = CONFIG.chains[SDK.network.name].identifier
         self.block_period: int = int(CONFIG.chains[SDK.network.name].period)
-
         self.__recent_block: int = start_block
+        log.debug(f"{trigger.name} is attached to an Event Daemon")
 
     def listen_events(self) -> Iterable[EventData]:
         """The main task for the EventDaemon. Checks for new events. If any, runs the trigger and returns the events.
@@ -65,6 +65,7 @@ class EventDaemon(Daemon):
         # eth.block_number or eth.get_block_number() can also be used
         # but this allows block_identifier.
         curr_block: int = (SDK.w3.eth.get_block(self.block_identifier)).number
+        log.debug(f"New block detected: {curr_block.number}")
 
         # check if required number of blocks have past:
         if curr_block > self.__recent_block + self.block_period:
@@ -76,15 +77,20 @@ class EventDaemon(Daemon):
                     last_block=curr_block,
                 )
             except Exception as e:
-                # TODO: log error
+                log.error(e)
                 send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
                 events = []
 
             # save events to db
             if events:
+                log.debug(f"{self.trigger.name} will be triggered")
                 self.__recent_block = curr_block
                 return events
             else:
                 return None
         else:
+            log.debug(
+                f"Block period have not been met yet.\
+                Expected block:{self.__recent_block + self.block_period}"
+            )
             return None

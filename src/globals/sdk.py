@@ -7,6 +7,7 @@ from web3.middleware import construct_sign_and_send_raw_middleware
 from src.exceptions import MissingPrivateKeyError
 
 from .env import EXECUTION_API, CONSENSUS_API, PRIVATE_KEY
+from .logger import log
 
 
 def __set_web3_account(sdk: Geode, private_key: str) -> Geode:
@@ -18,7 +19,6 @@ def __set_web3_account(sdk: Geode, private_key: str) -> Geode:
     Returns:
         Geode: Initialized Geode SDK instance.
     """
-
     # Create account on Geode's web3py instance
     acct = sdk.w3.eth.account.from_key(private_key)
 
@@ -28,6 +28,7 @@ def __set_web3_account(sdk: Geode, private_key: str) -> Geode:
     # Set default account if one address is used generally
     sdk.w3.eth.defaultAccount = acct
 
+    log.info(f"Connected to web3 with: {acct}")
     return sdk
 
 
@@ -54,11 +55,9 @@ def __init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
         sdk = __set_web3_account(sdk, priv_key)
         return sdk
 
-    except MissingPrivateKeyError as e:
-        # TODO: log the error
-        sys.exit(e)
+    # pylint: disable-next=broad-exception-caught
     except Exception as e:
-        # TODO: log the error
+        log.exception("Could not connect to sdk. Please check your configuration.", exc_info=True)
         sys.exit(e)
 
 

@@ -13,7 +13,7 @@ def send_email(subject, body, attachments=None):
     msg['From'] = SENDER_EMAIL
     msg['To'] = RECEIVER_EMAIL if RECEIVER_EMAIL else SENDER_EMAIL
     msg['Cc'] = CONFIG.email.admin_email
-    msg['Subject'] = f"GEOSCOPE - {OPERATOR_ID}: {subject}"
+    msg['Subject'] = f"GEONIUS - {OPERATOR_ID}: {subject}"
 
     msg.attach(MIMEText(body, 'plain'))
 

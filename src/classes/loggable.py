@@ -5,7 +5,8 @@ from typing import Any
 import logging
 from logging import StreamHandler, Formatter
 from logging.handlers import TimedRotatingFileHandler
-from src.globals import CONFIG
+
+from ..globals.config import CONFIG
 
 
 class Loggable:
@@ -32,8 +33,8 @@ class Loggable:
 
     def __init__(self) -> None:
         """Initializes a Loggable object."""
-
         self.logger: logging.Logger = self.__get_logger()
+        self.logger.info("Initalized a global logger.")
 
     def __get_logger(self) -> logging.Logger:
         """Initializes and returns a logger object with given streams and files.
@@ -49,9 +50,11 @@ class Loggable:
 
         if CONFIG.logger.stream:
             logger.addHandler(self.__get_stream_handler())
+            self.logger.info(f"Logger is provided with a stream handler. Level: {self.__level}")
 
         if CONFIG.logger.file:
             logger.addHandler(self.__get_file_handler())
+            self.logger.info(f"Logger is provided with a file handler. Level: {self.__level}")
 
         return logger
 
@@ -90,6 +93,7 @@ class Loggable:
         sh: StreamHandler = StreamHandler()
         sh.setFormatter(self.__formatter)
         sh.setLevel(self.__level)
+
         return sh
 
     def __get_file_handler(self) -> TimedRotatingFileHandler:
