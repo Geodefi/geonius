@@ -2,7 +2,7 @@
 
 from web3.types import TxReceipt
 from web3.exceptions import TimeExhausted
-from src.globals import SDK, OPERATOR_ID
+from src.globals import SDK, OPERATOR_ID, log
 from src.exceptions import CannotStakeError, CallFailedError
 from src.utils import send_email
 
@@ -39,13 +39,16 @@ def call_proposeStake(
             pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
         ).transact({"from": SDK.w3.eth.defaultAccount})
 
+        log.info(f"proposeStake tx is created: {tx_hash}")
+
         # Wait for the transaction to be mined, and get the transaction receipt
         tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
-        # TODO: log tx_receipt
+        log.info(f"proposeStake tx is concluded: {tx_receipt}")
 
         return True
 
     except TimeExhausted as e:
+        log.error(f"proposeStake tx could not conclude in time.")
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call proposeStake on portal contract") from e
@@ -77,15 +80,17 @@ def call_stake(pubkeys: list[str]) -> bool:
 
             for pubkey in pubkeys:
                 if not SDK.portal.functions.canStake(pubkey).call():
+                    log.critical(f"Not allowed to finalize staking for provided pubkey: {pubkey}")
                     raise CannotStakeError(f"Validator with pubkey {pubkey} cannot stake")
 
             tx_hash: str = SDK.portal.functions.stake(pubkeys).transact(
                 {"from": SDK.w3.eth.defaultAccount}
             )
+            log.info(f"stake tx is created: {tx_hash}")
 
             # Wait for the transaction to be mined, and get the transaction receipt
             tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
-            # TODO: log tx_receipt
+            log.info(f"stake tx is concluded: {tx_receipt}")
 
             return True
 
@@ -93,6 +98,7 @@ def call_stake(pubkeys: list[str]) -> bool:
         send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
         return False
     except TimeExhausted as e:
+        log.error(f"stake tx could not conclude in time.")
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call stake on portal contract") from e

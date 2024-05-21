@@ -3,7 +3,7 @@
 from geodefi.globals import VALIDATOR_STATE
 
 from src.classes import Database
-from src.globals import SDK
+from src.globals import SDK, log
 from src.utils import multithread
 from src.exceptions import DatabaseError, DatabaseMismatchError
 from src.helpers import get_StakeParams
@@ -34,6 +34,7 @@ def create_validators_table() -> None:
                 )
                 """
             )
+        log.debug(f"Created a new table: Validators")
     except Exception as e:
         raise DatabaseError(f"Error creating Validators table with name Validators") from e
 
@@ -155,11 +156,12 @@ def save_local_state(pubkey: int, local_state: VALIDATOR_STATE) -> None:
             db.execute(
                 """
                 UPDATE Validators 
-                SET beacon_state = ?
+                SET local_storage = ?
                 WHERE pubkey = ?
                 """,
                 (int(local_state), pubkey),
             )
+        log.debug(f"Updated local_state to: {local_state}")
     except Exception as e:
         raise DatabaseError(
             f"Error updating local state of validator with pubkey {pubkey} \
@@ -188,6 +190,7 @@ def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE) -> None:
                 """,
                 (int(portal_state), pubkey),
             )
+            log.debug(f"Updated portal_state to: {portal_state}")
     except Exception as e:
         raise DatabaseError(
             f"Error updating portal state of validator with pubkey {pubkey} \
@@ -205,8 +208,9 @@ def save_exit_epoch(pubkey: int, exit_epoch: str) -> None:
     Raises:
         DatabaseError: Error updating exit epoch of validator
     """
-
+    # did not we
     try:
+        log.debug(f"Updated the exit epoch: {exit_epoch}")
         with Database() as db:
             db.execute(
                 """
@@ -246,6 +250,9 @@ def fetch_verified_pks() -> list[str]:
                 (int(VALIDATOR_STATE.PROPOSED), verification_index),
             )
             approved_pks: list[str] = db.fetchall()
+            log.info(f"{len(approved_pks)} new verified public keys are detected.")
+            log.debug(",".join(map(str, approved_pks)))
+
             return approved_pks
     except Exception as e:
         raise DatabaseError(f"Error fetching validators from table Validators") from e
@@ -260,7 +267,6 @@ def check_pk_in_db(pubkey: str) -> bool:
     Raises:
         DatabaseError: Error checking if pubkey is in table Validators
     """
-
     try:
         with Database() as db:
             db.execute("SELECT * FROM Validators WHERE pubkey = ?", (pubkey))

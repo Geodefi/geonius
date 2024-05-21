@@ -5,10 +5,10 @@ from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
 
+from src.globals import SDK, CONFIG, log
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
 from src.exceptions import BeaconStateMismatchError, DatabaseError, EthdoError
-from src.globals import SDK, CONFIG
 from src.utils import send_email
 from src.actions import exit_validator
 from src.helpers import (
@@ -42,6 +42,7 @@ class ExitRequestTrigger(Trigger):
         # Runs finalize exit triggers if there are any validators to be finalized
         run_finalize_exit_triggers()
         create_exit_request_table()
+        log.debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is in the validators table.
@@ -87,6 +88,7 @@ class ExitRequestTrigger(Trigger):
                     "INSERT INTO ExitRequest VALUES (?,?,?,?,?,?,?)",
                     events,
                 )
+            log.debug(f"Inserted {len(events)} events into ExitRequest table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table ExitRequest") from e
 
@@ -96,6 +98,7 @@ class ExitRequestTrigger(Trigger):
         Args:
             events (Iterable[EventData]): The events to be processed and saved to the database.
         """
+        log.info(f"{self.name} is triggered.")
 
         # filter, parse and save events
         filtered_events: Iterable[EventData] = event_handler(

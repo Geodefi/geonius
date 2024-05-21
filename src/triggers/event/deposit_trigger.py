@@ -3,6 +3,7 @@
 from typing import Iterable
 from web3.types import EventData
 
+from src.globals import log
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
 from src.helpers import (
@@ -34,6 +35,7 @@ class DepositTrigger(Trigger):
         Trigger.__init__(self, name=self.name, action=self.update_surplus)
         create_pools_table()
         create_deposit_table()
+        log.debug(f"{self.name} is initated.")
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
@@ -47,21 +49,14 @@ class DepositTrigger(Trigger):
 
         saveable_events: list[tuple] = []
         for event in events:
-            pool_id: int = event.args.poolId
-            bought_amount: int = event.args.boughtgETH
-            minted_amount: int = event.args.mintedgETH
-            block_number: int = event.blockNumber
-            transaction_index: int = event.transactionIndex
-            log_index: int = event.logIndex
-
             saveable_events.append(
                 (
-                    pool_id,
-                    bought_amount,
-                    minted_amount,
-                    block_number,
-                    transaction_index,
-                    log_index,
+                    event.args.poolId,
+                    event.args.boughtgETH,
+                    event.args.mintedgETH,
+                    event.blockNumber,
+                    event.transactionIndex,
+                    event.logIndex,
                 )
             )
 
@@ -79,6 +74,7 @@ class DepositTrigger(Trigger):
                     "INSERT INTO Deposit VALUES (?,?,?,?,?,?,?,?,?)",
                     events,
                 )
+            log.debug(f"Inserted {len(events)} events into Deposit table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Deposit") from e
 
@@ -91,6 +87,7 @@ class DepositTrigger(Trigger):
             *args: Variable length argument list
             **kwargs: Arbitrary keyword arguments
         """
+        log.info(f"{self.name} is triggered.")
 
         # parse and save events
         filtered_events: Iterable[EventData] = event_handler(

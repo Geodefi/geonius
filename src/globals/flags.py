@@ -129,4 +129,5 @@ parser.add_argument(
     dest="config_path",
     help="use a different config file than default geonius.json",
 )
+
 flags, unknown = parser.parse_known_args()

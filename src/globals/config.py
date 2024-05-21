@@ -76,6 +76,8 @@ def __init_config() -> AttributeDict:
         if flags.config_path:
             config_path = flags.config_path
 
+        # log.info(f"Expected config path: {config_path}")
+
         # catch configuration variables
         config_dict: dict = json.load(open(config_path, encoding="utf-8"))
 

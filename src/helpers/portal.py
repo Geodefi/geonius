@@ -5,7 +5,7 @@ from itertools import repeat
 from geodefi.globals import ID_TYPE
 from geodefi.utils import to_bytes32, get_key
 
-from src.globals import SDK, OPERATOR_ID
+from src.globals import SDK, OPERATOR_ID, log
 from src.utils import multithread
 
 
@@ -16,6 +16,7 @@ def get_StakeParams() -> list[Any]:
     Returns:
         list: list of StakeParams
     """
+    log.debug("Calling StakeParams() from portal")
     return SDK.portal.functions.StakeParams().call()
 
 
@@ -31,6 +32,7 @@ def get_allIdsByType(type: ID_TYPE, index: int) -> int:
         int: ID of the given type and index.
     """
 
+    log.debug("Calling allIdsByType() from portal")
     return SDK.portal.functions.allIdsByType(type, index).call()
 
 
@@ -47,6 +49,7 @@ def get_name(pool_id: int) -> str:
         str: Name of the pool.
     """
 
+    log.debug("Fetching the name of a pool: {pool_id}")
     return SDK.portal.functions.readBytes(pool_id, to_bytes32("NAME")).call()
 
 
@@ -60,6 +63,7 @@ def get_withdrawal_address(pool_id: int) -> str:
         str: Withdrawal address of the pool.
     """
 
+    log.debug("Fetching the withdrawalCredential of a pool: {pool_id}")
     res = SDK.portal.functions.readAddress(pool_id, to_bytes32("withdrawalCredential")).call()
 
     return "0x" + res.hex()
@@ -75,17 +79,8 @@ def get_surplus(pool_id: int) -> int:
         int: Surplus of the pool in wei.
     """
 
+    log.debug("Fetching the surplus of a pool: {pool_id}")
     return SDK.portal.functions.readUint(pool_id, to_bytes32("surplus")).call()
-
-
-# Using the get_operatorAllowance function instead now.
-# def get_allowance(pool_id: int) -> int:
-#     """
-#     Returns Allowance.
-#     """
-#     return SDK.portal.functions.readUint(
-#         pool_id, get_key(int(OPERATOR_ID), "allowance")
-#     ).call()
 
 
 def get_fallback_operator(pool_id: int) -> int:
@@ -98,7 +93,7 @@ def get_fallback_operator(pool_id: int) -> int:
     Returns:
         int: Fallback operator ID of the pool.
     """
-
+    log.debug("Fetching the fallbackOperator of a pool: {pool_id}")
     return SDK.portal.functions.readUint(pool_id, to_bytes32("fallbackOperator")).call()
 
 
@@ -109,6 +104,7 @@ def get_pools_count() -> int:
         int: Number of pools.
     """
 
+    log.debug("Fetching the pools count of a pool: {pool_id}")
     return SDK.portal.functions.allIdsByTypeLength(ID_TYPE.POOL).call()
 
 
@@ -137,6 +133,7 @@ def get_owned_pubkeys_count() -> int:
     Returns:
         int: Number of validators owned by the operator.
     """
+    log.debug("Fetching the number of pools owned pubkeys from a validator: {pool_id}")
     return SDK.portal.functions.readUint(OPERATOR_ID, to_bytes32("validators")).call()
 
 
@@ -149,7 +146,9 @@ def get_owned_pubkey(index: int) -> str:
     Returns:
         str: Pubkey of the validator.
     """
-    return SDK.portal.functions.readBytes(index, get_key(OPERATOR_ID, "operators"))
+    pk: str = SDK.portal.functions.readBytes(index, get_key(OPERATOR_ID, "validators"))
+    log.debug("Fetching an owned pubkey. index:{index} : pubkey:{pk}")
+    return pk
 
 
 def get_all_owned_pubkeys(start_index: int = 0) -> list[str]:

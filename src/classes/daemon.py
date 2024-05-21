@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-import sys
+
 from time import sleep
 from typing import Callable
 from threading import Thread, Event
 
+from src.globals import log
 from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError
 from .trigger import Trigger
 
@@ -53,7 +54,9 @@ class Daemon:
             trigger (Trigger): an initialized Trigger instance
             initial_delay (int, optional): Initial delay before starting the loop. Defaults to 0.
         """
-
+        log.debug(
+            f"Initializing a Daemon object. interval: {interval}, trigger:{trigger.name}, delay:{initial_delay}"
+        )
         self.__set_task(task)
         self.__set_interval(interval)
         self.__set_initial_delay(initial_delay)
@@ -63,6 +66,7 @@ class Daemon:
         self.__worker: Thread = Thread(name=trigger.name, target=self.__loop)
         self.start_flag: Event = Event()
         self.stop_flag: Event = Event()
+        log.debug(f"Initialized a Daemon for: {trigger.name}.")
 
     @property
     def interval(self) -> int:
@@ -133,7 +137,7 @@ class Daemon:
         Raises:
             DaemonError: Raised if the daemon stops due to an exception.
         """
-
+        log.debug(f"")
         sleep(self.__initial_delay)
 
         while not self.stop_flag.wait(self.interval):
@@ -146,12 +150,15 @@ class Daemon:
                 else:
                     pass
 
-            except (CallFailedError, BeaconStateMismatchError) as e:
-                # TODO: log the error
+            except (CallFailedError, BeaconStateMismatchError):
+                log.exception(
+                    f"Stopping the Daemon for {self.trigger.name} due to unhandled condition:",
+                    exc_info=True,
+                )
                 self.start_flag.clear()
                 self.stop_flag.set()
             except Exception as e:
-                # TODO: log the error
+                log.exception("Stopping Geonius", exc_info=True)
                 raise DaemonError("Daemon stopped due to an exception.") from e
 
     def run(self) -> None:
@@ -160,16 +167,17 @@ class Daemon:
         Raises:
             DaemonError: Raised if the daemon is already running.
         """
-
-        # if already started
         if self.start_flag.is_set():
+            log.exception("Stopping Geonius", exc_info=True)
             raise DaemonError("Daemon is already running.")
         self.stop_flag.clear()
 
         self.__worker.start()
 
-        # log.info("running. Use stop() to stop, and CTRL+Z to exit.")
         self.start_flag.set()
+        log.info(
+            f"Daemon for {self.trigger.name} is running. Use stop() to stop, and CTRL+Z to exit."
+        )
 
     def stop(self) -> None:
         """Stops the daemon, exits the loop.
@@ -180,6 +188,8 @@ class Daemon:
 
         # if already stopped
         if not self.start_flag.is_set() or self.stop_flag.is_set():
+            log.exception("Stopping Geonius", exc_info=True)
             raise DaemonError("Daemon is already stopped.")
 
         self.stop_flag.set()
+        log.info(f"Daemon for {self.trigger.name} is stopped.")

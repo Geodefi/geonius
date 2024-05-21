@@ -3,6 +3,7 @@
 from typing import Iterable
 from web3.types import EventData
 
+from src.globals import OPERATOR_ID, log
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
 from src.helpers import (
@@ -12,7 +13,6 @@ from src.helpers import (
     fill_validators_table,
     create_pools_table,
 )
-from src.globals import OPERATOR_ID
 
 
 class DelegationTrigger(Trigger):
@@ -33,6 +33,7 @@ class DelegationTrigger(Trigger):
         Trigger.__init__(self, name=self.name, action=self.consider_allowance)
         create_pools_table()
         create_delegation_table()
+        log.debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is for the script's OPERATOR_ID.
@@ -61,21 +62,14 @@ class DelegationTrigger(Trigger):
 
         saveable_events: list[tuple] = []
         for event in events:
-            pool_id: int = event.args.poolId
-            operator_id: str = event.args.operatorId
-            allowance: int = event.args.allowance
-            block_number: int = event.blockNumber
-            transaction_index: int = event.transactionIndex
-            log_index: int = event.logIndex
-
             saveable_events.append(
                 (
-                    pool_id,
-                    operator_id,
-                    allowance,
-                    block_number,
-                    transaction_index,
-                    log_index,
+                    event.args.poolId,
+                    event.args.operatorId,
+                    event.args.allowance,
+                    event.blockNumber,
+                    event.transactionIndex,
+                    event.logIndex,
                 )
             )
 
@@ -94,6 +88,7 @@ class DelegationTrigger(Trigger):
                     "INSERT INTO Delegation VALUES (?,?,?,?,?,?,?,?,?)",
                     events,
                 )
+            log.debug(f"Inserted {len(events)} events into Delegation table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Delegation") from e
 
@@ -107,6 +102,7 @@ class DelegationTrigger(Trigger):
             *args: Variable length argument list
             **kwargs: Arbitrary keyword arguments
         """
+        log.info(f"{self.name} is triggered.")
 
         # filter, parse and save events
         filtered_events: Iterable[EventData] = event_handler(

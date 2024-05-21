@@ -2,7 +2,7 @@
 
 from src.classes import Database
 from src.utils import multithread
-from src.globals import OPERATOR_ID
+from src.globals import OPERATOR_ID, log
 from src.exceptions import DatabaseError
 
 from .portal import get_surplus, get_fallback_operator
@@ -27,7 +27,7 @@ def create_pools_table() -> None:
                 )
                 """
             )
-
+        log.debug(f"Created a new table: Pools")
     except Exception as e:
         raise DatabaseError(f"Error creating Pools table with name Pools") from e
 
@@ -42,6 +42,7 @@ def drop_pools_table() -> None:
     try:
         with Database() as db:
             db.execute("""DROP TABLE IF EXISTS Pools""")
+        log.debug(f"Dropped Table: Pools")
     except Exception as e:
         raise DatabaseError(f"Error dropping Pools table with name Pools") from e
 
@@ -62,6 +63,7 @@ def fetch_pools_batch(ids: list[int]) -> list[dict]:
     Returns:
         list[dict]: list of dictionaries containing the pool info, in format of [{id: val, surplus: val,...},...]
     """
+    log.debug(f"Fetching pools.")
 
     surpluses: list[int] = multithread(get_surplus, ids)
     fallback_operators: list[int] = multithread(get_fallback_operator, ids)
@@ -87,6 +89,7 @@ def insert_many_pools(new_pools: list[dict]) -> None:
     Raises:
         DatabaseError: Error inserting many pools into table
     """
+    log.debug(f"Inserting new pools to database.")
 
     try:
         with Database() as db:
@@ -102,6 +105,8 @@ def insert_many_pools(new_pools: list[dict]) -> None:
                 ],
             )
     except Exception as e:
+        log.exception(f"Encountered an error while insterting new pools", exc_info=True)
+
         raise DatabaseError(f"Error inserting many pools into table Pools") from e
 
 
@@ -125,6 +130,7 @@ def save_surplus(pool_id: int, surplus: int) -> None:
     Raises:
         DatabaseError: Error updating surplus of pool
     """
+    log.debug(f"Saving the surplus for {pool_id} : {surplus}")
 
     try:
         with Database() as db:
@@ -153,6 +159,7 @@ def save_fallback_operator(pool_id: int, value: bool) -> None:
     Raises:
         DatabaseError: Error updating fallback of pool
     """
+    log.debug(f"Saving the fallback operator for {pool_id}")
 
     try:
         with Database() as db:

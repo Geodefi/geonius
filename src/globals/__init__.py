@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .logger import log
 from .config import CONFIG
 from .constants import hour_blocks
 from .env import (
@@ -14,4 +15,3 @@ from .env import (
     RECEIVER_EMAIL,
 )
 from .sdk import SDK
-from .logger import log

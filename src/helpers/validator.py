@@ -3,9 +3,10 @@
 from typing import Any
 from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE
 from geodefi.utils import to_bytes32
+from web3.exceptions import TimeExhausted
 
 from src.classes import Database
-from src.globals import SDK, OPERATOR_ID, CONFIG
+from src.globals import SDK, OPERATOR_ID, CONFIG, log
 from src.utils import send_email
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.daemons.time_daemon import TimeDaemon
@@ -30,37 +31,51 @@ def max_proposals_count(pool_id: int) -> int:
     """
 
     allowance: int = get_operatorAllowance(pool_id)
-    try:
-        with Database() as db:
-            db.execute(
-                """
-                SELECT surplus FROM Pools 
-                WHERE id = ?
-                """,
-                (pool_id),
-            )
-            surplus: str = db.fetchone()  # surplus is a TEXT field
-            surplus = int(surplus)
-    except Exception as e:
-        raise DatabaseError(f"Error fetching surplus for pool {pool_id} from table Pools") from e
 
     if allowance > 0:
+        try:
+            with Database() as db:
+                db.execute(
+                    """
+                    SELECT surplus FROM Pools 
+                    WHERE id = ?
+                    """,
+                    (pool_id),
+                )
+                surplus: str = db.fetchone()  # surplus is a TEXT field
+                surplus = int(surplus)
+        except Exception as e:
+            raise DatabaseError(
+                f"Error fetching surplus for pool {pool_id} from table Pools"
+            ) from e
+
         # every 32 ether is 1 validator.
         eth_per_prop: int = int(surplus) // DEPOSIT_SIZE.STAKE
+        curr_max: int = min(allowance, eth_per_prop)
 
-        # considering the wallet balance of the operator since it might not be enough (1 eth per val)
-        wallet_balance: int = SDK.portal.functions.readUint(
-            OPERATOR_ID, to_bytes32("wallet")
-        ).call()
-        eth_per_wallet_balance: int = wallet_balance // DEPOSIT_SIZE.PROPOSAL
+        if curr_max > 0:
+            # considering the wallet balance of the operator since it might not be enough (1 eth per val)
+            wallet_balance: int = SDK.portal.functions.readUint(
+                OPERATOR_ID, to_bytes32("wallet")
+            ).call()
+            eth_per_wallet_balance: int = wallet_balance // DEPOSIT_SIZE.PROPOSAL
 
-        return min(allowance, eth_per_prop, eth_per_wallet_balance)
-    else:
-        return 0
+            if curr_max > eth_per_wallet_balance:
+                log.critical(
+                    f"Could propose {curr_max} validators for {pool_id}. \
+                        But wallet only has enoygh funds for {eth_per_wallet_balance}"
+                )
+                # TODO: send email
+                return eth_per_wallet_balance
+
+            else:
+                return curr_max
+    return 0
 
 
 def check_and_propose(pool_id: int) -> list[str]:
-    """Propose for given pool if able to propose for all of them at once or in batches of 50 pubkeys at a time if needed to.
+    """Propose for given pool if able to propose for all of them at once \
+        or in batches of 50 pubkeys at a time if needed to.
 
     Args:
         pool_id (int): ID of the pool to propose for
@@ -101,7 +116,7 @@ def check_and_propose(pool_id: int) -> list[str]:
 
         try:
             success: bool = call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
-        except CallFailedError as e:
+        except (CallFailedError, TimeExhausted) as e:
             if len(pks) > 0:
                 fill_validators_table(pks)
             raise e
@@ -113,7 +128,8 @@ def check_and_propose(pool_id: int) -> list[str]:
 
 
 def check_and_stake(pks: list[str]) -> list[str]:
-    """Stake for given pubkeys if able to stake for all of them at once or in batches of 50 pubkeys at a time if needed to.
+    """Stake for given pubkeys if able to stake for all of them at \
+        once or in batches of 50 pubkeys at a time if needed to.
 
     Args:
         pks (list[str]): pubkeys to stake for

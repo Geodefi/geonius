@@ -31,6 +31,7 @@ class FinalizeExitTrigger(Trigger):
 
         Trigger.__init__(self, name=self.name, action=self.finalize_exit)
         self.pubkey: str = pubkey
+        log.debug(f"{self.name} is initated for pubkey: {pubkey}")
 
     def finalize_exit(self, daemon: TimeDaemon, *args, **kwargs) -> None:
         """Finalizes the exit of the validator. Stops the daemon after the exit is finalized.
@@ -41,6 +42,7 @@ class FinalizeExitTrigger(Trigger):
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
+        log.info(f"{self.name} is triggered.")
 
         # Check if the validator is in the exit state on the beacon chain
         val: Validator = SDK.portal.validator(self.pubkey)
