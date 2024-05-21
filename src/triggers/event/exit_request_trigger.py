@@ -5,7 +5,7 @@ from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
 
-from src.globals import SDK, CONFIG, log
+from src.globals import SDK, chain, log
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
 from src.exceptions import BeaconStateMismatchError, DatabaseError, EthdoError
@@ -142,8 +142,8 @@ class ExitRequestTrigger(Trigger):
             # calculate the delay for the daemon to run
             res: dict[str, Any] = SDK.beacon.beacon_headers_id("head")
             # pylint: disable=E1126:invalid-sequence-index
-            slots_per_epoch: int = CONFIG.chains[SDK.network.name].slots_per_epoch
-            slot_interval: int = int(CONFIG.chains[SDK.network.name].interval)
+            slots_per_epoch: int = chain.slots_per_epoch
+            slot_interval: int = int(chain.interval)
 
             current_slot: int = int(res["header"]["message"]["slot"])
             current_epoch: int = current_slot // slots_per_epoch

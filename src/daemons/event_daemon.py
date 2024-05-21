@@ -4,7 +4,7 @@ from typing import Iterable
 from web3.types import EventData
 from web3.contract.contract import ContractEvent
 from src.classes import Daemon, Trigger
-from src.globals import SDK, CONFIG, log
+from src.globals import SDK, log, chain
 
 from src.helpers import get_all_events
 from src.utils import send_email
@@ -29,7 +29,7 @@ class EventDaemon(Daemon):
         self,
         trigger: Trigger,
         event: ContractEvent,
-        start_block: int = CONFIG.chains[SDK.network.name].start,
+        start_block: int = chain.start,
     ) -> None:
         """Initializes a EventDaemon object. The daemon will run the trigger on every event emitted.
 
@@ -41,7 +41,7 @@ class EventDaemon(Daemon):
 
         Daemon.__init__(
             self,
-            interval=int(CONFIG.chains[SDK.network.name].interval) + 1,
+            interval=int(chain.interval) + 1,
             task=self.listen_events,
             trigger=trigger,
         )
@@ -49,8 +49,8 @@ class EventDaemon(Daemon):
 
         # block_identifier sets if we are looking for:
         # 'latest', 'earliest', 'pending', 'safe', 'finalized'.
-        self.block_identifier: str = CONFIG.chains[SDK.network.name].identifier
-        self.block_period: int = int(CONFIG.chains[SDK.network.name].period)
+        self.block_identifier: str = chain.identifier
+        self.block_period: int = int(chain.period)
         self.__recent_block: int = start_block
         log.debug(f"{trigger.name} is attached to an Event Daemon")
 

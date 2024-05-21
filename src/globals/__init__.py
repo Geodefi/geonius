@@ -2,7 +2,7 @@
 
 from .config import CONFIG
 from .logger import log
-from .constants import hour_blocks
+from .constants import hour_blocks, chain
 from .env import (
     EXECUTION_API,
     CONSENSUS_API,
@@ -14,4 +14,3 @@ from .env import (
     SENDER_PASSWORD,
     RECEIVER_EMAIL,
 )
-from .sdk import SDK

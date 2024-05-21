@@ -6,7 +6,7 @@ from geodefi.utils import to_bytes32
 from web3.exceptions import TimeExhausted
 
 from src.classes import Database
-from src.globals import SDK, OPERATOR_ID, CONFIG, log
+from src.globals import SDK, OPERATOR_ID, chain, log
 from src.utils import send_email
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.daemons.time_daemon import TimeDaemon
@@ -192,8 +192,8 @@ def run_finalize_exit_triggers():
         # calculate the delay for the daemon to run
         res: dict[str, Any] = SDK.beacon.beacon_headers_id("head")
 
-        slots_per_epoch: int = CONFIG.chains[SDK.network.name].slots_per_epoch
-        slot_interval: int = int(CONFIG.chains[SDK.network.name].interval)
+        slots_per_epoch: int = chain.slots_per_epoch
+        slot_interval: int = int(chain.interval)
 
         # pylint: disable=E1126:invalid-sequence-index
         current_slot: int = int(res["header"]["message"]["slot"])

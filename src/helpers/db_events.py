@@ -4,7 +4,7 @@ from typing import Callable, Iterable
 from web3.types import EventData
 
 from src.classes import Database
-from src.globals import SDK, CONFIG, log
+from src.globals import chain, log
 from src.exceptions import DatabaseError
 
 
@@ -39,12 +39,12 @@ def find_latest_event_block(event_name: str) -> int:
     except Exception as e:
         raise DatabaseError(f"Error finding latest block for {event_name}") from e
 
-    start: int = int(CONFIG.chains[SDK.network.name].start)
+    start: int = int(chain.start)
     log.debug(
         f"Could not find the event:{event_name} on database. \
             Proceeding with default initial block:{start}"
     )
-    return CONFIG.chains[SDK.network.name].start
+    return chain.start
 
 
 def create_alienated_table() -> None:

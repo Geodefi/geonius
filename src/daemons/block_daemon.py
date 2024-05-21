@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from src.classes import Daemon, Trigger
-from src.globals import SDK, CONFIG, log
+from src.globals import SDK, chain, log
 
 
 class BlockDaemon(Daemon):
@@ -26,7 +26,7 @@ class BlockDaemon(Daemon):
     def __init__(
         self,
         trigger: Trigger,
-        block_period: int = int(CONFIG.chains[SDK.network.name].period),
+        block_period: int = int(chain.period),
     ) -> None:
         """Initializes a BlockDaemon object. The daemon will run the triggers on every X block.
 
@@ -37,15 +37,15 @@ class BlockDaemon(Daemon):
         """
         Daemon.__init__(
             self,
-            interval=int(CONFIG.chains[SDK.network.name].interval),
+            interval=int(chain.interval),
             task=self.listen_blocks,
             trigger=trigger,
         )
 
         # block_identifier sets if we are looking for:
         # 'latest', 'earliest', 'pending', 'safe', 'finalized'.
-        self.block_identifier: int = CONFIG.chains[SDK.network.name].identifier
-        self.__recent_block: int = CONFIG.chains[SDK.network.name].start
+        self.block_identifier: int = chain.identifier
+        self.__recent_block: int = chain.start
         self.block_period: int = block_period
         log.debug(f"{trigger.name} is attached to a Block Daemon")
 
