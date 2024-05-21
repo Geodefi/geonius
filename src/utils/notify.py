@@ -9,11 +9,13 @@ from src.globals import CONFIG, OPERATOR_ID, SENDER_EMAIL, SENDER_PASSWORD, RECE
 
 def send_email(subject, body, attachments=None):
 
-    msg = MIMEMultipart()
-    msg['From'] = SENDER_EMAIL
-    msg['To'] = RECEIVER_EMAIL if RECEIVER_EMAIL else SENDER_EMAIL
-    msg['Cc'] = CONFIG.email.admin_email
-    msg['Subject'] = f"GEONIUS - {OPERATOR_ID}: {subject}"
+    msg: str = MIMEMultipart()
+    msg['From']: str = SENDER_EMAIL
+    msg['To']: str = RECEIVER_EMAIL if RECEIVER_EMAIL else SENDER_EMAIL
+    # TODO: make a way to prevent cc ing us.
+    msg['Cc']: str = CONFIG.email.admin_email
+    # TODO: get the Operator name on reboot and use it here.
+    msg['Subject']: str = f"GEONIUS - {OPERATOR_ID}: {subject}"
 
     msg.attach(MIMEText(body, 'plain'))
 

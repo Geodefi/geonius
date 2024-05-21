@@ -70,7 +70,6 @@ class EventDaemon(Daemon):
         # check if required number of blocks have past:
         if curr_block > self.__recent_block + self.block_period:
             try:
-                events = []
                 events = get_all_events(
                     event=self.event,
                     first_block=self.__recent_block,
