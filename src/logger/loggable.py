@@ -85,7 +85,7 @@ class Loggable:
         """
 
         return Formatter(
-            fmt=f"[%(asctime)s] {'%(threadName)s':<25} | %(levelname)-8s :: %(message)s",
+            fmt=f"[%(asctime)s] %(threadName)-25s | %(levelname)-8s :: %(message)s",
             datefmt="%H:%M:%S",
         )
 
