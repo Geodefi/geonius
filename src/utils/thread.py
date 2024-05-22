@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any, Callable
-from concurrent.futures import ThreadPoolExecutor
+from multiprocessing.pool import ThreadPool
+
+# from src.logger import log
 
 
 def multithread(func: Callable, *args, num_threads: int = None, chunk_size: int = 1) -> list[Any]:
@@ -16,6 +18,8 @@ def multithread(func: Callable, *args, num_threads: int = None, chunk_size: int 
     Returns:
         list[Any]: list of results from the function calls
     """
-    with ThreadPoolExecutor(max_workers=num_threads) as pool:
-        res: Any = pool.map(func, *args, chunksize=chunk_size)
+    # log.debug(f"Calling {func.__name__} multithreaded.")
+    with ThreadPool(processes=num_threads) as pool:
+        res: Any = pool.starmap(func, zip(*args), chunksize=chunk_size)
+
     return list(res)
