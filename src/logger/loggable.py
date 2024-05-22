@@ -114,7 +114,6 @@ class Loggable:
         path: str = os.path.join(main_dir, log_dir)
         if not os.path.exists(path):
             os.makedirs(path)
-        print(CONFIG.logger)
         prefix: str = "log"
         filename: str = os.path.join(path, prefix)
         fh: TimedRotatingFileHandler = TimedRotatingFileHandler(

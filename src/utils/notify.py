@@ -10,13 +10,13 @@ from email import encoders
 def send_email(subject, body, attachments=None):
     from src.globals import CONFIG, OPERATOR_ID, SENDER_EMAIL, SENDER_PASSWORD, RECEIVER_EMAIL
 
-    msg: str = MIMEMultipart()
-    msg['From']: str = SENDER_EMAIL
-    msg['To']: str = RECEIVER_EMAIL if RECEIVER_EMAIL else SENDER_EMAIL
+    msg: MIMEMultipart = MIMEMultipart()
+    msg['From'] = SENDER_EMAIL
+    msg['To'] = RECEIVER_EMAIL if RECEIVER_EMAIL else SENDER_EMAIL
     # TODO: make a way to prevent cc ing us.
-    msg['Cc']: str = CONFIG.email.admin_email
+    msg['Cc'] = CONFIG.email.admin_email
     # TODO: get the Operator name on reboot and use it here.
-    msg['Subject']: str = f"GEONIUS - {OPERATOR_ID}: {subject}"
+    msg['Subject'] = f"GEONIUS - {OPERATOR_ID}: {subject}"
 
     msg.attach(MIMEText(body, 'plain'))
 
