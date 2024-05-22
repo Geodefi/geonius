@@ -62,7 +62,8 @@ def get_all_events(event: ContractEvent, first_block: int, last_block: int) -> I
 
     # convert list of list into a list
     # TODO: consider using list.extend instead of list comprehension
-    logs: Iterable[EventData] = [log for batch in log_batches for log in batch]
+    # NOTE if log_batches[batch] is Iterable then unpack batch[log], else continue
+    logs: Iterable[EventData] = [log for batch in log_batches if batch for log in batch]
 
     # NOTE that the events should be sorted as: blockNumber->transactionIndex->logIndex
     # which persists here, so no need to sort again.
