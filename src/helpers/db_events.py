@@ -24,13 +24,12 @@ def find_latest_event_block(event_name: str) -> int:
     try:
         with Database() as db:
             db.execute(
-                """
+                f"""
                 SELECT block_number
-                FROM ?
+                FROM {event_name}
                 ORDER BY block_number DESC
                 LIMIT 1
                 """,
-                (event_name),
             )
             latest_block = db.fetchone()
 

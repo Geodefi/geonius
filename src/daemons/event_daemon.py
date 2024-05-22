@@ -66,7 +66,7 @@ class EventDaemon(Daemon):
         # eth.block_number or eth.get_block_number() can also be used
         # but this allows block_identifier.
         curr_block: int = (SDK.w3.eth.get_block(self.block_identifier)).number
-        log.debug(f"New block detected: {curr_block.number}")
+        log.debug(f"New block detected: {curr_block}")
 
         # check if required number of blocks have past:
         if curr_block > self.__recent_block + self.block_period:

@@ -4,6 +4,8 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
+# from src.logger import log
+
 
 def send_email(subject, body, attachments=None):
     from src.globals import CONFIG, OPERATOR_ID, SENDER_EMAIL, SENDER_PASSWORD, RECEIVER_EMAIL
@@ -28,8 +30,8 @@ def send_email(subject, body, attachments=None):
                 part.add_header('Content-Disposition', f'attachment; filename= {new_filename}')
                 msg.attach(part)
             except Exception as e:
-                print(f"Failed to attach file {file_path}: {e}")
-                # TODO: Add logging
+                # log.error(f"Failed to attach file {file_path}: {e}")
+                raise e
 
     try:
         server = smtplib.SMTP(CONFIG.email.smtp_server, CONFIG.email.smtp_port)
@@ -38,5 +40,5 @@ def send_email(subject, body, attachments=None):
         server.send_message(msg)
         server.quit()
     except Exception as e:
-        print(f"Failed to send email: {e}")
-        # TODO: Add logging
+        # log.error(f"Failed to send email: {e}")
+        raise e
