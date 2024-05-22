@@ -3,7 +3,7 @@
 from typing import Iterable
 from web3.types import EventData
 
-from src.globals import log
+from src.logger import log
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
 from src.helpers import (

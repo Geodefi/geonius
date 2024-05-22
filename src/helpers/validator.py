@@ -6,11 +6,13 @@ from geodefi.utils import to_bytes32
 from web3.exceptions import TimeExhausted
 
 from src.classes import Database
-from src.globals import SDK, OPERATOR_ID, chain, log
+from src.logger import log
+from src.globals import SDK, OPERATOR_ID, chain
 from src.utils import send_email
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.daemons.time_daemon import TimeDaemon
-from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
+
+# from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
 from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError, CallFailedError
 
 from .portal import get_operatorAllowance, get_withdrawal_address
@@ -207,12 +209,12 @@ def run_finalize_exit_triggers():
             init_delay: int = epoch_diff * seconds_per_epoch
 
         # initialize and run the daemon
-        finalize_exit_trigger: FinalizeExitTrigger = FinalizeExitTrigger(pk)
+        # finalize_exit_trigger: FinalizeExitTrigger = FinalizeExitTrigger(pk)
 
-        finalize_exit_daemon: TimeDaemon = TimeDaemon(
-            interval=slot_interval + 1,
-            trigger=finalize_exit_trigger,
-            initial_delay=init_delay,
-        )
+        # finalize_exit_daemon: TimeDaemon = TimeDaemon(
+        #     interval=slot_interval + 1,
+        #     trigger=finalize_exit_trigger,
+        #     initial_delay=init_delay,
+        # )
 
-        finalize_exit_daemon.run()
+        # finalize_exit_daemon.run()

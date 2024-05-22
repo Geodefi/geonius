@@ -10,7 +10,7 @@ from src.triggers import (
     DelegationTrigger,
     FallbackOperatorTrigger,
     IdInitiatedTrigger,
-    PoolsDBTrigger,
+    # PoolsDBTrigger,
     StakeTrigger,
     DepositTrigger,
     ExitRequestTrigger,
@@ -40,7 +40,7 @@ def init_dbs():
     reinitialize_pools_table()  # TODO: This will be removed after testing
     fill_pools_table(get_all_pool_ids())
 
-    # initialize validators table and fill it with current data
+    # # initialize validators table and fill it with current data
     reinitialize_validators_table()  # TODO: This will be removed after testing
     fill_validators_table(get_all_owned_pubkeys())
 
@@ -52,9 +52,9 @@ def setup_daemons():
     daemons are running.
     """
     # Triggers
-    pools_db_trigger: PoolsDBTrigger = (
-        PoolsDBTrigger()
-    )  # TODO: This will be removed and db setup will be initialized on here.
+    # pools_db_trigger: PoolsDBTrigger = (
+    #     PoolsDBTrigger()
+    # )  # TODO: This will be removed and db setup will be initialized on here.
     id_initiated_trigger: IdInitiatedTrigger = IdInitiatedTrigger()
     deposit_trigger: DepositTrigger = DepositTrigger()
     delegation_trigger: DelegationTrigger = DelegationTrigger()

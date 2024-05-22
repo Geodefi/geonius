@@ -33,8 +33,9 @@ class Loggable:
 
     def __init__(self) -> None:
         """Initializes a Loggable object."""
-        self.logger: logging.Logger = self.__get_logger()
-        self.logger.info("Initalized a global logger.")
+        logger: logging.Logger = self.__get_logger()
+        logger.info("Initalized a global logger.")
+        self.logger = logger
 
     def __get_logger(self) -> logging.Logger:
         """Initializes and returns a logger object with given streams and files.
@@ -42,20 +43,25 @@ class Loggable:
         Returns:
             logging.Logger: Logger object to be used in the class.
         """
-        logging.basicConfig(level=self.__level)
 
         logger: logging.Logger = logging.getLogger()
         logger.setLevel(self.__level)
         logger.propagate = False
 
+        handlers: list = list()
         if CONFIG.logger.stream:
-            logger.addHandler(self.__get_stream_handler())
-            self.logger.info(f"Logger is provided with a stream handler. Level: {self.__level}")
+            stream_handler: StreamHandler = self.__get_stream_handler()
+            handlers.append(stream_handler)
+            logger.addHandler(stream_handler)
+            logger.info(f"Logger is provided with a stream handler. Level: {self.__level}")
 
         if CONFIG.logger.file:
-            logger.addHandler(self.__get_file_handler())
-            self.logger.info(f"Logger is provided with a file handler. Level: {self.__level}")
+            file_handler: TimedRotatingFileHandler = self.__get_file_handler()
+            handlers.append(file_handler)
+            logger.addHandler(file_handler)
+            logger.info(f"Logger is provided with a file handler. Level: {self.__level}")
 
+        logging.basicConfig(handlers=handlers, force=True)
         return logger
 
     @property

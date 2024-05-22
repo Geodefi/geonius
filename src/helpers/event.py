@@ -8,7 +8,9 @@ from web3.contract.contract import ContractEvent
 from geodefi.utils import multiple_attempt
 
 from src.utils import multithread
-from src.globals import chain, log
+from src.globals import chain
+from src.logger import log
+
 
 max_block_range = int(chain.range)
 

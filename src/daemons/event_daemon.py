@@ -4,8 +4,9 @@ from typing import Iterable
 from web3.types import EventData
 from web3.contract.contract import ContractEvent
 from src.classes import Daemon, Trigger
-from src.globals import SDK, log, chain
+from src.globals import SDK, chain
 
+from src.logger import log
 from src.helpers import get_all_events
 from src.utils import send_email
 

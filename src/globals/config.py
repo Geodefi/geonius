@@ -20,7 +20,7 @@ def __apply_flags(config: AttributeDict):
     """
 
     if flags.no_log_stream:
-        config.logger.file = False
+        config.logger.stream = False
     if flags.no_log_file:
         config.logger.file = False
     if flags.min_proposal_queue:

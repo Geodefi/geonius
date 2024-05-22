@@ -3,10 +3,11 @@
 from geodefi.globals import VALIDATOR_STATE
 
 from src.classes import Database
-from src.globals import SDK, log
+from src.globals import SDK
+from src.logger import log
 from src.utils import multithread
 from src.exceptions import DatabaseError, DatabaseMismatchError
-from src.helpers import get_StakeParams
+from .portal import get_StakeParams
 
 
 def create_validators_table() -> None:

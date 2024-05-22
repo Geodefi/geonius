@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Callable
-from src.globals import log
+from src.logger import log
 
 
 class Trigger:

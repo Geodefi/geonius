@@ -5,7 +5,7 @@ from typing import Callable
 from threading import Thread, Event
 from web3.exceptions import TimeExhausted
 
-from src.globals import log
+from src.logger import log
 from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError
 from .trigger import Trigger
 

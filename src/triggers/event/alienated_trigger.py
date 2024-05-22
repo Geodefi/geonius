@@ -4,7 +4,7 @@ from typing import Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 
-from src.globals import log
+from src.logger import log
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
 from src.utils import send_email

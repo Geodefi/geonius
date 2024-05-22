@@ -48,6 +48,7 @@ docker pull Geodefi/geonius
 Run:
 
  ```bash
+ export PYTHONFAULTHANDLER=1
  PYTHONPATH=.  python3 src/main.py --flags
  ```
 

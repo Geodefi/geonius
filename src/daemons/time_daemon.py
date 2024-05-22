@@ -2,7 +2,7 @@
 
 from typing_extensions import Self
 from src.classes import Daemon, Trigger
-from src.globals import log
+from src.logger import log
 
 
 class TimeDaemon(Daemon):

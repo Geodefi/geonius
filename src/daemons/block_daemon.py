@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from src.classes import Daemon, Trigger
-from src.globals import SDK, chain, log
+from src.globals import SDK, chain
+
+from src.logger import log
 
 
 class BlockDaemon(Daemon):

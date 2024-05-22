@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from .config import CONFIG
-from .logger import log
 from .constants import hour_blocks, chain
 from .env import (
     EXECUTION_API,
@@ -14,3 +13,4 @@ from .env import (
     SENDER_PASSWORD,
     RECEIVER_EMAIL,
 )
+from .sdk import SDK

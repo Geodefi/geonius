@@ -2,7 +2,8 @@
 
 from src.classes import Database
 from src.utils import multithread
-from src.globals import OPERATOR_ID, log
+from src.globals import OPERATOR_ID
+from src.logger import log
 from src.exceptions import DatabaseError
 
 from .portal import get_surplus, get_fallback_operator

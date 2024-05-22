@@ -4,7 +4,9 @@ import json
 from subprocess import check_output
 import geodefi
 
-from src.globals import SDK, ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE, CONFIG, log
+from src.globals import SDK, ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE, CONFIG
+
+from src.logger import log
 from src.exceptions import EthdoError
 
 

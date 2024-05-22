@@ -5,7 +5,8 @@ from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
 
-from src.globals import SDK, chain, log
+from src.logger import log
+from src.globals import SDK, chain
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
 from src.exceptions import BeaconStateMismatchError, DatabaseError, EthdoError

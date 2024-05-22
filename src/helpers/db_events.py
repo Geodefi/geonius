@@ -4,7 +4,8 @@ from typing import Callable, Iterable
 from web3.types import EventData
 
 from src.classes import Database
-from src.globals import chain, log
+from src.globals import chain
+from src.logger import log
 from src.exceptions import DatabaseError
 
 
