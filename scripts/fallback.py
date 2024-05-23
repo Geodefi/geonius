@@ -1,19 +1,18 @@
 # Initilize Geode
-from time import sleep
 from os import getenv
+from time import sleep
 import random
-
-from dotenv import load_dotenv
-
-from geodefi.globals import ID_TYPE
 
 import sys
 
 sys.path.append(".")
 
+from dotenv import load_dotenv
+
+from geodefi.globals import ID_TYPE
+
 from src.globals import SDK
 from src.helpers import get_name
-
 from geodefi import Geode
 
 load_dotenv()
@@ -41,40 +40,21 @@ if op_len > 0:
     for i in range(op_len):
         operators.append(portal.functions.allIdsByType(op_type, i).call())
 
-# OUT OPERATORS
-crash_op = operators[0]
-ice_op = operators[1]
+thresholds = range(5 * 10**8, 10**10 + 1, 5 * 10**8)
+print(list(thresholds))
 
-# DELEGATE
 while True:
-    for op_id in operators:
+    for operator_id in operators:
         try:
-            allowance = random.randint(0, 100)
             pool_id = random.choice(pools)
+            fallback_threshold = random.choice(thresholds)
             print(
-                f"Delegating {allowance} to operator {get_name(op_id)} in pool {get_name(pool_id)}"
+                f"Setting fallback operator for pool {get_name(pool_id)} to operator {get_name(operator_id)} with threshold {fallback_threshold}"
             )
-            tx_hash: str = SDK.portal.contract.functions.delegate(
-                pool_id, [op_id], [allowance]
+            tx_hash: str = SDK.portal.contract.functions.setFallbackOperator(
+                pool_id, operator_id, fallback_threshold
             ).transact({"from": SDK.w3.eth.defaultAccount.address})
             print(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
         except:
             print("Tx failed, trying again.")
-        sleep(87)
-
-
-# threshold = 9e9  # 90%
-# tx_hash: str = SDK.portal.contract.functions.fallbackThreshold(pool_id, ice_op, threshold).transact(
-#     {"from": SDK.w3.eth.defaultAccount.address}
-# )
-# choose a pool id:
-# # random an action:
-# # # deposit
-# ->>>>>>>>>>>>>> wait.
-# # # delegate
-# ---------------> random operator
-# ->>>>>>>>>>>>>> wait.
-# # # fallback
-# ---------------> random operator
-# ---------------> x% : 1, 30, 90, 100
-# ->>>>>>>>>>>>>> wait.
+        sleep(61)
