@@ -7,6 +7,10 @@ from dotenv import load_dotenv
 
 from geodefi.globals import ID_TYPE
 
+import sys
+
+sys.path.append(".")
+
 from src.globals import SDK
 
 from geodefi import Geode
@@ -45,9 +49,11 @@ while True:
     for op_id in operators:
         allowance = random.randint(0, 100)
         pool_id = random.choice(pools)
+        print(f"Delegating {allowance} to operator {op_id} in pool {pool_id}")
         tx_hash: str = SDK.portal.contract.functions.delegate(
             pool_id, [op_id], [allowance]
         ).transact({"from": SDK.w3.eth.defaultAccount.address})
+        print("Tx hash:", tx_hash.hex())
         sleep(90)
 
 

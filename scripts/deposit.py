@@ -3,6 +3,10 @@ from os import getenv
 from time import sleep
 import random
 
+import sys
+
+sys.path.append(".")
+
 from dotenv import load_dotenv
 
 from geodefi.globals import ID_TYPE

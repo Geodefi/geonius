@@ -53,7 +53,7 @@ def setup_daemons():
 
     id_initiated_trigger: IdInitiatedTrigger = IdInitiatedTrigger()
     deposit_trigger: DepositTrigger = DepositTrigger()
-    # delegation_trigger: DelegationTrigger = DelegationTrigger()
+    delegation_trigger: DelegationTrigger = DelegationTrigger()
     # fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
     # alienated_trigger: AlienatedTrigger = AlienatedTrigger()
     # stake_trigger: StakeTrigger = StakeTrigger()
@@ -70,10 +70,10 @@ def setup_daemons():
         trigger=deposit_trigger,
         event=events.Deposit(),
     )
-    # delegation_daemon: EventDaemon = EventDaemon(
-    #     trigger=delegation_trigger,
-    #     event=events.Delegation(),
-    # )
+    delegation_daemon: EventDaemon = EventDaemon(
+        trigger=delegation_trigger,
+        event=events.Delegation(),
+    )
     # fallback_operator_daemon: EventDaemon = EventDaemon(
     #     trigger=fallback_operator_trigger,
     #     event=events.FallbackOperator(),
@@ -92,7 +92,7 @@ def setup_daemons():
     # Run the daemons
     id_initiated_daemon.run()
     deposit_daemon.run()
-    # delegation_daemon.run()
+    delegation_daemon.run()
     # fallback_operator_daemon.run()
     # alienated_daemon.run()
     # exit_request_daemon.run()
