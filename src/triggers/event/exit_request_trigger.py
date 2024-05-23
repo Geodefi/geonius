@@ -127,7 +127,7 @@ class ExitRequestTrigger(Trigger):
             val: Validator = SDK.portal.validator(pubkey)
             if val.beacon_status == "active_exiting":
                 # write database the expected exit block
-                # TODO: validator.withdrawable_epoch instead of exit_epoch
+                # TODO: validator.withdrawable_epoch instead of exit_epoch - today
                 save_exit_epoch(pubkey, val.exit_epoch)
                 exitted_pks.append(pubkey)
             else:

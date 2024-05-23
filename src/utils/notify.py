@@ -7,13 +7,14 @@ from email import encoders
 # from src.logger import log
 
 
-def send_email(subject, body, attachments=None):
+def send_email(subject, body, attachments=None, send_attachments=True):
     from src.globals import CONFIG, OPERATOR_ID, SENDER_EMAIL, SENDER_PASSWORD, RECEIVER_EMAIL
 
+    # TODO: if send_attachments but no attachments => send the latest log.
     msg: MIMEMultipart = MIMEMultipart()
     msg['From'] = SENDER_EMAIL
     msg['To'] = RECEIVER_EMAIL if RECEIVER_EMAIL else SENDER_EMAIL
-    # TODO: make a way to prevent cc ing us.
+    # TODO: make a way to prevent cc ing us: add --notify-geode : True > readme!
     msg['Cc'] = CONFIG.email.admin_email
     # TODO: get the Operator name on reboot and use it here.
     msg['Subject'] = f"GEONIUS - {OPERATOR_ID}: {subject}"

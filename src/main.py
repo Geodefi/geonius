@@ -87,7 +87,7 @@ def setup_daemons():
         event=events.ExitRequest(),
     )
 
-    stake_daemon: BlockDaemon = BlockDaemon(trigger=stake_trigger, block_period=1)
+    stake_daemon: BlockDaemon = BlockDaemon(trigger=stake_trigger, block_period=0.5 * hour_blocks)
 
     # Run the daemons
     id_initiated_daemon.run()
