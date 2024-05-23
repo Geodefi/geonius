@@ -36,13 +36,14 @@ def max_proposals_count(pool_id: int) -> int:
 
     if allowance > 0:
         try:
+            # TODO: get if from chain, this may not be accurate in some cases
             with Database() as db:
                 db.execute(
                     """
                     SELECT surplus FROM Pools 
                     WHERE id = ?
                     """,
-                    (pool_id),
+                    (pool_id,),
                 )
                 surplus: str = db.fetchone()  # surplus is a TEXT field
                 surplus = int(surplus)
@@ -87,6 +88,9 @@ def check_and_propose(pool_id: int) -> list[str]:
     """
 
     max_allowed: int = max_proposals_count(pool_id)
+
+    if max_allowed == 0:
+        return []
 
     try:
         for i in range(max_allowed):
