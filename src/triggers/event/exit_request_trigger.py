@@ -71,7 +71,7 @@ class ExitRequestTrigger(Trigger):
         for event in events:
             saveable_events.append(
                 (
-                    event.args.pubkey,
+                    event.args.pubkey,  # TEXT
                     event.blockNumber,
                     event.transactionIndex,
                     event.logIndex,

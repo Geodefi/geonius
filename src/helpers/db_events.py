@@ -64,7 +64,7 @@ def create_alienated_table() -> None:
             db.execute(
                 """
                 CREATE TABLE IF NOT EXISTS Alienated (
-                    pk TEXT NOT NULL PRIMARY KEY,
+                    pk TEXT NOT NULL,
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL
@@ -94,8 +94,7 @@ def create_delegation_table() -> None:
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    FOREIGN KEY (pool_id) REFERENCES Pools (id),
-                    PRIMARY KEY (pool_id, operator_id)
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
                 """
             )
@@ -122,8 +121,7 @@ def create_deposit_table() -> None:
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    FOREIGN KEY (pool_id) REFERENCES Pools (id),
-                    PRIMARY KEY (pool_id)
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
                 """
             )
@@ -149,8 +147,7 @@ def create_fallback_operator_table() -> None:
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    FOREIGN KEY (pool_id) REFERENCES Pools (id),
-                    PRIMARY KEY (pool_id)
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
                 """
             )
@@ -171,11 +168,11 @@ def create_id_initiated_table() -> None:
             db.execute(
                 """
                 CREATE TABLE IF NOT EXISTS IdInitiated (
-                    pool_id TEXT NOT NULL,
+                    pool_id TEXT UNIQUE NOT NULL,
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    PRIMARY KEY (pool_id)
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
                 """
             )
@@ -196,7 +193,7 @@ def create_exit_request_table() -> None:
             db.execute(
                 """
                  CREATE TABLE IF NOT EXISTS ExitRequest (
-                     pk TEXT NOT NULL,
+                     pk TEXT UNIQUE NOT NULL,
                      block_number INTEGER NOT NULL,
                      transaction_index INTEGER NOT NULL,
                      log_index INTEGER NOT NULL,

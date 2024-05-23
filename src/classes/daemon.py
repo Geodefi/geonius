@@ -176,7 +176,7 @@ class Daemon:
 
         self.start_flag.set()
         log.info(
-            f"Daemon for {self.trigger.name} is running. Use stop() to stop, and CTRL+Z to exit."
+            f"Daemon for {self.trigger.name} is running. Use stop() to stop, and CTRL+C to exit."
         )
 
     def stop(self) -> None:

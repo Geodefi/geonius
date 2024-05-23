@@ -141,11 +141,11 @@ def fill_validators_table(pks: list[str]) -> None:
     insert_many_validators(fetch_validators_batch(pks))
 
 
-def save_local_state(pubkey: int, local_state: VALIDATOR_STATE) -> None:
+def save_local_state(pubkey: str, local_state: VALIDATOR_STATE) -> None:
     """Sets local_state on db when it changes.
 
     Args:
-        pubkey (int): public key of the validator
+        pubkey (str): public key of the validator
         local_state (VALIDATOR_STATE): new local state of the validator
 
     Raises:
@@ -170,11 +170,11 @@ def save_local_state(pubkey: int, local_state: VALIDATOR_STATE) -> None:
         ) from e
 
 
-def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE) -> None:
+def save_portal_state(pubkey: str, portal_state: VALIDATOR_STATE) -> None:
     """Sets portal_state on db when it changes on chain.
 
     Args:
-        pubkey (int): public key of the validator
+        pubkey (str): public key of the validator
         portal_state (VALIDATOR_STATE): new portal state of the validator
 
     Raises:
@@ -199,11 +199,11 @@ def save_portal_state(pubkey: int, portal_state: VALIDATOR_STATE) -> None:
         ) from e
 
 
-def save_exit_epoch(pubkey: int, exit_epoch: str) -> None:
+def save_exit_epoch(pubkey: str, exit_epoch: str) -> None:
     """Sets exit_epoch on db when it changes on chain.
 
     Args:
-        pubkey (int): public key of the validator
+        pubkey (str): public key of the validator
         exit_epoch (str): new exit epoch of the validator
 
     Raises:
@@ -219,7 +219,7 @@ def save_exit_epoch(pubkey: int, exit_epoch: str) -> None:
                 SET exit_epoch = ?
                 WHERE pubkey = ?
                 """,
-                (exit_epoch, pubkey),
+                (int(exit_epoch), pubkey),
             )
     except Exception as e:
         raise DatabaseError(
@@ -262,6 +262,9 @@ def fetch_verified_pks() -> list[str]:
 def check_pk_in_db(pubkey: str) -> bool:
     """Checks if the given public key is in the database.
 
+    Args:
+        pubkey (str): public key of the validator
+
     Returns:
         bool: True if the public key is in the database, False otherwise
 
@@ -270,7 +273,7 @@ def check_pk_in_db(pubkey: str) -> bool:
     """
     try:
         with Database() as db:
-            db.execute("SELECT * FROM Validators WHERE pubkey = ?", (pubkey))
+            db.execute("SELECT * FROM Validators WHERE pubkey = ?", (pubkey,))
             return db.fetchone() is not None
     except Exception as e:
         raise DatabaseError(f"Error checking if pubkey {pubkey} is in table Validators") from e

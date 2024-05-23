@@ -139,7 +139,7 @@ def save_surplus(pool_id: int, surplus: int) -> None:
                 SET surplus = ?
                 WHERE Id =?
                 """,
-                (surplus, pool_id),
+                (str(surplus), str(pool_id)),
             )
     except Exception as e:
         raise DatabaseError(
@@ -168,7 +168,7 @@ def save_fallback_operator(pool_id: int, value: bool) -> None:
                 SET fallback = ?
                 WHERE Id = ?
                 """,
-                (1 if value else 0, pool_id),
+                (1 if value else 0, str(pool_id)),
             )
     except Exception as e:
         raise DatabaseError(

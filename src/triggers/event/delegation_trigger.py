@@ -65,9 +65,9 @@ class DelegationTrigger(Trigger):
         for event in events:
             saveable_events.append(
                 (
-                    event.args.poolId,
-                    event.args.operatorId,
-                    event.args.allowance,
+                    str(event.args.poolId),
+                    str(event.args.operatorId),
+                    str(event.args.allowance),
                     event.blockNumber,
                     event.transactionIndex,
                     event.logIndex,
@@ -122,5 +122,5 @@ class DelegationTrigger(Trigger):
             proposed_pks: list[str] = check_and_propose(pool_id)
             all_proposed_pks.extend(proposed_pks)
 
-        if len(all_proposed_pks) > 0:
+        if all_proposed_pks:
             fill_validators_table(all_proposed_pks)
