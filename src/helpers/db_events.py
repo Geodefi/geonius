@@ -68,6 +68,7 @@ def create_alienated_table() -> None:
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL
+                    FOREIGN KEY (pk) REFERENCES Validators (pk),
                 )
                 """
             )
@@ -197,7 +198,7 @@ def create_exit_request_table() -> None:
                      block_number INTEGER NOT NULL,
                      transaction_index INTEGER NOT NULL,
                      log_index INTEGER NOT NULL,
-                     FOREIGN KEY (pk) REFERENCES validators(pk),
+                     FOREIGN KEY (pk) REFERENCES Validators (pk),
                      PRIMARY KEY (pk)
                  )
                 """
