@@ -16,11 +16,11 @@ class FinalizeExitTrigger(Trigger):
     It stops the daemon after the exit is finalized.
 
     Attributes:
-        name (str): The name of the trigger to be used when logging etc. (value: FINALIZE_EXIT_TRIGGER)
+        name (str): The name of the trigger to be used when logging etc. (value: FINALIZE_EXIT)
         pubkey (str): The public key of the validator to finalize the exit
     """
 
-    name: str = "FINALIZE_EXIT_TRIGGER"
+    name: str = "FINALIZE_EXIT"
 
     def __init__(self, pubkey: str) -> None:
         """Initializes a FinalizeExitTrigger object. The trigger will process the changes of the daemon after a loop.

@@ -23,10 +23,10 @@ class FallbackOperatorTrigger(Trigger):
     Updates the database with the latest info.
 
     Attributes:
-        name (str): name of the trigger to be used when logging etc. (value: FALLBACK_OPERATOR_TRIGGER)
+        name (str): name of the trigger to be used when logging etc. (value: FALLBACK_OPERATOR)
     """
 
-    name: str = "FALLBACK_OPERATOR_TRIGGER"
+    name: str = "FALLBACK_OPERATOR"
 
     def __init__(self) -> None:
         """Initializes a FallbackOperatorTrigger object. The trigger will process the changes of the daemon after a loop.
