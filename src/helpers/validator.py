@@ -15,7 +15,7 @@ from src.daemons.time_daemon import TimeDaemon
 # from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
 from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError, CallFailedError
 
-from .portal import get_operatorAllowance, get_withdrawal_address
+from .portal import get_operatorAllowance, get_surplus, get_withdrawal_address
 from .db_validators import fill_validators_table, save_local_state
 
 
@@ -33,47 +33,36 @@ def max_proposals_count(pool_id: int) -> int:
     """
 
     allowance: int = get_operatorAllowance(pool_id)
+    if allowance == 0:
+        return 0
 
-    if allowance > 0:
-        try:
-            # TODO: get if from chain, this may not be accurate in some cases
-            with Database() as db:
-                db.execute(
-                    """
-                    SELECT surplus FROM Pools 
-                    WHERE id = ?
-                    """,
-                    (pool_id,),
-                )
-                surplus: str = db.fetchone()  # surplus is a TEXT field
-                surplus = int(surplus)
-        except Exception as e:
-            raise DatabaseError(
-                f"Error fetching surplus for pool {pool_id} from table Pools"
-            ) from e
+    surplus: int = get_surplus(pool_id)
+    if surplus == 0:
+        return 0
 
-        # every 32 ether is 1 validator.
-        eth_per_prop: int = int(surplus) // DEPOSIT_SIZE.STAKE
-        curr_max: int = min(allowance, eth_per_prop)
+    # every 32 ether is 1 validator.
+    eth_per_prop: int = surplus // DEPOSIT_SIZE.STAKE
+    curr_max: int = min(allowance, eth_per_prop)
 
-        if curr_max > 0:
-            # considering the wallet balance of the operator since it might not be enough (1 eth per val)
-            wallet_balance: int = SDK.portal.functions.readUint(
-                OPERATOR_ID, to_bytes32("wallet")
-            ).call()
-            eth_per_wallet_balance: int = wallet_balance // DEPOSIT_SIZE.PROPOSAL
+    # considering the wallet balance of the operator since it might not be enough (1 eth per val)
+    wallet_balance: int = SDK.portal.functions.readUint(OPERATOR_ID, to_bytes32("wallet")).call()
+    eth_per_wallet_balance: int = wallet_balance // DEPOSIT_SIZE.PROPOSAL
 
-            if curr_max > eth_per_wallet_balance:
-                log.critical(
-                    f"Could propose {curr_max} validators for {pool_id}. \
-                        But wallet only has enoygh funds for {eth_per_wallet_balance}"
-                )
-                # TODO: send email
-                return eth_per_wallet_balance
+    if curr_max > eth_per_wallet_balance:
+        log.critical(
+            f"Could propose {curr_max} validators for {pool_id}. \
+                But wallet only has enough funds for {eth_per_wallet_balance}"
+        )
+        send_email(
+            "Insufficient funds for proposals",
+            f"Could propose {curr_max} validators for {pool_id}. \
+                But wallet only has enough funds for {eth_per_wallet_balance}",
+            [("<file_path>", "<file_name>.log")],
+        )
+        return eth_per_wallet_balance
 
-            else:
-                return curr_max
-    return 0
+    else:
+        return curr_max
 
 
 def check_and_propose(pool_id: int) -> list[str]:
