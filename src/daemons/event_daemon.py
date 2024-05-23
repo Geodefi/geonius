@@ -7,8 +7,8 @@ from src.classes import Daemon, Trigger
 from src.globals import SDK, chain
 
 from src.logger import log
-from src.helpers import get_all_events
-from src.utils import send_email
+from src.helpers import get_all_events, find_latest_event
+from src.utils import send_email, AttributeDict, convert_recursive
 
 
 class EventDaemon(Daemon):
@@ -30,7 +30,6 @@ class EventDaemon(Daemon):
         self,
         trigger: Trigger,
         event: ContractEvent,
-        start_block: int = chain.start,
     ) -> None:
         """Initializes a EventDaemon object. The daemon will run the trigger on every event emitted.
 
@@ -42,7 +41,7 @@ class EventDaemon(Daemon):
 
         Daemon.__init__(
             self,
-            interval=int(chain.interval) + 1,
+            interval=int(chain.interval),
             task=self.listen_events,
             trigger=trigger,
         )
@@ -52,11 +51,23 @@ class EventDaemon(Daemon):
         # 'latest', 'earliest', 'pending', 'safe', 'finalized'.
         self.block_identifier: str = chain.identifier
         self.block_period: int = int(chain.period)
-        self.__recent_block: int = start_block
+
+        self.__last_snapshot: AttributeDict = find_latest_event(event.event_name)
         log.debug(f"{trigger.name} is attached to an Event Daemon")
 
+    def filter_known_events(self, e: EventData) -> bool:
+        """Filter events that are in the previous block, which are not processed."""
+        if int(e.blockNumber) > self.__last_snapshot.block_number:
+            return True
+        if int(e.transactionIndex) > self.__last_snapshot.transaction_index:
+            return True
+        if int(e.logIndex) > self.__last_snapshot.log_index:
+            return True
+        return False
+
     def listen_events(self) -> Iterable[EventData]:
-        """The main task for the EventDaemon. Checks for new events. If any, runs the trigger and returns the events.
+        """The main task for the EventDaemon. Checks for new events.\ 
+        If any, runs the trigger and returns the events.\ 
         If no events are emitted, returns None.
 
         Returns:
@@ -66,31 +77,50 @@ class EventDaemon(Daemon):
         # eth.block_number or eth.get_block_number() can also be used
         # but this allows block_identifier.
         curr_block: int = (SDK.w3.eth.get_block(self.block_identifier)).number
-        log.debug(f"New block detected: {curr_block}")
+        log.debug(f"Processing Block: {curr_block}")
 
         # check if required number of blocks have past:
-        if curr_block > self.__recent_block + self.block_period:
+        if curr_block >= self.__last_snapshot.block_number + self.block_period:
+            unknown_events = list()
+
             try:
-                events = get_all_events(
+                detected_events: Iterable[EventData] = get_all_events(
                     event=self.event,
-                    first_block=self.__recent_block,
+                    first_block=self.__last_snapshot.block_number,
                     last_block=curr_block,
                 )
+
+                # take a snapshot from db before filtering (potentially) new events.
+                self.__last_snapshot: int = find_latest_event(self.event.event_name)
+                unknown_events: list[EventData] = list(
+                    filter(
+                        self.filter_known_events,
+                        detected_events,
+                    )
+                )
+
             except Exception as e:
                 log.error(e)
                 send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
-                events = []
 
-            # save events to db
-            if events:
-                log.debug(f"{self.trigger.name} will be triggered")
-                self.__recent_block = curr_block
-                return events
+            # take a snapshot after finishing processing the block.\
+            # Does not matter if there are events or not.
+            self.__last_snapshot = convert_recursive(
+                {"block_number": curr_block, "transaction_index": 0, "log_index": 0}
+            )
+
+            if unknown_events:
+                log.debug(
+                    f"{self.trigger.name} will be triggered with {len(unknown_events)} events"
+                )
+                return unknown_events
+
             else:
                 return None
+
         else:
             log.debug(
                 f"Block period have not been met yet.\
-                Expected block:{self.__recent_block + self.block_period}"
+                Expected block:{self.__last_snapshot.block_number + self.block_period}"
             )
             return None

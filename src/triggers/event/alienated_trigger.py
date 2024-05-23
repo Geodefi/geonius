@@ -85,7 +85,7 @@ class AlienatedTrigger(Trigger):
         try:
             with Database() as db:
                 db.executemany(
-                    "INSERT INTO Alienated VALUES (?,?,?,?,?,?,?)",
+                    "INSERT INTO Alienated VALUES (?,?,?,?)",
                     events,
                 )
             log.debug(f"Inserted {len(events)} events into Alienated table")

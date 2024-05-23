@@ -43,7 +43,6 @@ class IdInitiatedTrigger(Trigger):
         Returns:
             bool: True if the event is a pool event, False otherwise
         """
-
         if event.args.TYPE == ID_TYPE.POOL:
             return True
         else:
@@ -58,15 +57,19 @@ class IdInitiatedTrigger(Trigger):
         Returns:
             list[tuple]: list of saveable events
         """
-
         saveable_events: list[tuple] = []
         for event in events:
+            pool_id: str = str(event.args.id)
+            block_number: int = event.blockNumber
+            transaction_index: int = event.transactionIndex
+            log_index: int = event.logIndex
+
             saveable_events.append(
                 (
-                    event.args.id,
-                    event.blockNumber,
-                    event.transactionIndex,
-                    event.logIndex,
+                    pool_id,
+                    block_number,
+                    transaction_index,
+                    log_index,
                 )
             )
 
@@ -80,7 +83,10 @@ class IdInitiatedTrigger(Trigger):
         """
         try:
             with Database() as db:
-                db.execute("INSERT INTO IdInitiated VALUES (?,?,?,?,?,?,?)", events)
+                db.executemany(
+                    "INSERT INTO IdInitiated VALUES(?,?,?,?)",
+                    events,
+                )
             log.debug(f"Inserted {len(events)} events into IdInitiated table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table IdInitiated") from e

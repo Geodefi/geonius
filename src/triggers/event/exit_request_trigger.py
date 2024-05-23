@@ -89,7 +89,7 @@ class ExitRequestTrigger(Trigger):
         try:
             with Database() as db:
                 db.executemany(
-                    "INSERT INTO ExitRequest VALUES (?,?,?,?,?,?,?)",
+                    "INSERT INTO ExitRequest VALUES (?,?,?,?)",
                     events,
                 )
             log.debug(f"Inserted {len(events)} events into ExitRequest table")

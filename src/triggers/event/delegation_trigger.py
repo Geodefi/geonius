@@ -86,7 +86,7 @@ class DelegationTrigger(Trigger):
         try:
             with Database() as db:
                 db.executemany(
-                    "INSERT INTO Delegation VALUES (?,?,?,?,?,?,?,?,?)",
+                    "INSERT INTO Delegation VALUES (?,?,?,?,?,?)",
                     events,
                 )
             log.debug(f"Inserted {len(events)} events into Delegation table")

@@ -10,14 +10,12 @@ from src.triggers import (
     DelegationTrigger,
     FallbackOperatorTrigger,
     IdInitiatedTrigger,
-    # PoolsDBTrigger,
     StakeTrigger,
     DepositTrigger,
     ExitRequestTrigger,
 )
 from src.utils import send_email
 from src.helpers import (
-    find_latest_event_block,
     reinitialize_validators_table,
     fill_validators_table,
     reinitialize_pools_table,
@@ -37,12 +35,12 @@ def init_dbs():
     # log.info("Initializing info")
 
     # initialize pools table and fill it with current data
-    reinitialize_pools_table()  # TODO: This will be removed after testing
-    fill_pools_table(get_all_pool_ids())
+    # reinitialize_pools_table()  # TODO: This will be removed after testing
+    # fill_pools_table(get_all_pool_ids())
 
     # # initialize validators table and fill it with current data
-    reinitialize_validators_table()  # TODO: This will be removed after testing
-    fill_validators_table(get_all_owned_pubkeys())
+    # reinitialize_validators_table()  # TODO: This will be removed after testing
+    # fill_validators_table(get_all_owned_pubkeys())
 
 
 def setup_daemons():
@@ -52,16 +50,14 @@ def setup_daemons():
     daemons are running.
     """
     # Triggers
-    # pools_db_trigger: PoolsDBTrigger = (
-    #     PoolsDBTrigger()
-    # )  # TODO: This will be removed and db setup will be initialized on here.
+
     id_initiated_trigger: IdInitiatedTrigger = IdInitiatedTrigger()
     deposit_trigger: DepositTrigger = DepositTrigger()
     delegation_trigger: DelegationTrigger = DelegationTrigger()
     fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
-    alienated_trigger: AlienatedTrigger = AlienatedTrigger()
-    stake_trigger: StakeTrigger = StakeTrigger()
-    exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
+    # alienated_trigger: AlienatedTrigger = AlienatedTrigger()
+    # stake_trigger: StakeTrigger = StakeTrigger()
+    # exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
 
     events: ContractEvent = SDK.portal.contract.events
 
@@ -69,47 +65,38 @@ def setup_daemons():
     id_initiated_daemon: EventDaemon = EventDaemon(
         trigger=id_initiated_trigger,
         event=events.IdInitiated(),
-        start_block=find_latest_event_block("IdInitiated"),
     )
     deposit_daemon: EventDaemon = EventDaemon(
         trigger=deposit_trigger,
         event=events.Deposit(),
-        start_block=find_latest_event_block("Deposit"),
     )
     delegation_daemon: EventDaemon = EventDaemon(
         trigger=delegation_trigger,
         event=events.Delegation(),
-        start_block=find_latest_event_block("Delegation"),
     )
     fallback_operator_daemon: EventDaemon = EventDaemon(
         trigger=fallback_operator_trigger,
         event=events.FallbackOperator(),
-        start_block=find_latest_event_block("FallbackOperator"),
     )
-    alienated_daemon: EventDaemon = EventDaemon(
-        trigger=alienated_trigger,
-        event=events.Alienated(),
-        start_block=find_latest_event_block("Alienated"),
-    )
-    exit_request_daemon: EventDaemon = EventDaemon(
-        trigger=exit_request_trigger,
-        event=events.ExitRequest(),
-        start_block=find_latest_event_block("ExitRequest"),
-    )
-    # pools_db_daemon: TimeDaemon = TimeDaemon(
-    #     interval=21600, trigger=pools_db_trigger
-    # )  # TODO: This will be removed after testing
-    stake_daemon: BlockDaemon = BlockDaemon(trigger=stake_trigger, block_period=1)
+    # alienated_daemon: EventDaemon = EventDaemon(
+    #     trigger=alienated_trigger,
+    #     event=events.Alienated(),
+    # )
+    # exit_request_daemon: EventDaemon = EventDaemon(
+    #     trigger=exit_request_trigger,
+    #     event=events.ExitRequest(),
+    # )
+
+    # stake_daemon: BlockDaemon = BlockDaemon(trigger=stake_trigger, block_period=1)
 
     # Run the daemons
-    # pools_db_daemon.run()
     id_initiated_daemon.run()
     deposit_daemon.run()
     delegation_daemon.run()
     fallback_operator_daemon.run()
-    alienated_daemon.run()
-    exit_request_daemon.run()
-    stake_daemon.run()
+    # alienated_daemon.run()
+    # exit_request_daemon.run()
+    # stake_daemon.run()
 
 
 def main():

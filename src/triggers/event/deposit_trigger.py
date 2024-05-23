@@ -71,7 +71,7 @@ class DepositTrigger(Trigger):
         try:
             with Database() as db:
                 db.execute_many(
-                    "INSERT INTO Deposit VALUES (?,?,?,?,?,?,?,?,?)",
+                    "INSERT INTO Deposit VALUES (?,?,?,?,?,?)",
                     events,
                 )
             log.debug(f"Inserted {len(events)} events into Deposit table")

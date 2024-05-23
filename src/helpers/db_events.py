@@ -7,44 +7,49 @@ from src.classes import Database
 from src.globals import chain
 from src.logger import log
 from src.exceptions import DatabaseError
+from src.utils import AttributeDict, convert_recursive
 
 
-def find_latest_event_block(event_name: str) -> int:
-    """Finds the latest block number for the given event_name in the database. \
-        If not found, returns the first block number.
+def find_latest_event(event_name: str) -> AttributeDict:
+    """Finds the latest eventt info for the given event_name in the database.
 
     Args:
         event_name (str): Name of the event.
 
     Returns:
-        int: Latest saved block number for the given event_name. If not found, \
-        returns the first block number.
+        AttributeDict: Blocknumber, tx index and log index \
+            that will define the starting point for the given event_name. \
+                If no event is found in database, returns provided default start info.
     """
 
     try:
         with Database() as db:
             db.execute(
                 f"""
-                SELECT block_number
+                SELECT block_number,transaction_index,log_index
                 FROM {event_name}
-                ORDER BY block_number DESC
+                ORDER BY block_number DESC, transaction_index DESC, log_index DESC
                 LIMIT 1
                 """,
             )
-            latest_block = db.fetchone()
+            found_event = db.fetchone()
+            if found_event:
+                e = found_event
+                log.debug(f"Found on database:{event_name} => {e[0]}/{e[1]}/{e[2]}")
+                return convert_recursive(
+                    {"block_number": e[0], "transaction_index": e[1], "log_index": e[2]}
+                )
 
-            if latest_block:
-                log.debug(f"Found the event:{event_name} on database: {latest_block}")
-                return latest_block[0]
     except Exception as e:
         raise DatabaseError(f"Error finding latest block for {event_name}") from e
 
-    start: int = int(chain.start)
     log.debug(
         f"Could not find the event:{event_name} on database. \
-            Proceeding with default initial block:{start}"
+            Proceeding with default initial block:{chain.start}"
     )
-    return chain.start
+    return convert_recursive(
+        {"block_number": int(chain.start), "transaction_index": 0, "log_index": 0}
+    )
 
 
 def create_alienated_table() -> None:
@@ -222,8 +227,8 @@ def event_handler(
     Returns:
         Iterable[EventData]: list of events.
     """
-    if filter_func is not None:
-        events: Iterable[EventData] = filter(filter_func, events)
+    if filter_func:
+        events: Iterable[EventData] = list(filter(filter_func, events))
     saveable_events: list[tuple] = parser(events)
     saver(saveable_events)
 

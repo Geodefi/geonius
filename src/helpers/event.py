@@ -36,8 +36,8 @@ def get_batch_events(event: ContractEvent, from_block: int, limit: int) -> Itera
 
     # @dev do not use filters instead, some providers do not support it.
     logs = event.get_logs(fromBlock=from_block, toBlock=to_block)
-    log.debug(f"Found {event} event logs between {from_block}-{to_block} blocks:{len(logs)}")
-    return
+    log.info(f"Detected {event.event_name} logs between {from_block}-{to_block} => {len(logs)}")
+    return logs
 
 
 def get_all_events(event: ContractEvent, first_block: int, last_block: int) -> Iterable[EventData]:

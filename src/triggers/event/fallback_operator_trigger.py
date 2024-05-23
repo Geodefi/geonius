@@ -86,7 +86,7 @@ class FallbackOperatorTrigger(Trigger):
         try:
             with Database() as db:
                 db.executemany(
-                    "INSERT INTO FallbackOperator VALUES (?,?,?,?,?,?,?,?)",
+                    "INSERT INTO FallbackOperator VALUES (?,?,?,?,?)",
                     events,
                 )
             log.debug(f"Inserted {len(events)} events into FallbackOperator table")

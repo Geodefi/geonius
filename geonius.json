@@ -4,7 +4,7 @@
     "file": true,
     "stream": true,
     "directory": "logs",
-    "level": "INFO",
+    "level": "DEBUG",
     "when": "midnight",
     "interval": 1,
     "backup": 30
@@ -14,7 +14,7 @@
   },
   "chains": {
     "holesky": {
-      "start": 1463900,
+      "start": 1550551,
       "identifier": "latest",
       "period": "1",
       "interval": "12",

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .db_events import (
-    find_latest_event_block,
+    find_latest_event,
     create_alienated_table,
     create_delegation_table,
     create_deposit_table,
