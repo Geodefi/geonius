@@ -2,8 +2,26 @@
 
 from typing import Any, Callable
 from multiprocessing.pool import ThreadPool
+from threading import current_thread
 
-# from src.logger import log
+from ..logger import log
+
+from functools import wraps
+from multiprocessing.pool import ThreadPool
+
+
+def rename_worker(fn):
+
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        w = fn(*args, **kwargs)
+        w.name = w.name.replace('Thread', (current_thread()).name)
+        return w
+
+    return wrapper
+
+
+ThreadPool.Process = staticmethod(rename_worker(ThreadPool.Process))
 
 
 def multithread(func: Callable, *args, num_threads: int = None, chunk_size: int = 1) -> list[Any]:
@@ -18,7 +36,7 @@ def multithread(func: Callable, *args, num_threads: int = None, chunk_size: int 
     Returns:
         list[Any]: list of results from the function calls
     """
-    # log.debug(f"Calling {func.__name__} multithreaded.")
+    log.debug(f"Calling {func.__name__} multithreaded.")
     with ThreadPool(processes=num_threads) as pool:
         res: Any = pool.starmap(func, zip(*args), chunksize=chunk_size)
 
