@@ -7,7 +7,7 @@ from src.classes import Database
 from src.globals import chain
 from src.logger import log
 from src.exceptions import DatabaseError
-from src.utils import AttributeDict, convert_recursive
+from src.common import AttributeDict
 
 
 def find_latest_event(event_name: str) -> AttributeDict:
@@ -36,7 +36,7 @@ def find_latest_event(event_name: str) -> AttributeDict:
             if found_event:
                 e = found_event
                 log.debug(f"Found on database:{event_name} => {e[0]}/{e[1]}/{e[2]}")
-                return convert_recursive(
+                return AttributeDict.convert_recursive(
                     {"block_number": e[0], "transaction_index": e[1], "log_index": e[2]}
                 )
 
@@ -47,7 +47,7 @@ def find_latest_event(event_name: str) -> AttributeDict:
         f"Could not find the event:{event_name} on database. \
             Proceeding with default initial block:{chain.start}"
     )
-    return convert_recursive(
+    return AttributeDict.convert_recursive(
         {"block_number": int(chain.start), "transaction_index": 0, "log_index": 0}
     )
 

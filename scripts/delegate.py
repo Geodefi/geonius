@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 
 from geodefi.globals import ID_TYPE
 
+from geodefi import Geode
+
 import sys
 
 sys.path.append(".")
@@ -14,7 +16,6 @@ sys.path.append(".")
 from src.globals import SDK
 from src.helpers import get_name
 
-from geodefi import Geode
 
 load_dotenv()
 

@@ -31,9 +31,6 @@ def init_dbs():
     This function is called at the beginning of the program to make sure the
     databases are up to date.
     """
-    # log.debug("Initializing.")
-    # log.info("Initializing info")
-
     # initialize pools table and fill it with current data
     reinitialize_pools_table()  # TODO: This will be removed after testing
     fill_pools_table(get_all_pool_ids())

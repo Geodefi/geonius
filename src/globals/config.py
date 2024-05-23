@@ -2,7 +2,7 @@
 
 import json
 
-from src.utils.attribute_dict import AttributeDict, convert_recursive
+from src.common import AttributeDict
 from src.exceptions import ConfigurationError
 
 from .sdk import SDK
@@ -76,15 +76,13 @@ def __init_config() -> AttributeDict:
         if flags.config_path:
             config_path = flags.config_path
 
-        # log.info(f"Expected config path: {config_path}")
-
         # catch configuration variables
         config_dict: dict = json.load(open(config_path, encoding="utf-8"))
 
         if not isinstance(config_dict, dict):
             raise TypeError("Config file should be a dict after loading from json, but it is not.")
 
-        config: AttributeDict = convert_recursive(config_dict)
+        config: AttributeDict = AttributeDict.convert_recursive(config_dict)
 
     except Exception as e:
         raise ConfigurationError("Error loading configuration file `geonius.json`.") from e
