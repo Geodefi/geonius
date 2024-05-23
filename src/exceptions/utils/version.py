@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from ..custom_exception import CustomException
 
-
-class PythonVersionException(CustomException):
+class PythonVersionException(Exception):
     "Python version is not supported."

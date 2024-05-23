@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from ..custom_exception import CustomException
 
-
-class DatabaseError(CustomException):
+class DatabaseError(Exception):
     """Exception raised for errors related with Database actions."""
 
 

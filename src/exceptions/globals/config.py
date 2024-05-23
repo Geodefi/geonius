@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from ..custom_exception import CustomException
 
 
-class ConfigurationError(CustomException):
+class ConfigurationError(Exception):
     "An error occurred during configuration."
