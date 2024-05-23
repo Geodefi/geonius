@@ -23,7 +23,6 @@ def create_pools_table() -> None:
                 """
                 CREATE TABLE IF NOT EXISTS Pools (
                     id TEXT NOT NULL PRIMARY KEY,
-                    surplus TEXT ,
                     fallback INTEGER DEFAULT 0
                 )
                 """
@@ -62,21 +61,19 @@ def fetch_pools_batch(ids: list[int]) -> list[dict]:
         ids (list[int]): pool IDs that will be fetched
 
     Returns:
-        list[dict]: list of dictionaries containing the pool info, in format of [{id: val, surplus: val,...},...]
+        list[dict]: list of dictionaries containing the pool info, in format of [{id: val, fallback: bool,...},...]
     """
     log.debug(f"Fetching pools.")
 
-    surpluses: list[int] = multithread(get_surplus, ids)
     fallback_operators: list[int] = multithread(get_fallback_operator, ids)
 
     # transpose the info and insert all the pools
     pools_transposed: list[dict] = [
         {
             "id": str(id),
-            "surplus": str(surplus),
             "fallback": 1 if fallback == OPERATOR_ID else 0,
         }
-        for (id, surplus, fallback) in zip(ids, surpluses, fallback_operators)
+        for (id, fallback) in zip(ids, fallback_operators)
     ]
     return pools_transposed
 
@@ -95,11 +92,10 @@ def insert_many_pools(new_pools: list[dict]) -> None:
     try:
         with Database() as db:
             db.executemany(
-                "INSERT INTO Pools VALUES (?,?,?)",
+                "INSERT INTO Pools VALUES (?,?)",
                 [
                     (
                         a["id"],
-                        a["surplus"],
                         a["fallback"],
                     )
                     for a in new_pools
@@ -117,35 +113,6 @@ def fill_pools_table(ids: list[int]) -> None:
     """
 
     insert_many_pools(fetch_pools_batch(ids))
-
-
-def save_surplus(pool_id: int, surplus: int) -> None:
-    """Sets surplus of pool on database to provided value
-
-    Args:
-        pool_id (int): pool ID
-        surplus (int): surplus value to be updated
-
-    Raises:
-        DatabaseError: Error updating surplus of pool
-    """
-    log.debug(f"Saving the surplus for {pool_id} : {surplus}")
-
-    try:
-        with Database() as db:
-            db.execute(
-                """
-                UPDATE Pools 
-                SET surplus = ?
-                WHERE Id =?
-                """,
-                (str(surplus), str(pool_id)),
-            )
-    except Exception as e:
-        raise DatabaseError(
-            f"Error updating surplus of pool with id {pool_id} and surplus {surplus} \
-                in table Pools"
-        ) from e
 
 
 def save_fallback_operator(pool_id: int, value: bool) -> None:

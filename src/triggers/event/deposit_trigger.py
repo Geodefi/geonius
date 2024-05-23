@@ -12,7 +12,6 @@ from src.helpers import (
     fill_validators_table,
     get_surplus,
     create_pools_table,
-    save_surplus,
     check_and_propose,
 )
 
@@ -32,7 +31,7 @@ class DepositTrigger(Trigger):
         It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
         """
 
-        Trigger.__init__(self, name=self.name, action=self.update_surplus)
+        Trigger.__init__(self, name=self.name, action=self.consider_deposit)
         create_pools_table()
         create_deposit_table()
         log.debug(f"{self.name} is initated.")
@@ -78,7 +77,7 @@ class DepositTrigger(Trigger):
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Deposit") from e
 
-    def update_surplus(self, events: Iterable[EventData], *args, **kwargs) -> None:
+    def consider_deposit(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Updates the surplus for given pool with the current data.
         for encountered pool ids within provided "Deposit" emits.
 
@@ -98,10 +97,6 @@ class DepositTrigger(Trigger):
 
         all_proposed_pks: list[str] = []
         for pool_id in pool_ids:
-            # save to db
-            surplus: int = get_surplus(pool_id)
-            save_surplus(pool_id, surplus)
-
             # if able to propose any new validators do so
             proposed_pks: list[str] = check_and_propose(pool_id)
             all_proposed_pks.extend(proposed_pks)

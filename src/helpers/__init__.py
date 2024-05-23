@@ -18,7 +18,6 @@ from .db_pools import (
     fetch_pools_batch,
     insert_many_pools,
     fill_pools_table,
-    save_surplus,
     save_fallback_operator,
 )
 from .db_validators import (
