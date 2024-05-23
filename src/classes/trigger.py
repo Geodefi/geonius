@@ -35,7 +35,7 @@ class Trigger:
             raise ValueError(f"Name length should be max {__name_len} characters.")
         self.name: str = name
 
-        log.info(f"Trigger {name} is initalized.")
+        log.debug(f"Trigger {name} is initalized.")
         self.__register_action(action)
 
     def __register_action(self, action: Callable) -> None:
