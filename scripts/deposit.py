@@ -1,20 +1,18 @@
 # Initilize Geode
-from os import getenv
-from time import sleep
-import random
-
 import sys
 
 sys.path.append(".")
 
+from os import getenv
+from time import sleep
+import random
 from dotenv import load_dotenv
-
+from geodefi import Geode
 from geodefi.globals import ID_TYPE
-
 from src.globals import SDK
+from src.logger import log
 from src.helpers import get_name
 
-from geodefi import Geode
 
 load_dotenv()
 
@@ -33,7 +31,7 @@ if pools_len > 0:
 while True:
     try:
         pool_id = random.choice(pools)
-        print(f"Depositing 1 wei to pool {get_name(pool_id)}")
+        log.info(f"Depositing 1 wei to pool {get_name(pool_id)}")
         tx_hash: bytes = SDK.portal.contract.functions.deposit(
             int(pool_id),
             0,
@@ -42,7 +40,7 @@ while True:
             1719127731,
             SDK.w3.eth.defaultAccount.address,
         ).transact({"value": 1_000_000_000, "from": SDK.w3.eth.defaultAccount.address})
-        print(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
+        log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
     except:
-        print("Tx failed, trying again.")
+        log.error("Tx failed, trying again.")
     sleep(32)
