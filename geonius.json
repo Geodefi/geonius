@@ -1,5 +1,5 @@
 {
-  "directory": ".geonius",
+  "directory": "geonius",
   "logger": {
     "file": true,
     "stream": true,

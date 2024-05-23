@@ -80,7 +80,7 @@ def get_surplus(pool_id: int) -> int:
         int: Surplus of the pool in wei.
     """
 
-    log.debug("Fetching the surplus of a pool: {pool_id}")
+    log.debug(f"Fetching the surplus of a pool: {pool_id}")
     return SDK.portal.functions.readUint(pool_id, to_bytes32("surplus")).call()
 
 

@@ -35,12 +35,12 @@ def init_dbs():
     # log.info("Initializing info")
 
     # initialize pools table and fill it with current data
-    # reinitialize_pools_table()  # TODO: This will be removed after testing
-    # fill_pools_table(get_all_pool_ids())
+    reinitialize_pools_table()  # TODO: This will be removed after testing
+    fill_pools_table(get_all_pool_ids())
 
     # # initialize validators table and fill it with current data
-    # reinitialize_validators_table()  # TODO: This will be removed after testing
-    # fill_validators_table(get_all_owned_pubkeys())
+    reinitialize_validators_table()  # TODO: This will be removed after testing
+    fill_validators_table(get_all_owned_pubkeys())
 
 
 def setup_daemons():
@@ -53,8 +53,8 @@ def setup_daemons():
 
     id_initiated_trigger: IdInitiatedTrigger = IdInitiatedTrigger()
     deposit_trigger: DepositTrigger = DepositTrigger()
-    delegation_trigger: DelegationTrigger = DelegationTrigger()
-    fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
+    # delegation_trigger: DelegationTrigger = DelegationTrigger()
+    # fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
     # alienated_trigger: AlienatedTrigger = AlienatedTrigger()
     # stake_trigger: StakeTrigger = StakeTrigger()
     # exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
@@ -70,14 +70,14 @@ def setup_daemons():
         trigger=deposit_trigger,
         event=events.Deposit(),
     )
-    delegation_daemon: EventDaemon = EventDaemon(
-        trigger=delegation_trigger,
-        event=events.Delegation(),
-    )
-    fallback_operator_daemon: EventDaemon = EventDaemon(
-        trigger=fallback_operator_trigger,
-        event=events.FallbackOperator(),
-    )
+    # delegation_daemon: EventDaemon = EventDaemon(
+    #     trigger=delegation_trigger,
+    #     event=events.Delegation(),
+    # )
+    # fallback_operator_daemon: EventDaemon = EventDaemon(
+    #     trigger=fallback_operator_trigger,
+    #     event=events.FallbackOperator(),
+    # )
     # alienated_daemon: EventDaemon = EventDaemon(
     #     trigger=alienated_trigger,
     #     event=events.Alienated(),
@@ -92,8 +92,8 @@ def setup_daemons():
     # Run the daemons
     id_initiated_daemon.run()
     deposit_daemon.run()
-    delegation_daemon.run()
-    fallback_operator_daemon.run()
+    # delegation_daemon.run()
+    # fallback_operator_daemon.run()
     # alienated_daemon.run()
     # exit_request_daemon.run()
     # stake_daemon.run()
