@@ -55,9 +55,9 @@ def setup_daemons():
     deposit_trigger: DepositTrigger = DepositTrigger()
     delegation_trigger: DelegationTrigger = DelegationTrigger()
     fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
-    # alienated_trigger: AlienatedTrigger = AlienatedTrigger()
-    # stake_trigger: StakeTrigger = StakeTrigger()
-    # exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
+    alienated_trigger: AlienatedTrigger = AlienatedTrigger()
+    exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
+    stake_trigger: StakeTrigger = StakeTrigger()
 
     events: ContractEvent = SDK.portal.contract.events
 
@@ -78,25 +78,25 @@ def setup_daemons():
         trigger=fallback_operator_trigger,
         event=events.FallbackOperator(),
     )
-    # alienated_daemon: EventDaemon = EventDaemon(
-    #     trigger=alienated_trigger,
-    #     event=events.Alienated(),
-    # )
-    # exit_request_daemon: EventDaemon = EventDaemon(
-    #     trigger=exit_request_trigger,
-    #     event=events.ExitRequest(),
-    # )
+    alienated_daemon: EventDaemon = EventDaemon(
+        trigger=alienated_trigger,
+        event=events.Alienated(),
+    )
+    exit_request_daemon: EventDaemon = EventDaemon(
+        trigger=exit_request_trigger,
+        event=events.ExitRequest(),
+    )
 
-    # stake_daemon: BlockDaemon = BlockDaemon(trigger=stake_trigger, block_period=1)
+    stake_daemon: BlockDaemon = BlockDaemon(trigger=stake_trigger, block_period=1)
 
     # Run the daemons
     id_initiated_daemon.run()
     deposit_daemon.run()
     delegation_daemon.run()
     fallback_operator_daemon.run()
-    # alienated_daemon.run()
-    # exit_request_daemon.run()
-    # stake_daemon.run()
+    alienated_daemon.run()
+    exit_request_daemon.run()
+    stake_daemon.run()
 
 
 def main():

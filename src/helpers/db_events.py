@@ -67,8 +67,8 @@ def create_alienated_table() -> None:
                     pk TEXT NOT NULL,
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
-                    log_index INTEGER NOT NULL
-                    FOREIGN KEY (pk) REFERENCES Validators (pk),
+                    log_index INTEGER NOT NULL,
+                    FOREIGN KEY (pk) REFERENCES Validators (pk)
                 )
                 """
             )
