@@ -49,18 +49,24 @@ Run:
 
  ```bash
  export PYTHONFAULTHANDLER=1
- PYTHONPATH=.  python3 src/main.py --flags
+ PYTHONPATH=.  python3 src/main.py --flags 
  ```
+
+ Put & to run it on background
 
 ### Flags
 
 | Parameter  | Description |
 | --- | --- |
+| --reset               |      Clears database on reboot. Useful when mitigating issues such as migration.                                              |
 | --no-log-stream       |      Don't print log messages to stdout                                                                                       |
 | --no-log-file         |      Don't save log messages to files                                                                                         |
+| --main-directory      |      Main directory name that will be created, and used to store data                                                         |
 | --min-proposal-queue  |      Minimum amount of proposals to wait before creating a tx                                                                 |
 | --max-proposal-delay  |      Max seconds for any proposals to wait                                                                                    |
-| --main-directory      |      Main directory name that will be created, and used to store data                                                         |
+| --network-refresh-rate|      Cached data will be refreshed after provided delay (in seconds)                                                          |
+| --network-attempt-rate|      Interval between api requests (in seconds)                                                                               |
+| --network-max-attempt |      Api requests will fail after given max calls                                                                                    |
 | --logger-directory    |      Main directory the log files will be stored                                                                              |
 | --logger-level        |      Set log level to DEBUG, INFO, WARNING, ERROR, CRITICAL                                                                   |
 | --logger-when         |      When should logger continue with a new file: 'S', 'M', 'H', 'D', 'W0', 'W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'midnight'    |

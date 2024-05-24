@@ -78,7 +78,7 @@ class Loggable:
         """Returns the logger formatter with Multithread support.
 
         Example formatted msg for stream:
-            [09:28:05] BLOCK_DAEMON | CRITICAL ::critical message
+            [01:35:56] STAKE                | INFO     :: 0 new verified public keys are detected.
 
         Returns:
             Formatter: Formatter object to be used in the logger.

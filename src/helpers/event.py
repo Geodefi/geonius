@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from typing import Any, Iterable
+from typing import Callable, Iterable, Any
 from itertools import repeat
 from eth_abi import abi
 from web3.types import EventData
@@ -85,3 +84,28 @@ def decode_abi(types: list, data: Any) -> tuple:
 
     decoded: tuple = abi.decode(types, bytes.fromhex(str(data.hex())[2:]))
     return decoded
+
+
+def event_handler(
+    events: Iterable[EventData],
+    parser: Callable,
+    saver: Callable,
+    filter_func: Callable = None,
+) -> Iterable[EventData]:
+    """Handles the events by filtering, parsing and saving them.
+
+    Args:
+        events (Iterable[EventData]): list of events.
+        parser (Callable): Function to parse the events.
+        saver (Callable): Function to save the events.
+        filter_func (Callable, optional): Function to filter the events. Defaults to None.
+
+    Returns:
+        Iterable[EventData]: list of events.
+    """
+    if filter_func:
+        events: Iterable[EventData] = list(filter(filter_func, events))
+    saveable_events: list[tuple] = parser(events)
+    saver(saveable_events)
+
+    return events

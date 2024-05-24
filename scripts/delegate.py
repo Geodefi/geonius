@@ -7,14 +7,16 @@ from dotenv import load_dotenv
 
 from geodefi.globals import ID_TYPE
 
+from geodefi import Geode
+
 import sys
 
 sys.path.append(".")
 
 from src.globals import SDK
 from src.helpers import get_name
-
-from geodefi import Geode
+from src.logger import log
+from src.utils import get_gas
 
 load_dotenv()
 
@@ -51,30 +53,20 @@ while True:
         try:
             allowance = random.randint(0, 100)
             pool_id = random.choice(pools)
-            print(
+            log.info(
                 f"Delegating {allowance} to operator {get_name(op_id)} in pool {get_name(pool_id)}"
             )
+            priority_fee, base_fee = get_gas()
             tx_hash: str = SDK.portal.contract.functions.delegate(
                 pool_id, [op_id], [allowance]
-            ).transact({"from": SDK.w3.eth.defaultAccount.address})
-            print(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
+            ).transact(
+                {
+                    "from": SDK.w3.eth.defaultAccount.address,
+                    "maxPriorityFeePerGas": priority_fee,
+                    "maxFeePerGas": base_fee,
+                }
+            )
+            log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
         except:
-            print("Tx failed, trying again.")
+            log.error("Tx failed, trying again.")
         sleep(87)
-
-
-# threshold = 9e9  # 90%
-# tx_hash: str = SDK.portal.contract.functions.fallbackThreshold(pool_id, ice_op, threshold).transact(
-#     {"from": SDK.w3.eth.defaultAccount.address}
-# )
-# choose a pool id:
-# # random an action:
-# # # deposit
-# ->>>>>>>>>>>>>> wait.
-# # # delegate
-# ---------------> random operator
-# ->>>>>>>>>>>>>> wait.
-# # # fallback
-# ---------------> random operator
-# ---------------> x% : 1, 30, 90, 100
-# ->>>>>>>>>>>>>> wait.

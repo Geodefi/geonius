@@ -29,10 +29,10 @@ class ExitRequestTrigger(Trigger):
     """Trigger for the EXIT_REQUEST event. This event is emitted when a validator requests to exit.
 
     Attributes:
-        name (str): The name of the trigger to be used when logging (value: EXIT_REQUEST_TRIGGER)
+        name (str): The name of the trigger to be used when logging (value: EXIT_REQUEST)
     """
 
-    name: str = "EXIT_REQUEST_TRIGGER"
+    name: str = "EXIT_REQUEST"
 
     def __init__(self) -> None:
         """Initializes an ExitRequestTrigger object. The trigger will process the changes of the daemon after a loop.

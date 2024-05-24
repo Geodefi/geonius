@@ -21,10 +21,10 @@ class DepositTrigger(Trigger):
     Updates the database with the latest info.
 
     Attributes:
-        name (str): name of the trigger to be used when logging etc. (value: DEPOSIT_TRIGGER)
+        name (str): name of the trigger to be used when logging etc. (value: DEPOSIT)
     """
 
-    name: str = "DEPOSIT_TRIGGER"
+    name: str = "DEPOSIT"
 
     def __init__(self) -> None:
         """Initializes a DepositTrigger object. The trigger will process the changes of the daemon after a loop.

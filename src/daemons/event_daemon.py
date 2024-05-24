@@ -8,7 +8,8 @@ from src.globals import SDK, chain
 
 from src.logger import log
 from src.helpers import get_all_events, find_latest_event
-from src.utils import send_email, AttributeDict, convert_recursive
+from src.utils import send_email
+from src.common import AttributeDict
 
 
 class EventDaemon(Daemon):
@@ -106,7 +107,7 @@ class EventDaemon(Daemon):
 
             # take a snapshot after finishing processing the block.\
             # Does not matter if there are events or not.
-            self.__last_snapshot = convert_recursive(
+            self.__last_snapshot = AttributeDict.convert_recursive(
                 {"block_number": curr_block, "transaction_index": 0, "log_index": 0}
             )
 

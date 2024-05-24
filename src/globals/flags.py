@@ -3,7 +3,12 @@
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
-
+parser.add_argument(
+    "--reset",
+    action="store_true",
+    dest="reset",
+    help="reinitializes the databases",
+)
 parser.add_argument(
     "--no-log-stream",
     action="store_true",
@@ -15,6 +20,12 @@ parser.add_argument(
     action="store_true",
     dest="no_log_file",
     help="don't save log messages to files",
+)
+parser.add_argument(
+    "--main-directory",
+    action="store",
+    dest="main_directory",
+    help="main directory name that will be created, and used to store data",
 )
 parser.add_argument(
     "--min-proposal-queue",
@@ -31,10 +42,22 @@ parser.add_argument(
     help="Max seconds for any proposals to wait",
 )
 parser.add_argument(
-    "--main-directory",
+    "--network-refresh-rate",
     action="store",
-    dest="main_directory",
-    help="main directory name that will be created, and used to store data",
+    dest="network_refresh_rate",
+    help="Cached data will be refreshed after provided delay (s)",
+)
+parser.add_argument(
+    "--network-attempt-rate",
+    action="store",
+    dest="network_attempt_rate",
+    help="Interval between api requests (s)",
+)
+parser.add_argument(
+    "--network-max-attempt",
+    action="store",
+    dest="network_max_attempt",
+    help="Api requests will fail after given max calls",
 )
 parser.add_argument(
     "--logger-directory",
@@ -130,4 +153,7 @@ parser.add_argument(
     help="use a different config file than default geonius.json",
 )
 
-flags, unknown = parser.parse_known_args()
+FLAGS, unknown = parser.parse_known_args()
+
+if unknown:
+    print("Unknown flags provided:", unknown)
