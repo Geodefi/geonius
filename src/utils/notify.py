@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -9,15 +10,16 @@ from src.globals import CONFIG, OPERATOR_ID, SENDER_EMAIL, SENDER_PASSWORD, RECE
 from src.logger import log
 
 
-def log_file_name():
-    # TODO: get the correct filename from log
-    return "log"
+def get_log_attachment():
+    return (os.getcwd().join(CONFIG.directory).join(CONFIG.logger.directory).join("log"), "log.txt")
 
 
-def send_email(subject, body, attachments: str = None, send_attachments: str = True):
+def send_email(
+    subject, body, attachments: list[tuple[str, str]] = None, send_attachments: str = True
+):
 
     if send_attachments and not attachments:
-        attachments: str = log_file_name()
+        attachments: list[tuple[str, str]] = [get_log_attachment()]
 
     msg: MIMEMultipart = MIMEMultipart()
     msg['From'] = SENDER_EMAIL
