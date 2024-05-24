@@ -65,6 +65,8 @@ def __apply_flags(config: AttributeDict):
         config.ethdo.wallet = FLAGS.ethdo_wallet
     if FLAGS.ethdo_account:
         config.ethdo.account = FLAGS.ethdo_account
+    if FLAGS.not_notify_geode is False:
+        config.email.notify_geode = False
 
     # put the gas api key in the configuration from the environment variables
     if GAS_API_KEY:

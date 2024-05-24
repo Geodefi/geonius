@@ -22,9 +22,9 @@ def send_email(subject, body, attachments: str = None, send_attachments: str = T
     msg: MIMEMultipart = MIMEMultipart()
     msg['From'] = SENDER_EMAIL
     msg['To'] = RECEIVER_EMAIL if RECEIVER_EMAIL else SENDER_EMAIL
-    # TODO: make a way to prevent cc ing us: add --notify-geode : True > readme!
-    msg['Cc'] = CONFIG.email.admin_email
     msg['Subject'] = f"GEONIUS - {OPERATOR_ID}: {subject}"
+    if CONFIG.email.notify_geode:
+        msg['Cc'] = CONFIG.email.admin_email
 
     msg.attach(MIMEText(body, 'plain'))
 

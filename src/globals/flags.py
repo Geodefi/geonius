@@ -10,6 +10,12 @@ parser.add_argument(
     help="reinitializes the databases",
 )
 parser.add_argument(
+    "--not-notify-geode",
+    action="store_false",
+    dest="not_notify_geode",
+    help="don't send email notifications to geode for any alerts",
+)
+parser.add_argument(
     "--no-log-stream",
     action="store_true",
     dest="no_log_stream",
