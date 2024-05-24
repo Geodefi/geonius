@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import json
+import geodefi
 
 from src.common import AttributeDict
 from src.exceptions import ConfigurationError
 
 from .sdk import SDK
 from .flags import FLAGS
-import geodefi
+from .env import GAS_API_KEY
 
 
 def __apply_flags(config: AttributeDict):
@@ -64,6 +65,12 @@ def __apply_flags(config: AttributeDict):
         config.ethdo.wallet = FLAGS.ethdo_wallet
     if FLAGS.ethdo_account:
         config.ethdo.account = FLAGS.ethdo_account
+
+    # put the gas api key in the configuration from the environment variables
+    if GAS_API_KEY:
+        config.gas.api = config.gas.api.replace("<GAS_API_KEY>", GAS_API_KEY)
+    else:
+        config.gas.api = None
 
     return config
 

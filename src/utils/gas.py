@@ -6,8 +6,6 @@ from src.common import AttributeDict
 from src.logger import log
 from src.utils import send_email
 
-# TODO: take <GAS_API_KEY> if if exist and replace with ENV.GAS_API_KEY
-
 
 @http_request
 def fetch_gas() -> tuple:
