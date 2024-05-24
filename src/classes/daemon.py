@@ -63,11 +63,11 @@ class Daemon:
         self.__set_initial_delay(initial_delay)
         self.__set_trigger(trigger)
 
-        # TODO: should consider using daemon threads
+        # TODO: add flag --background : daemon=True
         self.__worker: Thread = Thread(name=trigger.name, target=self.__loop)
         self.start_flag: Event = Event()
         self.stop_flag: Event = Event()
-        log.debug(f"Initialized a Daemon for: {trigger.name}.")
+        log.debug(f"Initialized a Daemon for: {trigger.name:^17}.")
 
     @property
     def interval(self) -> int:
@@ -152,7 +152,7 @@ class Daemon:
 
             except (CallFailedError, TimeExhausted, BeaconStateMismatchError):
                 log.exception(
-                    f"Stopping the Daemon for {self.trigger.name} due to unhandled condition:",
+                    f"Stopping the Daemon for {self.trigger.name:^17} due to unhandled condition:",
                     exc_info=True,
                 )
                 self.start_flag.clear()
@@ -176,7 +176,7 @@ class Daemon:
 
         self.start_flag.set()
         log.info(
-            f"Daemon for {self.trigger.name} is running. Use stop() to stop, and CTRL+Z to exit."
+            f"Daemon for {self.trigger.name:^17} is running. Use stop() to stop, and CTRL+C to exit."
         )
 
     def stop(self) -> None:
@@ -192,4 +192,4 @@ class Daemon:
             raise DaemonError("Daemon is already stopped.")
 
         self.stop_flag.set()
-        log.info(f"Daemon for {self.trigger.name} is stopped.")
+        log.info(f"Daemon for {self.trigger.name:^17} is stopped.")

@@ -5,7 +5,21 @@ from web3.exceptions import TimeExhausted
 from src.globals import SDK, OPERATOR_ID
 from src.exceptions import CannotStakeError, CallFailedError
 from src.logger import log
-from src.utils import send_email
+from src.utils import send_email, get_gas
+
+
+def tx_params() -> dict:
+    priority_fee, base_fee = get_gas()
+    if priority_fee and base_fee:
+        return {
+            "from": SDK.w3.eth.defaultAccount.address,
+            "maxPriorityFeePerGas": priority_fee,
+            "maxFeePerGas": base_fee,
+        }
+    else:
+        return {
+            "from": SDK.w3.eth.defaultAccount.address,
+        }
 
 
 # pylint: disable-next=invalid-name
@@ -38,7 +52,7 @@ def call_proposeStake(
     try:
         tx_hash: str = SDK.portal.functions.proposeStake(
             pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
-        ).transact({"from": SDK.w3.eth.defaultAccount.address})
+        ).transact(tx_params())
 
         log.info(f"proposeStake tx is created: {tx_hash}")
 
@@ -84,9 +98,7 @@ def call_stake(pubkeys: list[str]) -> bool:
                     log.critical(f"Not allowed to finalize staking for provided pubkey: {pubkey}")
                     raise CannotStakeError(f"Validator with pubkey {pubkey} cannot stake")
 
-            tx_hash: str = SDK.portal.functions.stake(pubkeys).transact(
-                {"from": SDK.w3.eth.defaultAccount.address}
-            )
+            tx_hash: str = SDK.portal.functions.stake(pubkeys).transact(tx_params())
             log.info(f"stake tx is created: {tx_hash}")
 
             # Wait for the transaction to be mined, and get the transaction receipt

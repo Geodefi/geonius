@@ -14,3 +14,4 @@ from .env import (
     RECEIVER_EMAIL,
 )
 from .sdk import SDK
+from .flags import FLAGS

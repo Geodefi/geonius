@@ -29,10 +29,10 @@ class ExitRequestTrigger(Trigger):
     """Trigger for the EXIT_REQUEST event. This event is emitted when a validator requests to exit.
 
     Attributes:
-        name (str): The name of the trigger to be used when logging (value: EXIT_REQUEST_TRIGGER)
+        name (str): The name of the trigger to be used when logging (value: EXIT_REQUEST)
     """
 
-    name: str = "EXIT_REQUEST_TRIGGER"
+    name: str = "EXIT_REQUEST"
 
     def __init__(self) -> None:
         """Initializes an ExitRequestTrigger object. The trigger will process the changes of the daemon after a loop.
@@ -71,7 +71,7 @@ class ExitRequestTrigger(Trigger):
         for event in events:
             saveable_events.append(
                 (
-                    event.args.pubkey,
+                    event.args.pubkey,  # TEXT
                     event.blockNumber,
                     event.transactionIndex,
                     event.logIndex,
@@ -89,7 +89,7 @@ class ExitRequestTrigger(Trigger):
         try:
             with Database() as db:
                 db.executemany(
-                    "INSERT INTO ExitRequest VALUES (?,?,?,?,?,?,?)",
+                    "INSERT INTO ExitRequest VALUES (?,?,?,?)",
                     events,
                 )
             log.debug(f"Inserted {len(events)} events into ExitRequest table")
@@ -127,7 +127,7 @@ class ExitRequestTrigger(Trigger):
             val: Validator = SDK.portal.validator(pubkey)
             if val.beacon_status == "active_exiting":
                 # write database the expected exit block
-                # TODO: validator.withdrawable_epoch instead of exit_epoch
+                # TODO: validator.withdrawable_epoch instead of exit_epoch - today
                 save_exit_epoch(pubkey, val.exit_epoch)
                 exitted_pks.append(pubkey)
             else:

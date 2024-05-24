@@ -23,10 +23,10 @@ class FallbackOperatorTrigger(Trigger):
     Updates the database with the latest info.
 
     Attributes:
-        name (str): name of the trigger to be used when logging etc. (value: FALLBACK_OPERATOR_TRIGGER)
+        name (str): name of the trigger to be used when logging etc. (value: FALLBACK_OPERATOR)
     """
 
-    name: str = "FALLBACK_OPERATOR_TRIGGER"
+    name: str = "FALLBACK_OPERATOR"
 
     def __init__(self) -> None:
         """Initializes a FallbackOperatorTrigger object. The trigger will process the changes of the daemon after a loop.
@@ -67,7 +67,7 @@ class FallbackOperatorTrigger(Trigger):
         for event in events:
             saveable_events.append(
                 (
-                    event.args.poolId,
+                    str(event.args.poolId),
                     event.args.threshold,
                     event.blockNumber,
                     event.transactionIndex,
@@ -86,7 +86,7 @@ class FallbackOperatorTrigger(Trigger):
         try:
             with Database() as db:
                 db.executemany(
-                    "INSERT INTO FallbackOperator VALUES (?,?,?,?,?,?,?,?)",
+                    "INSERT INTO FallbackOperator VALUES (?,?,?,?,?)",
                     events,
                 )
             log.debug(f"Inserted {len(events)} events into FallbackOperator table")
@@ -123,5 +123,5 @@ class FallbackOperatorTrigger(Trigger):
             proposed_pks: list[str] = check_and_propose(pool_id)
             all_proposed_pks.extend(proposed_pks)
 
-        if len(all_proposed_pks) > 0:
+        if all_proposed_pks:
             fill_validators_table(all_proposed_pks)

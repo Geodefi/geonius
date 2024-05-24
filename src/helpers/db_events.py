@@ -1,50 +1,53 @@
 # -*- coding: utf-8 -*-
 
-from typing import Callable, Iterable
-from web3.types import EventData
 
 from src.classes import Database
 from src.globals import chain
 from src.logger import log
 from src.exceptions import DatabaseError
+from src.common import AttributeDict
 
 
-def find_latest_event_block(event_name: str) -> int:
-    """Finds the latest block number for the given event_name in the database. \
-        If not found, returns the first block number.
+def find_latest_event(event_name: str) -> AttributeDict:
+    """Finds the latest eventt info for the given event_name in the database.
 
     Args:
         event_name (str): Name of the event.
 
     Returns:
-        int: Latest saved block number for the given event_name. If not found, \
-        returns the first block number.
+        AttributeDict: Blocknumber, tx index and log index \
+            that will define the starting point for the given event_name. \
+                If no event is found in database, returns provided default start info.
     """
 
     try:
         with Database() as db:
             db.execute(
                 f"""
-                SELECT block_number
+                SELECT block_number,transaction_index,log_index
                 FROM {event_name}
-                ORDER BY block_number DESC
+                ORDER BY block_number DESC, transaction_index DESC, log_index DESC
                 LIMIT 1
                 """,
             )
-            latest_block = db.fetchone()
+            found_event = db.fetchone()
+            if found_event:
+                e = found_event
+                log.debug(f"Found on database:{event_name} => {e[0]}/{e[1]}/{e[2]}")
+                return AttributeDict.convert_recursive(
+                    {"block_number": e[0], "transaction_index": e[1], "log_index": e[2]}
+                )
 
-            if latest_block:
-                log.debug(f"Found the event:{event_name} on database: {latest_block}")
-                return latest_block[0]
     except Exception as e:
         raise DatabaseError(f"Error finding latest block for {event_name}") from e
 
-    start: int = int(chain.start)
     log.debug(
         f"Could not find the event:{event_name} on database. \
-            Proceeding with default initial block:{start}"
+            Proceeding with default initial block:{chain.start}"
     )
-    return chain.start
+    return AttributeDict.convert_recursive(
+        {"block_number": int(chain.start), "transaction_index": 0, "log_index": 0}
+    )
 
 
 def create_alienated_table() -> None:
@@ -59,16 +62,39 @@ def create_alienated_table() -> None:
             db.execute(
                 """
                 CREATE TABLE IF NOT EXISTS Alienated (
-                    pk TEXT NOT NULL PRIMARY KEY,
+                    pk TEXT NOT NULL,
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
-                    log_index INTEGER NOT NULL
+                    log_index INTEGER NOT NULL,
+                    FOREIGN KEY (pk) REFERENCES Validators (pk)
                 )
                 """
             )
         log.debug(f"Created a new table: Alienated")
     except Exception as e:
         raise DatabaseError("Error creating Alienated table") from e
+
+
+def drop_alienated_table() -> None:
+    """Removes Alienated table from the database.
+
+    Raises:
+        DatabaseError: Error dropping Alienated table
+    """
+
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS Alienated""")
+        log.debug(f"Dropped Table: Alienated")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping Alienated table") from e
+
+
+def reinitialize_alienated_table() -> None:
+    """Removes Alienated table and creates an empty one."""
+
+    drop_alienated_table()
+    create_alienated_table()
 
 
 def create_delegation_table() -> None:
@@ -89,14 +115,35 @@ def create_delegation_table() -> None:
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    FOREIGN KEY (pool_id) REFERENCES Pools (id),
-                    PRIMARY KEY (pool_id, operator_id)
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
                 """
             )
         log.debug(f"Created a new table: Delegation")
     except Exception as e:
         raise DatabaseError("Error creating Delegation table") from e
+
+
+def drop_delegation_table() -> None:
+    """Removes Delegation table from the database.
+
+    Raises:
+        DatabaseError: Error dropping Delegation table
+    """
+
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS Delegation""")
+        log.debug(f"Dropped Table: Delegation")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping Delegation table") from e
+
+
+def reinitialize_delegation_table() -> None:
+    """Removes delegation table and creates an empty one."""
+
+    drop_delegation_table()
+    create_delegation_table()
 
 
 def create_deposit_table() -> None:
@@ -117,14 +164,35 @@ def create_deposit_table() -> None:
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    FOREIGN KEY (pool_id) REFERENCES Pools (id),
-                    PRIMARY KEY (pool_id)
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
                 """
             )
         log.debug(f"Created a new table: Deposit")
     except Exception as e:
         raise DatabaseError("Error creating Deposit table") from e
+
+
+def drop_deposit_table() -> None:
+    """Removes Deposit table from the database.
+
+    Raises:
+        DatabaseError: Error dropping deposit table
+    """
+
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS Deposit""")
+        log.debug(f"Dropped Table: Deposit")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping Deposit table") from e
+
+
+def reinitialize_deposit_table() -> None:
+    """Removes deposit table and creates an empty one."""
+
+    drop_deposit_table()
+    create_deposit_table()
 
 
 def create_fallback_operator_table() -> None:
@@ -144,14 +212,35 @@ def create_fallback_operator_table() -> None:
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    FOREIGN KEY (pool_id) REFERENCES Pools (id),
-                    PRIMARY KEY (pool_id)
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
                 """
             )
         log.debug(f"Created a new table: FallbackOperator")
     except Exception as e:
         raise DatabaseError("Error creating FallbackOperator table") from e
+
+
+def drop_fallback_operator_table() -> None:
+    """Removes FallbackOperator table from the database.
+
+    Raises:
+        DatabaseError: Error dropping FallbackOperator table
+    """
+
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS FallbackOperator""")
+        log.debug(f"Dropped Table: FallbackOperator")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping FallbackOperator table") from e
+
+
+def reinitialize_fallback_operator_table() -> None:
+    """Removes FallbackOperator table and creates an empty one."""
+
+    drop_fallback_operator_table()
+    create_fallback_operator_table()
 
 
 def create_id_initiated_table() -> None:
@@ -166,17 +255,39 @@ def create_id_initiated_table() -> None:
             db.execute(
                 """
                 CREATE TABLE IF NOT EXISTS IdInitiated (
-                    pool_id TEXT NOT NULL,
+                    pool_id TEXT UNIQUE NOT NULL,
                     block_number INTEGER NOT NULL,
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
-                    PRIMARY KEY (pool_id)
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
                 """
             )
         log.debug(f"Created a new table: IdInitiated")
     except Exception as e:
         raise DatabaseError("Error creating IdInitiated table") from e
+
+
+def drop_id_initiated_table() -> None:
+    """Removes IdInitiated table from the database.
+
+    Raises:
+        DatabaseError: Error dropping IdInitiated table
+    """
+
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS IdInitiated""")
+        log.debug(f"Dropped Table: IdInitiated")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping IdInitiated table") from e
+
+
+def reinitialize_id_initiated_table() -> None:
+    """Removes IdInitiated table and creates an empty one."""
+
+    drop_id_initiated_table()
+    create_id_initiated_table()
 
 
 def create_exit_request_table() -> None:
@@ -191,11 +302,11 @@ def create_exit_request_table() -> None:
             db.execute(
                 """
                  CREATE TABLE IF NOT EXISTS ExitRequest (
-                     pk TEXT NOT NULL,
+                     pk TEXT UNIQUE NOT NULL,
                      block_number INTEGER NOT NULL,
                      transaction_index INTEGER NOT NULL,
                      log_index INTEGER NOT NULL,
-                     FOREIGN KEY (pk) REFERENCES validators(pk),
+                     FOREIGN KEY (pk) REFERENCES Validators (pk),
                      PRIMARY KEY (pk)
                  )
                 """
@@ -205,26 +316,23 @@ def create_exit_request_table() -> None:
         raise DatabaseError("Error creating ExitRequest table") from e
 
 
-def event_handler(
-    events: Iterable[EventData],
-    parser: Callable,
-    saver: Callable,
-    filter_func: Callable = None,
-) -> Iterable[EventData]:
-    """Handles the events by filtering, parsing and saving them.
+def drop_exit_request_table() -> None:
+    """Removes ExitRequest table from the database.
 
-    Args:
-        events (Iterable[EventData]): list of events.
-        parser (Callable): Function to parse the events.
-        saver (Callable): Function to save the events.
-        filter_func (Callable, optional): Function to filter the events. Defaults to None.
-
-    Returns:
-        Iterable[EventData]: list of events.
+    Raises:
+        DatabaseError: Error dropping ExitRequest table
     """
-    if filter_func is not None:
-        events: Iterable[EventData] = filter(filter_func, events)
-    saveable_events: list[tuple] = parser(events)
-    saver(saveable_events)
 
-    return events
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS ExitRequest""")
+        log.debug(f"Dropped Table: ExitRequest")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping ExitRequest table") from e
+
+
+def reinitialize_exit_request_table() -> None:
+    """Removes ExitRequest table and creates an empty one."""
+
+    drop_exit_request_table()
+    create_exit_request_table()

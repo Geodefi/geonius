@@ -6,8 +6,6 @@ from web3.middleware import construct_sign_and_send_raw_middleware
 
 from src.exceptions import MissingPrivateKeyError
 
-# from src.logger import log
-
 from .env import EXECUTION_API, CONSENSUS_API, PRIVATE_KEY
 
 

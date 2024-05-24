@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from ..custom_exception import CustomException
 
-
-class DaemonError(CustomException):
+class DaemonError(Exception):
     """Exception raised for errors in the Daemon class."""
 
 

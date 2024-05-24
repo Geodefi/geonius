@@ -20,10 +20,10 @@ class StakeTrigger(Trigger):
     Finalizes the validator creation by calling portal.stake()
 
     Attributes:
-        name (str): name of the trigger to be used when logging etc. (value: STAKE_TRIGGER)
+        name (str): name of the trigger to be used when logging etc. (value: STAKE)
     """
 
-    name: str = "STAKE_TRIGGER"
+    name: str = "STAKE"
 
     def __init__(self) -> None:
         """Initializes a StakeTrigger object. The trigger will process the changes of the daemon after a loop.

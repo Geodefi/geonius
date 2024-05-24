@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from ..custom_exception import CustomException
 
-
-class EthdoError(CustomException):
+class EthdoError(Exception):
     """Exception raised for errors in the ethdo call functions."""

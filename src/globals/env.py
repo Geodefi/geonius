@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from os import getenv
+from dotenv import load_dotenv
 
-# from dotenv import load_dotenv
-
-# load_dotenv()
+load_dotenv()
 
 # catch environment variables
 EXECUTION_API = getenv("EXECUTION_API")

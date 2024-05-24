@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .block import PoolsDBTrigger, StakeTrigger
+from .block import StakeTrigger
 from .event import (
     AlienatedTrigger,
     DelegationTrigger,

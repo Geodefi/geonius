@@ -24,10 +24,10 @@ class AlienatedTrigger(Trigger):
     Updates the database with the latest info.
 
     Attributes:
-        name (str): name of the trigger to be used when logging etc. (value: ALIENATED_TRIGGER)
+        name (str): name of the trigger to be used when logging etc. (value: ALIENATED)
     """
 
-    name: str = "ALIENATED_TRIGGER"
+    name: str = "ALIENATED"
 
     def __init__(self) -> None:
         """Initializes a AlienatedTrigger object. The trigger will process the changes of the daemon after a loop.
@@ -66,7 +66,7 @@ class AlienatedTrigger(Trigger):
         for event in events:
             saveable_events.append(
                 (
-                    event.args.pubkey,
+                    event.args.pubkey,  # TEXT
                     event.blockNumber,
                     event.transactionIndex,
                     event.logIndex,
@@ -85,7 +85,7 @@ class AlienatedTrigger(Trigger):
         try:
             with Database() as db:
                 db.executemany(
-                    "INSERT INTO Alienated VALUES (?,?,?,?,?,?,?)",
+                    "INSERT INTO Alienated VALUES (?,?,?,?)",
                     events,
                 )
             log.debug(f"Inserted {len(events)} events into Alienated table")

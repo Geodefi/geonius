@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from typing import Any, Iterable
+from typing import Callable, Iterable, Any
 from itertools import repeat
 from eth_abi import abi
 from web3.types import EventData
@@ -36,8 +35,11 @@ def get_batch_events(event: ContractEvent, from_block: int, limit: int) -> Itera
 
     # @dev do not use filters instead, some providers do not support it.
     logs = event.get_logs(fromBlock=from_block, toBlock=to_block)
-    log.debug(f"Found {event} event logs between {from_block}-{to_block} blocks:{len(logs)}")
-    return
+    if logs:
+        log.info(
+            f"Detected {event.event_name:^17} logs between {from_block}-{to_block} => {len(logs)}"
+        )
+    return logs
 
 
 def get_all_events(event: ContractEvent, first_block: int, last_block: int) -> Iterable[EventData]:
@@ -60,8 +62,7 @@ def get_all_events(event: ContractEvent, first_block: int, last_block: int) -> I
         get_batch_events, repeat(event), r, repeat(last_block)
     )
 
-    # convert list of list into a list
-    # TODO: consider using list.extend instead of list comprehension
+    # converts list of list into a list
     # NOTE if log_batches[batch] is Iterable then unpack batch[log], else continue
     logs: Iterable[EventData] = [log for batch in log_batches if batch for log in batch]
 
@@ -83,3 +84,28 @@ def decode_abi(types: list, data: Any) -> tuple:
 
     decoded: tuple = abi.decode(types, bytes.fromhex(str(data.hex())[2:]))
     return decoded
+
+
+def event_handler(
+    events: Iterable[EventData],
+    parser: Callable,
+    saver: Callable,
+    filter_func: Callable = None,
+) -> Iterable[EventData]:
+    """Handles the events by filtering, parsing and saving them.
+
+    Args:
+        events (Iterable[EventData]): list of events.
+        parser (Callable): Function to parse the events.
+        saver (Callable): Function to save the events.
+        filter_func (Callable, optional): Function to filter the events. Defaults to None.
+
+    Returns:
+        Iterable[EventData]: list of events.
+    """
+    if filter_func:
+        events: Iterable[EventData] = list(filter(filter_func, events))
+    saveable_events: list[tuple] = parser(events)
+    saver(saveable_events)
+
+    return events

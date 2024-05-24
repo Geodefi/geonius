@@ -32,7 +32,6 @@ class Database:
         DatabaseError: Error while connecting to the database.
     """
 
-    # TODO (delete this) should not utilize log much, to reduce overhead while using "with" notation.
     main_dir: str = CONFIG.directory
     db_dir: str = CONFIG.database.directory
     db_name: str = "operator"

@@ -23,19 +23,19 @@ class Trigger:
         It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
 
         Args:
-            name (str): name of the trigger to be used when logging etc. Every Trigger must have a name. 5-25 char.
+            name (str): name of the trigger to be used when logging etc. Every Trigger must have a name. 5-17 char.
             action (Callable): function to be called when Triggered.
 
         Raises:
-            ValueError: Name length should be max 25 characters.
+            ValueError: Name length should be max 17 characters.
         """
 
-        __name_len = 25
+        __name_len = 17
         if len(name) > __name_len:
             raise ValueError(f"Name length should be max {__name_len} characters.")
         self.name: str = name
 
-        log.info(f"Trigger {name} is initalized.")
+        log.debug(f"Trigger {name} is initalized.")
         self.__register_action(action)
 
     def __register_action(self, action: Callable) -> None:
