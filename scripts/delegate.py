@@ -16,6 +16,7 @@ sys.path.append(".")
 from src.globals import SDK
 from src.helpers import get_name
 from src.logger import log
+from src.utils import get_gas
 
 load_dotenv()
 
@@ -55,9 +56,16 @@ while True:
             log.info(
                 f"Delegating {allowance} to operator {get_name(op_id)} in pool {get_name(pool_id)}"
             )
+            priority_fee, base_fee = get_gas()
             tx_hash: str = SDK.portal.contract.functions.delegate(
                 pool_id, [op_id], [allowance]
-            ).transact({"from": SDK.w3.eth.defaultAccount.address})
+            ).transact(
+                {
+                    "from": SDK.w3.eth.defaultAccount.address,
+                    "maxPriorityFeePerGas": priority_fee,
+                    "maxFeePerGas": base_fee,
+                }
+            )
             log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
         except:
             log.error("Tx failed, trying again.")

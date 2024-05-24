@@ -6,7 +6,7 @@ import random
 import sys
 
 sys.path.append(".")
-
+from src.utils import get_gas
 from dotenv import load_dotenv
 
 from geodefi import Geode
@@ -51,9 +51,16 @@ while True:
             log.info(
                 f"Setting fallback operator for pool {get_name(pool_id)} to operator {get_name(operator_id)} with threshold {fallback_threshold}"
             )
+            priority_fee, base_fee = get_gas()
             tx_hash: str = SDK.portal.contract.functions.setFallbackOperator(
                 pool_id, operator_id, fallback_threshold
-            ).transact({"from": SDK.w3.eth.defaultAccount.address})
+            ).transact(
+                {
+                    "from": SDK.w3.eth.defaultAccount.address,
+                    "maxPriorityFeePerGas": priority_fee,
+                    "maxFeePerGas": base_fee,
+                }
+            )
             log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
         except:
             log.error("Tx failed, trying again.")

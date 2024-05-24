@@ -29,7 +29,7 @@ def create_pools_table() -> None:
             )
         log.debug(f"Created a new table: Pools")
     except Exception as e:
-        raise DatabaseError(f"Error creating Pools table with name Pools") from e
+        raise DatabaseError(f"Error creating Pools table") from e
 
 
 def drop_pools_table() -> None:
@@ -44,7 +44,7 @@ def drop_pools_table() -> None:
             db.execute("""DROP TABLE IF EXISTS Pools""")
         log.debug(f"Dropped Table: Pools")
     except Exception as e:
-        raise DatabaseError(f"Error dropping Pools table with name Pools") from e
+        raise DatabaseError(f"Error dropping Pools table") from e
 
 
 def reinitialize_pools_table() -> None:

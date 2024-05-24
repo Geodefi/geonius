@@ -37,7 +37,7 @@ def create_validators_table() -> None:
             )
         log.debug(f"Created a new table: Validators")
     except Exception as e:
-        raise DatabaseError(f"Error creating Validators table with name Validators") from e
+        raise DatabaseError(f"Error creating Validators table") from e
 
 
 def drop_validators_table() -> None:
@@ -51,7 +51,7 @@ def drop_validators_table() -> None:
         with Database() as db:
             db.execute("""DROP TABLE IF EXISTS Validators""")
     except Exception as e:
-        raise DatabaseError(f"Error dropping Validators table with name Validators") from e
+        raise DatabaseError(f"Error dropping Validators table") from e
 
 
 def reinitialize_validators_table() -> None:
