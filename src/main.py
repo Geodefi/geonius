@@ -33,11 +33,11 @@ def init_dbs():
     """
     # initialize pools table and fill it with current data
     reinitialize_pools_table()  # TODO: This will be removed after testing
-    fill_pools_table(get_all_pool_ids())
+    # fill_pools_table(get_all_pool_ids()) # These are not needed, utilize daemons
 
     # # initialize validators table and fill it with current data
     reinitialize_validators_table()  # TODO: This will be removed after testing
-    fill_validators_table(get_all_owned_pubkeys())
+    # fill_validators_table(get_all_owned_pubkeys()) # These are not needed, utilize daemons
 
 
 def setup_daemons():

@@ -49,13 +49,16 @@ Run:
 
  ```bash
  export PYTHONFAULTHANDLER=1
- PYTHONPATH=.  python3 src/main.py --flags
+ PYTHONPATH=.  python3 src/main.py --flags 
  ```
+
+ Put & to run it on background
 
 ### Flags
 
 | Parameter  | Description |
 | --- | --- |
+| --background          |      Runs All daemons in the background, does not block the terminal with outputs                                             |
 | --no-log-stream       |      Don't print log messages to stdout                                                                                       |
 | --no-log-file         |      Don't save log messages to files                                                                                         |
 | --min-proposal-queue  |      Minimum amount of proposals to wait before creating a tx                                                                 |
