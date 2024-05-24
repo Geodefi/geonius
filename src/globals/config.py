@@ -69,10 +69,10 @@ def __apply_flags(config: AttributeDict):
         config.email.notify_geode = False
 
     # put the gas api key in the configuration from the environment variables
-    if GAS_API_KEY:
+    if "<GAS_API_KEY>" in config.gas.api and GAS_API_KEY:
         config.gas.api = config.gas.api.replace("<GAS_API_KEY>", GAS_API_KEY)
-    else:
-        config.gas.api = None
+    elif "<GAS_API_KEY>" in config.gas.api:
+        raise ConfigurationError("GAS_API_KEY environment variable is not set.")
 
     return config
 
