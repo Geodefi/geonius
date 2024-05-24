@@ -6,7 +6,8 @@ from src.common import AttributeDict
 from src.exceptions import ConfigurationError
 
 from .sdk import SDK
-from .flags import flags
+from .flags import FLAGS
+import geodefi
 
 
 def __apply_flags(config: AttributeDict):
@@ -19,44 +20,50 @@ def __apply_flags(config: AttributeDict):
         AttributeDict: the configuration with the flags applied.
     """
 
-    if flags.no_log_stream:
+    if FLAGS.no_log_stream:
         config.logger.stream = False
-    if flags.no_log_file:
+    if FLAGS.no_log_file:
         config.logger.file = False
-    if flags.min_proposal_queue:
+    if FLAGS.main_directory:
+        config.directory = FLAGS.main_directory
+    if FLAGS.min_proposal_queue:
         # TODO:
         pass
-    if flags.max_proposal_delay:
+    if FLAGS.max_proposal_delay:
         # TODO:
         pass
-    if flags.main_directory:
-        config.directory = flags.main_directory
-    if flags.logger_directory:
-        config.logger.directory = flags.logger_directory
-    if flags.logger_level:
-        config.logger.level = flags.logger_level
-    if flags.logger_when:
-        config.logger.when = flags.logger_when
-    if flags.logger_interval:
-        config.logger.interval = flags.logger_interval
-    if flags.logger_backup:
-        config.logger.backup = flags.logger_backup
-    if flags.database_directory:
-        config.database.directory = flags.database_directory
-    if flags.chain_start:
-        config.chains[SDK.network.name].start = flags.chain_start
-    if flags.chain_identifier:
-        config.chains[SDK.network.name].identifier = flags.chain_identifier
-    if flags.chain_period:
-        config.chains[SDK.network.name].period = int(flags.chain_period)
-    if flags.chain_interval:
-        config.chains[SDK.network.name].interval = int(flags.chain_interval)
-    if flags.chain_range:
-        config.chains[SDK.network.name].range = int(flags.chain_range)
-    if flags.ethdo_wallet:
-        config.ethdo.wallet = flags.ethdo_wallet
-    if flags.ethdo_account:
-        config.ethdo.account = flags.ethdo_account
+    if FLAGS.network_refresh_rate:
+        geodefi.globals.constants.REFRESH_RATE = FLAGS.network_max_attempt
+    if FLAGS.network_attempt_rate:
+        geodefi.globals.constants.ATTEMPT_RATE = FLAGS.network_attempt_rate
+    if FLAGS.network_max_attempt:
+        geodefi.globals.constants.MAX_ATTEMPT = FLAGS.network_refresh_rate
+    if FLAGS.logger_directory:
+        config.logger.directory = FLAGS.logger_directory
+    if FLAGS.logger_level:
+        config.logger.level = FLAGS.logger_level
+    if FLAGS.logger_when:
+        config.logger.when = FLAGS.logger_when
+    if FLAGS.logger_interval:
+        config.logger.interval = FLAGS.logger_interval
+    if FLAGS.logger_backup:
+        config.logger.backup = FLAGS.logger_backup
+    if FLAGS.database_directory:
+        config.database.directory = FLAGS.database_directory
+    if FLAGS.chain_start:
+        config.chains[SDK.network.name].start = FLAGS.chain_start
+    if FLAGS.chain_identifier:
+        config.chains[SDK.network.name].identifier = FLAGS.chain_identifier
+    if FLAGS.chain_period:
+        config.chains[SDK.network.name].period = int(FLAGS.chain_period)
+    if FLAGS.chain_interval:
+        config.chains[SDK.network.name].interval = int(FLAGS.chain_interval)
+    if FLAGS.chain_range:
+        config.chains[SDK.network.name].range = int(FLAGS.chain_range)
+    if FLAGS.ethdo_wallet:
+        config.ethdo.wallet = FLAGS.ethdo_wallet
+    if FLAGS.ethdo_account:
+        config.ethdo.account = FLAGS.ethdo_account
 
     return config
 
@@ -73,8 +80,8 @@ def __init_config() -> AttributeDict:
 
     try:
         config_path = "geonius.json"
-        if flags.config_path:
-            config_path = flags.config_path
+        if FLAGS.config_path:
+            config_path = FLAGS.config_path
 
         # catch configuration variables
         config_dict: dict = json.load(open(config_path, encoding="utf-8"))

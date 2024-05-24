@@ -3,14 +3,24 @@
 from .db_events import (
     find_latest_event,
     create_alienated_table,
+    drop_alienated_table,
+    reinitialize_alienated_table,
     create_delegation_table,
+    drop_delegation_table,
+    reinitialize_delegation_table,
     create_deposit_table,
+    drop_deposit_table,
+    reinitialize_deposit_table,
     create_fallback_operator_table,
+    drop_fallback_operator_table,
+    reinitialize_fallback_operator_table,
     create_id_initiated_table,
+    drop_id_initiated_table,
+    reinitialize_id_initiated_table,
     create_exit_request_table,
-    event_handler,
+    drop_exit_request_table,
+    reinitialize_exit_request_table,
 )
-
 from .db_pools import (
     create_pools_table,
     drop_pools_table,
@@ -35,7 +45,7 @@ from .db_validators import (
     check_pk_in_db,
     fetch_pool_id,
 )
-from .event import get_batch_events, get_all_events, decode_abi
+from .event import get_batch_events, get_all_events, decode_abi, event_handler
 from .portal import (
     get_StakeParams,
     get_allIdsByType,

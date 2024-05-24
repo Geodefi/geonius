@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
-
 from web3.contract.contract import ContractEvent
-
-from src.globals import SDK, hour_blocks
+from src.globals import SDK, FLAGS, hour_blocks
 from src.daemons import BlockDaemon, EventDaemon
 from src.triggers import (
     AlienatedTrigger,
@@ -17,11 +15,13 @@ from src.triggers import (
 from src.utils import send_email
 from src.helpers import (
     reinitialize_validators_table,
-    fill_validators_table,
     reinitialize_pools_table,
-    fill_pools_table,
-    get_all_owned_pubkeys,
-    get_all_pool_ids,
+    reinitialize_alienated_table,
+    reinitialize_delegation_table,
+    reinitialize_deposit_table,
+    reinitialize_exit_request_table,
+    reinitialize_fallback_operator_table,
+    reinitialize_id_initiated_table,
 )
 
 
@@ -31,12 +31,18 @@ def init_dbs():
     This function is called at the beginning of the program to make sure the
     databases are up to date.
     """
-    # initialize pools table and fill it with current data
-    reinitialize_pools_table()  # TODO: This will be removed after testing
-    # fill_pools_table(get_all_pool_ids()) # These are not needed, utilize daemons
+    if FLAGS.reset:
+        reinitialize_validators_table()
+        reinitialize_pools_table()
+        reinitialize_alienated_table()
+        reinitialize_delegation_table()
+        reinitialize_deposit_table()
+        reinitialize_exit_request_table()
+        reinitialize_fallback_operator_table()
+        reinitialize_id_initiated_table()
+        reinitialize_pools_table()
 
-    # # initialize validators table and fill it with current data
-    reinitialize_validators_table()  # TODO: This will be removed after testing
+    # fill_pools_table(get_all_pool_ids()) # These are not needed, utilize daemons
     # fill_validators_table(get_all_owned_pubkeys()) # These are not needed, utilize daemons
 
 
@@ -46,6 +52,7 @@ def setup_daemons():
     This function is called at the beginning of the program to make sure the
     daemons are running.
     """
+    events: ContractEvent = SDK.portal.contract.events
     # Triggers
 
     id_initiated_trigger: IdInitiatedTrigger = IdInitiatedTrigger()
@@ -55,8 +62,6 @@ def setup_daemons():
     alienated_trigger: AlienatedTrigger = AlienatedTrigger()
     exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
     stake_trigger: StakeTrigger = StakeTrigger()
-
-    events: ContractEvent = SDK.portal.contract.events
 
     # Create appropriate type of Daemons for the triggers
     id_initiated_daemon: EventDaemon = EventDaemon(
@@ -83,7 +88,6 @@ def setup_daemons():
         trigger=exit_request_trigger,
         event=events.ExitRequest(),
     )
-
     stake_daemon: BlockDaemon = BlockDaemon(trigger=stake_trigger, block_period=0.5 * hour_blocks)
 
     # Run the daemons
@@ -104,11 +108,8 @@ def main():
     initializes the databases and sets up the daemons.
     """
 
-    # make sure database is ok
-    init_dbs()
-
-    # Initialize and run the daemons
     try:
+        init_dbs()
         setup_daemons()
 
     # pylint: disable-next=broad-exception-caught
