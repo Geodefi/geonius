@@ -14,8 +14,8 @@
     "max_fee": 100,
     "api": "https://gas.api.infura.io/v3/<GAS_API_KEY>/networks/1/suggestedGasFees",
     "parser": {
-      "priority": "low.suggestedMaxPriorityFeePerGas",
-      "fee": "low.suggestedMaxFeePerGas"
+      "base": "low.suggestedMaxFeePerGas",
+      "priority": "low.suggestedMaxPriorityFeePerGas"
     }
   },
   "logger": {
