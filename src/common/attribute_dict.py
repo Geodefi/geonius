@@ -19,18 +19,22 @@ class AttributeDict(dict):
     __setattr__ = dict.__setitem__
 
     @classmethod
-    def convert_recursive(cls, d: dict):
+    def convert_recursive(cls, d: dict, i: int = 0):
         """Recursively converts intertwined dicts into AttributeDict objects. This is a helper function for CONFIG.
 
         Args:
             d (dict): A dict to recursively create an AttributeDict instance from.
+            i (int): Iteration count on recursion.
 
         Returns:
             AttributeDict: An AttributeDict object with dot notation.
         """
+        if i == 0:
+            if not isinstance(d, dict):
+                raise TypeError(f"When converting into AttributeDict, expected dict got {type(d)} ")
 
         for k, v in d.items():
             if isinstance(v, dict):
-                d[k] = cls.convert_recursive(v)
+                d[k] = cls.convert_recursive(v, i=i + 1)
 
         return AttributeDict(**d)
