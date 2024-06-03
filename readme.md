@@ -9,6 +9,8 @@ Geonius is a multi**daemon**tional daemonic python script that allows Node Opera
     - [Binaries](#binaries)
     - [Docker](#docker)
     - [Build from source](#build-from-source)
+      - [Install pyenv](#install-pyenv)
+      - [Install python3.9](#install-python39)
       - [Install pipx](#install-pipx)
       - [Install poetry](#install-poetry)
       - [Create virtual env](#create-virtual-env)
@@ -48,11 +50,29 @@ docker pull Geodefi/geonius
 
 ### Build from source
 
-We do not recommend usign `pip`.
+We do not recommend usign `pip` and your local `python` packages.
+
+Use `pyenv` to manage your python version.
 
 Use `pipx` to manage your local packages.
 
 Use `poetry` for dependency management and packaging.
+
+#### Install pyenv
+
+```bash
+curl https://pyenv.run | bash
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+exec $SHELL
+```
+
+#### Install python3.9
+
+```bash
+pyenv install 3.9
+```
 
 #### Install pipx
 
