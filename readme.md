@@ -102,6 +102,7 @@ exec $SHELL
 
 ```bash
 pipx install poetry
+poetry config virtualenvs.prefer-active-python true
 which poetry
 ```
 
@@ -117,11 +118,10 @@ cd geonius
 Get the `path` for the ref'ed python version is
 
 ```bash
-which python
 ```
 
 ```bash
-poetry env use {path}
+poetry env use 3.8
 source {path_to_venv}/bin/activate}
 ```
 
