@@ -62,7 +62,7 @@ def fetch_last_stake_timestamp() -> int:
                 SELECT last_stake_ts FROM Operators
                 WHERE id = ?
                 """,
-                (OPERATOR_ID,),
+                (str(OPERATOR_ID),),
             )
             last_stake_ts: int = db.fetchone()[0]
     except Exception as e:
