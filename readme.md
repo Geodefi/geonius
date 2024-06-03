@@ -106,8 +106,14 @@ which poetry
 
 #### Create virtual env
 
+Get the `path` for the ref'ed python version is
+
 ```bash
-poetry env use /usr/bin/python3
+which python
+```
+
+```bash
+poetry env use {path}
 source {path_to_venv}/bin/activate}
 ```
 
