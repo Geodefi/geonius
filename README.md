@@ -116,7 +116,7 @@ cd geonius
 #### Create virtual env
 
 ```bash
-poetry env use 3.8
+poetry env use 3.9
 source {path_to_venv}/bin/activate}
 ```
 
