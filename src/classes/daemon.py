@@ -63,7 +63,6 @@ class Daemon:
         self.__set_initial_delay(initial_delay)
         self.__set_trigger(trigger)
 
-        # TODO: add flag --background : daemon=True
         self.__worker: Thread = Thread(name=trigger.name, target=self.__loop)
         self.start_flag: Event = Event()
         self.stop_flag: Event = Event()
@@ -150,7 +149,11 @@ class Daemon:
                 else:
                     pass
 
-            except (CallFailedError, TimeExhausted, BeaconStateMismatchError):
+            except CallFailedError:
+                log.warning(
+                    f"One of the calls failed for {self.trigger.name:^17}. Continuing but may need to be checked in case of a problem."
+                )
+            except (TimeExhausted, BeaconStateMismatchError):
                 log.exception(
                     f"Stopping the Daemon for {self.trigger.name:^17} due to unhandled condition:",
                     exc_info=True,

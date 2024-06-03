@@ -24,6 +24,7 @@ def create_pools_table() -> None:
                 CREATE TABLE IF NOT EXISTS Pools (
                     id TEXT NOT NULL PRIMARY KEY,
                     fallback INTEGER DEFAULT 0
+                    last_proposal_ts TIMESTAMP DEFAULT 0
                 )
                 """
             )
@@ -140,5 +141,34 @@ def save_fallback_operator(pool_id: int, value: bool) -> None:
     except Exception as e:
         raise DatabaseError(
             f"Error updating fallback of pool with id {pool_id} and value {value} \
+                in table Pools"
+        ) from e
+
+
+def save_last_proposal_timestamp(pool_id: int, timestamp: int) -> None:
+    """Sets last proposal timestamp of pool on database to provided value
+
+    Args:
+        pool_id (int): pool ID
+        timestamp (int): timestamp value to be updated
+
+    Raises:
+        DatabaseError: Error updating last proposal timestamp of pool
+    """
+    log.debug(f"Saving the last proposal timestamp for {pool_id}")
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                UPDATE Pools 
+                SET last_proposal_ts = ?
+                WHERE Id = ?
+                """,
+                (timestamp, str(pool_id)),
+            )
+    except Exception as e:
+        raise DatabaseError(
+            f"Error updating last proposal timestamp of pool with id {pool_id} and timestamp {timestamp} \
                 in table Pools"
         ) from e

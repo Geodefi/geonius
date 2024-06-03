@@ -28,11 +28,9 @@ def __apply_flags(config: AttributeDict):
     if FLAGS.main_directory:
         config.directory = FLAGS.main_directory
     if FLAGS.min_proposal_queue:
-        # TODO:
-        pass
+        config.min_proposal_queue = FLAGS.min_proposal_queue
     if FLAGS.max_proposal_delay:
-        # TODO:
-        pass
+        config.max_proposal_delay = FLAGS.max_proposal_delay
     if FLAGS.network_refresh_rate:
         geodefi.globals.constants.REFRESH_RATE = FLAGS.network_max_attempt
     if FLAGS.network_attempt_rate:

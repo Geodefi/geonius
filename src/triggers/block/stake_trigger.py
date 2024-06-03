@@ -42,7 +42,6 @@ class StakeTrigger(Trigger):
             **kwargs: Arbitrary keyword arguments.
         """
         log.info(f"{self.name} is triggered.")
-        # TODO: utilize flags: --min-proposal-queue --max-proposal-delay
 
         # check if there are any pending validator proposals.
         staked_pks: list[str] = check_and_stake(fetch_verified_pks())

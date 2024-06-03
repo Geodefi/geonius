@@ -21,6 +21,12 @@ from .db_events import (
     drop_exit_request_table,
     reinitialize_exit_request_table,
 )
+from .db_operator import (
+    create_operators_table,
+    drop_operators_table,
+    reinitialize_operators_table,
+    save_last_stake_timestamp,
+)
 from .db_pools import (
     create_pools_table,
     drop_pools_table,
@@ -29,6 +35,7 @@ from .db_pools import (
     insert_many_pools,
     fill_pools_table,
     save_fallback_operator,
+    save_last_proposal_timestamp,
 )
 from .db_validators import (
     create_validators_table,

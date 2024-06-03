@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any
+from datetime import datetime
 from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE
 from geodefi.utils import to_bytes32
 from web3.exceptions import TimeExhausted
 
 from src.classes import Database
 from src.logger import log
-from src.globals import SDK, OPERATOR_ID, chain
+from src.globals import SDK, OPERATOR_ID, chain, CONFIG
 from src.utils import send_email
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.daemons.time_daemon import TimeDaemon
@@ -17,6 +18,59 @@ from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError, Cal
 
 from .portal import get_operatorAllowance, get_surplus, get_withdrawal_address
 from .db_validators import fill_validators_table, save_local_state
+from .db_pools import save_last_proposal_timestamp
+from .db_operator import save_last_stake_timestamp
+
+
+def fetch_last_proposal_timestamp(pool_id: int) -> int:
+    """Fetches the last proposal timestamp for given pool
+
+    Args:
+        pool_id (int): ID of the pool to get last proposal timestamp for
+
+    Returns:
+        int: Last proposal timestamp
+    """
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                SELECT last_proposal_ts FROM Pools
+                WHERE id = ?
+                """,
+                (pool_id,),
+            )
+            last_proposal_ts: int = db.fetchone()[0]
+    except Exception as e:
+        raise DatabaseError(f"Error fetching last proposal timestamp for pool {pool_id}") from e
+
+    return last_proposal_ts
+
+
+def fetch_last_stake_timestamp() -> int:
+    """Fetches the last stake timestamp for the operator
+
+    Returns:
+        int: Last stake timestamp
+    """
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                SELECT last_stake_ts FROM Operators
+                WHERE id = ?
+                """,
+                (OPERATOR_ID,),
+            )
+            last_stake_ts: int = db.fetchone()[0]
+    except Exception as e:
+        raise DatabaseError(
+            f"Error fetching last stake timestamp for operator {OPERATOR_ID}"
+        ) from e
+
+    return last_stake_ts
 
 
 def max_proposals_count(pool_id: int) -> int:
@@ -100,17 +154,23 @@ def check_and_propose(pool_id: int) -> list[str]:
     signatures1: list[bytes] = [bytes.fromhex(prop.signature) for prop in proposal_data]
     signatures31: list[bytes] = [bytes.fromhex(prop.signature) for prop in stake_data]
 
-    # TODO: current implementation is not considering last bunch of
-    #       validators count is higher than threshold or not may
-    #       need to implement a check for that later if needed.
+    last_proposal_timestamp: int = fetch_last_proposal_timestamp(pool_id)
     pks: list[str] = []
     for i in range(0, len(pubkeys), 50):
         temp_pks: list[str] = pubkeys[i : i + 50]
         temp_sigs1: list[str] = signatures1[i : i + 50]
         temp_sigs31: list[str] = signatures31[i : i + 50]
 
+        if i >= len(pubkeys) - CONFIG.min_proposal_queue:
+            if (
+                CONFIG.max_proposal_delay
+                >= int(round(datetime.now().timestamp())) - last_proposal_timestamp
+            ):
+                break
+
         try:
             success: bool = call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
+            save_last_proposal_timestamp(pool_id, int(round(datetime.now().timestamp())))
         except (CallFailedError, TimeExhausted) as e:
             if len(pks) > 0:
                 fill_validators_table(pks)
@@ -133,15 +193,22 @@ def check_and_stake(pks: list[str]) -> list[str]:
         list[str]: list of pubkeys staked
     """
 
-    # TODO: current implementation is not considering last bunch of
-    #       validators count is higher than threshold or not may
-    #       need to implement a check for that later if needed.
+    last_stake_timestamp: int = fetch_last_stake_timestamp()
+    last_stake_timestamp: int = 0
     pks: list[str] = []
     for i in range(0, len(pks), 50):
         temp_pks: list[str] = pks[i : i + 50]
 
+        if i >= len(pks) - CONFIG.min_proposal_queue:
+            if (
+                CONFIG.max_proposal_delay
+                >= int(round(datetime.now().timestamp())) - last_stake_timestamp
+            ):
+                break
+
         try:
             success: bool = call_stake(temp_pks)
+            save_last_stake_timestamp(int(round(datetime.now().timestamp())))
         except (CallFailedError, TimeExhausted) as e:
             if len(pks) > 0:
                 fill_validators_table(pks)

@@ -5,6 +5,7 @@ from src.globals import CONFIG
 from src.common import AttributeDict
 from src.logger import log
 from src.utils import send_email
+from src.exceptions import HighGasException
 
 
 @http_request
@@ -46,4 +47,5 @@ def get_gas() -> tuple[int]:
                     [("<file_path>", "<file_name>.log")],
                 )
                 # TODO: raise Exception and catch it in daemon so it doesn't create a tx!
+                raise HighGasException("Gas prices are too high!")
     return (None, None)
