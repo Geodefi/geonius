@@ -31,7 +31,7 @@ def create_operators_table() -> None:
                     (
                         str(OPERATOR_ID),
                         0,
-                    )
+                    ),
                 ],
             )
     except Exception as e:
