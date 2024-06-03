@@ -85,7 +85,7 @@ on Ubuntu 23.04 or above:
 sudo apt update
 sudo apt install pipx
 pipx ensurepath
-sudo pipx ensurepath --global
+sudo pipx --global ensurepath
 exec $SHELL
 ```
 
@@ -94,7 +94,7 @@ on MacOS:
 ```bash
 brew install pipx
 pipx ensurepath
-sudo pipx ensurepath --global
+sudo pipx --global ensurepath
 exec $SHELL
 ```
 
