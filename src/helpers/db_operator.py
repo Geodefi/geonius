@@ -23,17 +23,6 @@ def create_operators_table() -> None:
                 )
                 """
             )
-
-        with Database() as db:
-            db.executemany(
-                "INSERT INTO Operators VALUES (?,?)",
-                [
-                    (
-                        str(OPERATOR_ID),
-                        0,
-                    ),
-                ],
-            )
     except Exception as e:
         raise DatabaseError("Error creating table Operators") from e
 
@@ -57,6 +46,16 @@ def reinitialize_operators_table() -> None:
     log.debug("Reinitializing Operators table.")
     drop_operators_table()
     create_operators_table()
+    with Database() as db:
+        db.executemany(
+            "INSERT INTO Operators VALUES (?,?)",
+            [
+                (
+                    str(OPERATOR_ID),
+                    0,
+                ),
+            ],
+        )
 
 
 def save_last_stake_timestamp(timestamp: int) -> None:
