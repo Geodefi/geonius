@@ -116,7 +116,7 @@ cd geonius
 #### Create virtual env
 
 ```bash
-poetry env use 3.9
+poetry env use {python_version/3.9/3.9.19/etc}
 source {path_to_venv}/bin/activate}
 ```
 
