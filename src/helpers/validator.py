@@ -136,15 +136,19 @@ def check_and_propose(pool_id: int) -> list[str]:
         return []
 
     try:
+        # This returns the length of the validators array in the contract so it is same as the index of the next validator
+        new_val_ind: int = SDK.portal.functions.readUint(OPERATOR_ID, to_bytes32('validators'))
         for i in range(max_allowed):
             proposal_data: list[Any] = generate_deposit_data(
                 withdrawal_address=get_withdrawal_address(pool_id),
                 deposit_value=DEPOSIT_SIZE.PROPOSAL,
+                index=new_val_ind + i,
             )
 
             stake_data: list[Any] = generate_deposit_data(
                 withdrawal_address=get_withdrawal_address(pool_id),
                 deposit_value=DEPOSIT_SIZE.STAKE,
+                index=new_val_ind + i,
             )
     except EthdoError as e:
         send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])

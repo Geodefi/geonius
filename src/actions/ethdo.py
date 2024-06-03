@@ -29,7 +29,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
 
     account: str = CONFIG.ethdo.account
     if index:
-        account += f"_{index}_"
+        account += str(index)
 
     try:
         res: str = check_output(
