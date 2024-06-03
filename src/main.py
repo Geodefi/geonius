@@ -22,6 +22,7 @@ from src.helpers import (
     reinitialize_exit_request_table,
     reinitialize_fallback_operator_table,
     reinitialize_id_initiated_table,
+    reinitialize_operators_table,
 )
 
 
@@ -32,15 +33,15 @@ def init_dbs():
     databases are up to date.
     """
     if FLAGS.reset:
-        reinitialize_validators_table()
+        reinitialize_operators_table()
         reinitialize_pools_table()
+        reinitialize_validators_table()
         reinitialize_alienated_table()
         reinitialize_delegation_table()
         reinitialize_deposit_table()
         reinitialize_exit_request_table()
         reinitialize_fallback_operator_table()
         reinitialize_id_initiated_table()
-        reinitialize_pools_table()
 
 
 def setup_daemons():
