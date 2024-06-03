@@ -1,19 +1,9 @@
-[project]
-name = "geonius"
-description = "Geonius is a daemonic script that allows Node Operators to automate their operations on geodefi Operator Marketplace"
-version = "0.0.1"
-authors = [
-  { name = "0xIceBear", email = "admin@geode.fi" },
-  { name = "Crash Bandicoot", email = "bandicoot@geode.fi" },
-]
-
 [tool.poetry]
 name = "geonius"
 description = "Geonius is a daemonic script that allows Node Operators to automate their operations on geodefi Operator Marketplace"
 version = "0.0.1"
 authors = ["0xIceBear", "Crash Bandicoot"]
 readme = "README.md"
-package-mode = true
 
 [tool.poetry.dependencies]
 python = ">=3.8,<=3.10"
