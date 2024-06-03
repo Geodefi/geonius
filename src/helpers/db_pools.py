@@ -23,7 +23,7 @@ def create_pools_table() -> None:
                 """
                 CREATE TABLE IF NOT EXISTS Pools (
                     id TEXT NOT NULL PRIMARY KEY,
-                    fallback INTEGER DEFAULT 0
+                    fallback INTEGER DEFAULT 0,
                     last_proposal_ts TIMESTAMP DEFAULT 0
                 )
                 """
