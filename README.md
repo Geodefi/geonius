@@ -124,7 +124,7 @@ source {path_to_venv}/bin/activate}
 
 ```bash
 poetry install
-poetry run python your_script.py
+PYTHONPATH=. poetry run python src/main.py 
 ```
 
 ## Usage
