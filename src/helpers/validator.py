@@ -39,7 +39,7 @@ def fetch_last_proposal_timestamp(pool_id: int) -> int:
                 SELECT last_proposal_ts FROM Pools
                 WHERE id = ?
                 """,
-                (pool_id,),
+                (str(pool_id),),
             )
             last_proposal_ts: int = db.fetchone()[0]
     except Exception as e:
