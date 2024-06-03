@@ -116,29 +116,40 @@ cd geonius
 #### Create virtual env
 
 ```bash
-poetry env use {python_version/3.9/3.9.19/etc}
-source {path_to_venv}/bin/activate}
+poetry env use <python_version/3.9/3.9.19/etc>
+```
+
+This will output:
+> Using virtualenv: <path_to_venv>
+> copy <path_to_venv> and use it above to activate
+
+```bash
+source <path_to_venv>/bin/activate
 ```
 
 #### Install & Run
 
 ```bash
 poetry install
-PYTHONPATH=. poetry run python src/main.py 
+PYTHONPATH=. poetry run python src/main.py --flags
 ```
+
+> In case you want to see a very detailed debug information from the above, set `PYTHONFAULTHANDLER` before running the script:
+>
+> ```bash
+> export PYTHONFAULTHANDLER=1 
+> PYTHONPATH=. poetry run python src/main.py --flags
+> ```
+
+> In case you want to run it on background put `&` after the command:
+>
+> ```bash
+> PYTHONPATH=. poetry run python src/main.py --flags &
+> ```
 
 ## Usage
 
 <!-- TODO: add more information on usage -->
-
-Run:
-
-```bash
-export PYTHONFAULTHANDLER=1
-PYTHONPATH=.  python3 src/main.py --flags
-```
-
-Put & to run it on background
 
 ### Flags
 
