@@ -18,10 +18,21 @@ def create_operators_table() -> None:
             db.execute(
                 f"""
                 CREATE TABLE IF NOT EXISTS Operators (
-                    id INTEGER PRIMARY KEY DEFAULT {OPERATOR_ID},
-                    last_stake_ts INTEGER DEFAULT 0
+                    id TEXT PRIMARY KEY,
+                    last_stake_ts INTEGER
                 )
                 """
+            )
+
+        with Database() as db:
+            db.executemany(
+                "INSERT INTO Operators VALUES (?,?)",
+                [
+                    (
+                        str(OPERATOR_ID),
+                        0,
+                    )
+                ],
             )
     except Exception as e:
         raise DatabaseError("Error creating table Operators") from e
