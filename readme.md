@@ -85,6 +85,7 @@ sudo apt update
 sudo apt install pipx
 pipx ensurepath
 sudo pipx ensurepath --global
+exec $SHELL
 ```
 
 on MacOS:
@@ -93,6 +94,7 @@ on MacOS:
 brew install pipx
 pipx ensurepath
 sudo pipx ensurepath --global
+exec $SHELL
 ```
 
 #### Install poetry
