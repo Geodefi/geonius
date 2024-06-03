@@ -47,8 +47,8 @@ while True:
             {
                 "value": 1_000_000_000,
                 "from": SDK.w3.eth.defaultAccount.address,
-                "maxPriorityFeePerGas": 1,
-                "maxFeePerGas": 2485881157,
+                "maxPriorityFeePerGas": priority_fee,
+                "maxFeePerGas": base_fee,
             }
         )
         log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n")
