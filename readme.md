@@ -76,16 +76,21 @@ pyenv install 3.9
 
 #### Install pipx
 
+on Ubuntu 23.04 or above:
+
 ```bash
-sudo apt update sudo apt upgrade sudo apt install
-pip install pipx 
+sudo apt update
+sudo apt install pipx
 pipx ensurepath
+sudo pipx ensurepath --global
 ```
 
-alternatively on MACOS:
+on MacOS:
 
 ```bash
 brew install pipx
+pipx ensurepath
+sudo pipx ensurepath --global
 ```
 
 #### Install poetry
