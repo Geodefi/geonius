@@ -94,7 +94,7 @@ def insert_many_pools(new_pools: list[dict]) -> None:
     try:
         with Database() as db:
             db.executemany(
-                "INSERT INTO Pools VALUES (?,?)",
+                "INSERT INTO Pools VALUES (?,?,?)",
                 [
                     (
                         a["id"],
