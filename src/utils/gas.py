@@ -46,6 +46,5 @@ def get_gas() -> tuple[int]:
                     gas prices have surpassed the default max settings. Please fix.",
                     [("<file_path>", "<file_name>.log")],
                 )
-                # TODO: raise Exception and catch it in daemon so it doesn't create a tx!
                 raise HighGasException("Gas prices are too high!")
     return (None, None)
