@@ -1,14 +1,30 @@
+[project]
+name = "geonius"
+description = "Geonius is a daemonic script that allows Node Operators to automate their operations on geodefi Operator Marketplace"
+version = "0.0.1"
+authors = [
+  { name = "0xIceBear", email = "admin@geode.fi" },
+  { name = "Crash Bandicoot", email = "bandicoot@geode.fi" },
+]
+
 [tool.poetry]
-name = ""
-version = ""
-description = ""
-authors = [""]
+name = "geonius"
+description = "Geonius is a daemonic script that allows Node Operators to automate their operations on geodefi Operator Marketplace"
+version = "0.0.1"
+authors = ["0xIceBear", "Crash Bandicoot"]
+readme = "README.md"
+package-mode = true
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.10"
+python = ">=3.8,<=3.10"
+geodefi = "^2.1.1"
+python-dotenv = "^1.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "==3.0.3"
+ipykernel = "^6.29.4"
+pytest = "^8.2.1"
+black = "^24.4.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -17,23 +33,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.bandit]
 exclude_dirs = ["*/tests/*", "src/config/networks.py", "conftest.py"]
 skips = ["B608"]
-
-[tool.flake8]
-extend-ignore = ["E203", "E501"]  # line length will be checked by pylint
-exclude = ["conftest.py"]
-
-[tool.mypy]
-exclude = ["test"]
-ignore_missing_imports = true
-python_version = "3.10"
-disallow_incomplete_defs = true
-
-[[tool.mypy.overrides]]
-module = 'web3.*'
-no_implicit_optional = false
-
-[tool.isort]
-profile = "black"
 
 [tool.black]
 line-length = 100
@@ -53,6 +52,3 @@ exclude = '''
   | dist
 )/
 '''
-
-[tool.coverage.report]
-fail_under = 73

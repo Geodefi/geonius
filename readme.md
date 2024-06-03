@@ -9,6 +9,10 @@ Geonius is a multi**daemon**tional daemonic python script that allows Node Opera
     - [Binaries](#binaries)
     - [Docker](#docker)
     - [Build from source](#build-from-source)
+      - [Install pipx](#install-pipx)
+      - [Install poetry](#install-poetry)
+      - [Create virtual env](#create-virtual-env)
+      - [Install \& Run](#install--run)
   - [Usage](#usage)
     - [Flags](#flags)
     - [Scripts](#scripts)
@@ -44,7 +48,46 @@ docker pull Geodefi/geonius
 
 ### Build from source
 
-<!-- TODO: needs to check -->
+We do not recommend usign `pip`.
+
+Use `pipx` to manage your local packages.
+
+Use `poetry` for dependency management and packaging.
+
+#### Install pipx
+
+```bash
+sudo apt update sudo apt upgrade sudo apt install
+pip install pipx 
+pipx ensurepath
+```
+
+alternatively on MACOS:
+
+```bash
+brew install pipx
+```
+
+#### Install poetry
+
+```bash
+pipx install poetry
+which poetry
+```
+
+#### Create virtual env
+
+```bash
+poetry env use /usr/bin/python3
+source {path_to_venv}/bin/activate}
+```
+
+#### Install & Run
+
+```bash
+poetry install
+poetry run python your_script.py
+```
 
 ## Usage
 
