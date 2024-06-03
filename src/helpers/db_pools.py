@@ -73,6 +73,7 @@ def fetch_pools_batch(ids: list[int]) -> list[dict]:
         {
             "id": str(id),
             "fallback": 1 if fallback == OPERATOR_ID else 0,
+            "last_proposal_ts": 0,
         }
         for (id, fallback) in zip(ids, fallback_operators)
     ]
@@ -98,6 +99,7 @@ def insert_many_pools(new_pools: list[dict]) -> None:
                     (
                         a["id"],
                         a["fallback"],
+                        a["last_proposal_ts"],
                     )
                     for a in new_pools
                 ],

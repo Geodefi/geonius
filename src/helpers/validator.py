@@ -198,7 +198,6 @@ def check_and_stake(pks: list[str]) -> list[str]:
     """
 
     last_stake_timestamp: int = fetch_last_stake_timestamp()
-    last_stake_timestamp: int = 0
     pks: list[str] = []
     for i in range(0, len(pks), 50):
         temp_pks: list[str] = pks[i : i + 50]
