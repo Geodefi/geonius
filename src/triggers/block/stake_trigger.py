@@ -11,6 +11,7 @@ from src.helpers import (
     save_portal_state,
     check_and_stake,
     fetch_verified_pks,
+    create_operators_table,
 )
 from src.utils import multithread
 
@@ -31,6 +32,7 @@ class StakeTrigger(Trigger):
         """
 
         Trigger.__init__(self, name=self.name, action=self.activate_validators)
+        create_operators_table()
         create_validators_table()
         log.debug(f"{self.name} is initated.")
 

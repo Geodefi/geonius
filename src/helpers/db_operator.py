@@ -19,7 +19,7 @@ def create_operators_table() -> None:
                 f"""
                 CREATE TABLE IF NOT EXISTS Operators (
                     id INTEGER PRIMARY KEY DEFAULT {OPERATOR_ID},
-                    last_stake_ts TIMESTAMP DEFAULT 0
+                    last_stake_ts INTEGER DEFAULT 0
                 )
                 """
             )

@@ -15,6 +15,7 @@ from src.helpers import (
     create_pools_table,
     save_fallback_operator,
     check_and_propose,
+    create_operators_table,
 )
 
 
@@ -34,6 +35,7 @@ class FallbackOperatorTrigger(Trigger):
         """
 
         Trigger.__init__(self, name=self.name, action=self.update_fallback_operator)
+        create_operators_table()
         create_pools_table()
         create_fallback_operator_table()
         log.debug(f"{self.name} is initated.")

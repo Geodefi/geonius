@@ -13,6 +13,7 @@ from src.helpers import (
     get_surplus,
     create_pools_table,
     check_and_propose,
+    create_operators_table,
 )
 
 
@@ -32,6 +33,7 @@ class DepositTrigger(Trigger):
         """
 
         Trigger.__init__(self, name=self.name, action=self.consider_deposit)
+        create_operators_table()
         create_pools_table()
         create_deposit_table()
         log.debug(f"{self.name} is initated.")

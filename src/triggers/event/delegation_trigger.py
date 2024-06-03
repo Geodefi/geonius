@@ -13,6 +13,7 @@ from src.helpers import (
     check_and_propose,
     fill_validators_table,
     create_pools_table,
+    create_operators_table,
 )
 
 
@@ -32,6 +33,7 @@ class DelegationTrigger(Trigger):
         """
 
         Trigger.__init__(self, name=self.name, action=self.consider_allowance)
+        create_operators_table()
         create_pools_table()
         create_delegation_table()
         log.debug(f"{self.name} is initated.")
