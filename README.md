@@ -9,6 +9,13 @@ Geonius is a multi**daemon**tional daemonic python script that allows Node Opera
     - [Binaries](#binaries)
     - [Docker](#docker)
     - [Build from source](#build-from-source)
+      - [Install pyenv](#install-pyenv)
+      - [Install python3.9](#install-python39)
+      - [Install pipx](#install-pipx)
+      - [Install poetry](#install-poetry)
+      - [Clone repos](#clone-repos)
+      - [Create virtual env](#create-virtual-env)
+      - [Install \& Run](#install--run)
   - [Usage](#usage)
     - [Flags](#flags)
     - [Scripts](#scripts)
@@ -44,7 +51,81 @@ docker pull Geodefi/geonius
 
 ### Build from source
 
-<!-- TODO: needs to check -->
+We do not recommend usign `pip` and your local `python` packages.
+
+Use `pyenv` to manage your python version.
+
+Use `pipx` to manage your local packages.
+
+Use `poetry` for dependency management and packaging.
+
+#### Install pyenv
+
+```bash
+curl https://pyenv.run | bash
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+exec $SHELL
+pyenv update
+```
+
+#### Install python3.9
+
+```bash
+pyenv install 3.9
+pyenv versions
+```
+
+#### Install pipx
+
+on Ubuntu 23.04 or above:
+
+```bash
+sudo apt update
+sudo apt install pipx
+pipx ensurepath
+sudo pipx ensurepath --global
+exec $SHELL
+```
+
+on MacOS:
+
+```bash
+brew install pipx
+pipx ensurepath
+sudo pipx ensurepath --global
+exec $SHELL
+```
+
+#### Install poetry
+
+```bash
+pipx install poetry
+poetry config virtualenvs.prefer-active-python true
+which poetry
+```
+
+#### Clone repos
+
+```bash
+git clone  https://github.com/Geodefi/geonius 
+cd geonius
+```
+
+#### Create virtual env
+
+```bash
+poetry env use 3.8
+source {path_to_venv}/bin/activate}
+```
+
+#### Install & Run
+
+```bash
+poetry install
+PYTHONPATH=. poetry run python src/main.py 
+```
 
 ## Usage
 

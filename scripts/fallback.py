@@ -62,6 +62,10 @@ while True:
                 }
             )
             log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
-        except:
-            log.error("Tx failed, trying again.")
+        except Exception as e:
+            log.exception(
+                "Tx failed, trying again.",
+                exc_info=True,
+            )
+            log.error(e)
         sleep(61)

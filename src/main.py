@@ -42,9 +42,6 @@ def init_dbs():
         reinitialize_id_initiated_table()
         reinitialize_pools_table()
 
-    # fill_pools_table(get_all_pool_ids()) # These are not needed, utilize daemons
-    # fill_validators_table(get_all_owned_pubkeys()) # These are not needed, utilize daemons
-
 
 def setup_daemons():
     """Initializes and runs the daemons for the triggers.

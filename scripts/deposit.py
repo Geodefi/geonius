@@ -27,7 +27,7 @@ pools_type = ID_TYPE.POOL
 pools_len = portal.functions.allIdsByTypeLength(pools_type).call()
 
 if pools_len > 0:
-    for i in range(12, pools_len):
+    for i in range(0, pools_len):
         pools.append(portal.functions.allIdsByType(pools_type, i).call())
 
 while True:
@@ -51,7 +51,11 @@ while True:
                 "maxFeePerGas": base_fee,
             }
         )
-        log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
-    except:
-        log.error("Tx failed, trying again.")
+        log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n")
+    except Exception as e:
+        log.exception(
+            "Tx failed, trying again.",
+            exc_info=True,
+        )
+        log.error(e)
     sleep(32)

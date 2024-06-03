@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+import struct
+from geodefi.utils import wrappers
 
-from geodefi.utils.wrappers import http_request
 from src.globals import CONFIG
 from src.common import AttributeDict
 from src.logger import log
@@ -8,13 +9,17 @@ from src.utils import send_email
 from src.exceptions import HighGasException
 
 
-@http_request
+def __float_to_hexstring(f):
+    return hex(struct.unpack('<I', struct.pack('<f', f))[0])
+
+
+@wrappers.http_request
 def __fetch_gas() -> tuple:
     _url: str = CONFIG.gas.api
     return (_url, True)
 
 
-def __parse_gas(gas) -> tuple[int]:
+def __parse_gas(gas) -> tuple[float]:
     __priority_fee: list = CONFIG.gas.parser.priority.split('.')
     gas_priority = gas
     for i in __priority_fee:
@@ -28,13 +33,13 @@ def __parse_gas(gas) -> tuple[int]:
     return float(gas_priority), float(gas_base_fee)
 
 
-def get_gas() -> tuple[int]:
+def get_gas() -> tuple[str]:
     gas: AttributeDict = CONFIG.gas
     if gas:
         if gas.api and gas.parser and gas.max_priority and gas.max_fee:
             priority_fee, base_fee = __parse_gas(__fetch_gas())
             if priority_fee < gas.max_priority and base_fee < gas.max_fee:
-                return priority_fee, base_fee
+                return __float_to_hexstring(priority_fee), __float_to_hexstring(base_fee)
             else:
                 log.critical(
                     f"Undesired GAS price => priority:{priority_fee}, fee:{base_fee}. \
