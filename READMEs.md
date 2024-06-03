@@ -115,11 +115,6 @@ cd geonius
 
 #### Create virtual env
 
-Get the `path` for the ref'ed python version is
-
-```bash
-```
-
 ```bash
 poetry env use 3.8
 source {path_to_venv}/bin/activate}
