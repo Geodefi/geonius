@@ -13,6 +13,7 @@ Geonius is a multi**daemon**tional daemonic python script that allows Node Opera
       - [Install python3.9](#install-python39)
       - [Install pipx](#install-pipx)
       - [Install poetry](#install-poetry)
+      - [Clone repos](#clone-repos)
       - [Create virtual env](#create-virtual-env)
       - [Install \& Run](#install--run)
   - [Usage](#usage)
@@ -102,6 +103,13 @@ exec $SHELL
 ```bash
 pipx install poetry
 which poetry
+```
+
+#### Clone repos
+
+```bash
+git clone  https://github.com/Geodefi/geonius 
+cd geonius
 ```
 
 #### Create virtual env
