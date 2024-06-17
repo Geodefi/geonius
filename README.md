@@ -70,6 +70,15 @@ exec $SHELL
 pyenv update
 ```
 
+```zsh
+curl https://pyenv.run | bash
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
+echo 'eval "$(pyenv init -)"' >> ~/.zshrc
+exec $SHELL
+pyenv update
+```
+
 #### Install python3.9
 
 ```bash
@@ -109,7 +118,7 @@ which poetry
 #### Clone repos
 
 ```bash
-git clone  https://github.com/Geodefi/geonius 
+git clone  https://github.com/Geodefi/geonius
 cd geonius
 ```
 
@@ -120,6 +129,7 @@ poetry env use <python_version/3.9/3.9.19/etc>
 ```
 
 This will output:
+
 > Using virtualenv: <path_to_venv>
 > copy <path_to_venv> and use it above to activate
 
@@ -137,7 +147,7 @@ PYTHONPATH=. poetry run python src/main.py --flags
 > In case you want to see a very detailed debug information from the above, set `PYTHONFAULTHANDLER` before running the script:
 >
 > ```bash
-> export PYTHONFAULTHANDLER=1 
+> export PYTHONFAULTHANDLER=1
 > PYTHONPATH=. poetry run python src/main.py --flags
 > ```
 
