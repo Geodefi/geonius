@@ -4,17 +4,18 @@
 from os import getenv
 from time import sleep
 import random
+import sys
+
 from dotenv import load_dotenv
 from geodefi import Geode
 from geodefi.globals import ID_TYPE
-import sys
 
-sys.path.append(".")
-from src.globals import SDK
+from src.globals import SDK, PRIVATE_KEY
 from src.logger import log
 from src.helpers import get_name
 from src.utils import get_gas
 
+sys.path.append(".")
 
 load_dotenv()
 
@@ -36,22 +37,29 @@ while True:
         log.info(f"Depositing 1 wei to pool {get_name(pool_id)}")
 
         priority_fee, base_fee = get_gas()
-        tx_hash: bytes = SDK.portal.contract.functions.deposit(
+
+        # TODO: need to fix fee calculation, sometimes it fails
+        tx: dict = SDK.portal.contract.functions.deposit(
             int(pool_id),
             0,
             [],
             0,
             1719127731,
             SDK.w3.eth.defaultAccount.address,
-        ).transact(
+        ).build_transaction(
             {
+                "nonce": SDK.w3.eth.get_transaction_count(SDK.w3.eth.defaultAccount.address),
                 "value": 1_000_000_000,
                 "from": SDK.w3.eth.defaultAccount.address,
                 "maxPriorityFeePerGas": priority_fee,
                 "maxFeePerGas": base_fee,
             }
         )
-        log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n")
+
+        signed_tx = SDK.w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
+        tx_hash: bytes = SDK.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+
+        log.info(f"tx:\nhttps://holesky.etherscan.io/tx/0x{tx_hash.hex()}\n")
     except Exception as e:
         log.exception(
             "Tx failed, trying again.",
