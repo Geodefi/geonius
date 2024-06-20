@@ -36,7 +36,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         res: str = check_output(
             [
                 "ethdo",
-                "validators",
+                "validator",
                 "depositdata",
                 f"--validatoraccount={wallet}/{account}",
                 f"--passphrase={ACCOUNT_PASSPHRASE}",
