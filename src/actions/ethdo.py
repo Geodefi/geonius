@@ -29,7 +29,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
 
     account: str = CONFIG.ethdo.account
     wallet: str = CONFIG.ethdo.wallet
-    if index:
+    if index is not None:
         account += str(index)
 
     try:
