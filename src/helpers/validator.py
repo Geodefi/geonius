@@ -86,6 +86,8 @@ def max_proposals_count(pool_id: int) -> int:
         DatabaseError: Error fetching allowance and surplus for pool from table
     """
 
+    # TODO: monopoly log
+
     allowance: int = get_operatorAllowance(pool_id)
 
     print(f"Allowance for pool {pool_id}: {allowance}")

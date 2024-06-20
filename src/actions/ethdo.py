@@ -9,6 +9,8 @@ from src.globals import SDK, ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE, CONFIG
 from src.logger import log
 from src.exceptions import EthdoError
 
+# TODO: handle when ethdo is not installed or not in PATH
+
 
 def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int = None) -> dict:
     """Generates the deposit data for a new validator proposal.
@@ -42,7 +44,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
                 f"--passphrase={ACCOUNT_PASSPHRASE}",
                 f"--withdrawaladdress={withdrawal_address}",
                 f"--depositvalue={deposit_value}",
-                f"--forkversion={geodefi.globals.GENESIS_FORK_VERSION[SDK.network].hex()}",
+                f"--forkversion={geodefi.globals.GENESIS_FORK_VERSION[SDK.network].hex()}",  # TODO: may fix this on geo-sdk instead calling hex() here
                 "--launchpad",
             ]
         )

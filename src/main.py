@@ -32,6 +32,9 @@ def init_dbs():
     This function is called at the beginning of the program to make sure the
     databases are up to date.
     """
+
+    # TODO: try to call multiple trigger for the same action each time may create a problem
+
     if FLAGS.reset:
         reinitialize_operators_table()
         reinitialize_pools_table()
