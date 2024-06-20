@@ -169,7 +169,7 @@ def check_and_propose(pool_id: int) -> list[str]:
 
             proposal_data: list[Any] = generate_deposit_data(
                 withdrawal_address=get_withdrawal_address(pool_id),
-                deposit_value=DEPOSIT_SIZE.PROPOSAL,
+                deposit_value=DEPOSIT_SIZE.PROPOSAL * 1e9,
                 index=new_val_ind + i,
             )
 
@@ -177,7 +177,7 @@ def check_and_propose(pool_id: int) -> list[str]:
 
             stake_data: list[Any] = generate_deposit_data(
                 withdrawal_address=get_withdrawal_address(pool_id),
-                deposit_value=DEPOSIT_SIZE.STAKE,
+                deposit_value=DEPOSIT_SIZE.STAKE * 1e9,
                 index=new_val_ind + i,
             )
 

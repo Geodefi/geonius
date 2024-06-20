@@ -29,8 +29,8 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
 
     account: str = CONFIG.ethdo.account
     wallet: str = CONFIG.ethdo.wallet
-    if index is not None:
-        account += str(index)
+    # if index is not None:
+    #     account += str(index)
 
     try:
         res: str = check_output(
@@ -42,7 +42,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
                 f"--passphrase={ACCOUNT_PASSPHRASE}",
                 f"--withdrawaladdress={withdrawal_address}",
                 f"--depositvalue={deposit_value}",
-                f"--forkversion={geodefi.globals.GENESIS_FORK_VERSION[SDK.network]}",
+                f"--forkversion={geodefi.globals.GENESIS_FORK_VERSION[SDK.network].hex()}",
                 "--launchpad",
             ]
         )
