@@ -48,6 +48,10 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
 
         print("ETHDO RESPONSE", res)
 
+        import time
+
+        time.sleep(5)
+
     except Exception as e:
         raise EthdoError(
             f"Failed to generate deposit data from account {account} \
