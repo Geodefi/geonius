@@ -157,7 +157,9 @@ def check_and_propose(pool_id: int) -> list[str]:
 
     try:
         # This returns the length of the validators array in the contract so it is same as the index of the next validator
-        new_val_ind: int = SDK.portal.functions.readUint(OPERATOR_ID, to_bytes32('validators'))
+        new_val_ind: int = SDK.portal.functions.readUint(
+            OPERATOR_ID, to_bytes32('validators')
+        ).call()
 
         print(f"New validator index for operator {OPERATOR_ID}: {new_val_ind}")
 

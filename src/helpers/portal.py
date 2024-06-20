@@ -147,7 +147,7 @@ def get_owned_pubkey(index: int) -> str:
     Returns:
         str: Pubkey of the validator.
     """
-    pk: str = SDK.portal.functions.readBytes(index, get_key(OPERATOR_ID, "validators"))
+    pk: str = SDK.portal.functions.readBytes(index, get_key(OPERATOR_ID, "validators")).call()
     log.debug("Fetching an owned pubkey. index:{index} : pubkey:{pk}")
     return pk
 
