@@ -28,6 +28,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
     log.info(f"Generating deposit data{f'index: {index}'if index else '' }")
 
     account: str = CONFIG.ethdo.account
+    wallet: str = CONFIG.ethdo.wallet
     if index:
         account += str(index)
 
@@ -35,9 +36,9 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         res: str = check_output(
             [
                 "ethdo",
-                "validator",
+                "validators",
                 "depositdata",
-                f"--validatoraccount={account}",
+                f"--validatoraccount{wallet}/{account}",
                 f"--passphrase={ACCOUNT_PASSPHRASE}",
                 f"--withdrawaladdress={withdrawal_address}",
                 f"--depositvalue={deposit_value}",
