@@ -2,24 +2,32 @@
 
 from web3.types import TxReceipt
 from web3.exceptions import TimeExhausted
-from src.globals import SDK, OPERATOR_ID
+from src.globals import SDK, OPERATOR_ID, PRIVATE_KEY
 from src.exceptions import CannotStakeError, CallFailedError
 from src.logger import log
 from src.utils import send_email, get_gas
 
 
 def tx_params() -> dict:
-    priority_fee, base_fee = get_gas()
-    if priority_fee and base_fee:
-        return {
-            "from": SDK.w3.eth.defaultAccount.address,
-            "maxPriorityFeePerGas": priority_fee,
-            "maxFeePerGas": base_fee,
-        }
-    else:
-        return {
-            "from": SDK.w3.eth.defaultAccount.address,
-        }
+    # priority_fee, base_fee = get_gas()
+    # if priority_fee and base_fee:
+    #     return {
+    #         "from": SDK.w3.eth.defaultAccount.address,
+    #         "maxPriorityFeePerGas": priority_fee,
+    #         "maxFeePerGas": base_fee,
+    #     }
+    # else:
+    #     return {
+    #         "from": SDK.w3.eth.defaultAccount.address,
+    #     }
+
+    address: str = SDK.w3.eth.defaultAccount.address
+    nonce: int = SDK.w3.eth.getTransactionCount(address)
+
+    return {
+        "from": address,
+        "nonce": nonce,
+    }
 
 
 # pylint: disable-next=invalid-name
@@ -52,9 +60,12 @@ def call_proposeStake(
     try:
         print(f"Proposing stake for pool {pool_id} with pubkeys {pubkeys}")
 
-        tx_hash: str = SDK.portal.functions.proposeStake(
+        tx: dict = SDK.portal.functions.proposeStake(
             pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
-        ).transact(tx_params())
+        ).buildTransaction(tx_params())
+
+        signed_tx = SDK.w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
+        tx_hash: bytes = SDK.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
         log.info(f"proposeStake tx is created: {tx_hash}")
 
