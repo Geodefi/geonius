@@ -209,9 +209,9 @@ def check_and_propose(pool_id: int) -> list[str]:
         print(f"Temp signatures1 for proposals: {temp_sigs1}")
         print(f"Temp signatures31 for proposals: {temp_sigs31}")
 
-        if i >= len(pubkeys) - CONFIG.min_proposal_queue:
+        if i >= len(pubkeys) - CONFIG.strategy.min_proposal_queue:
             if (
-                CONFIG.max_proposal_delay
+                CONFIG.strategy.max_proposal_delay
                 >= int(round(datetime.now().timestamp())) - last_proposal_timestamp
             ):
                 break
@@ -249,9 +249,9 @@ def check_and_stake(pks: list[str]) -> list[str]:
     for i in range(0, len(pks), 50):
         temp_pks: list[str] = pks[i : i + 50]
 
-        if i >= len(pks) - CONFIG.min_proposal_queue:
+        if i >= len(pks) - CONFIG.strategy.min_proposal_queue:
             if (
-                CONFIG.max_proposal_delay
+                CONFIG.strategy.max_proposal_delay
                 >= int(round(datetime.now().timestamp())) - last_stake_timestamp
             ):
                 break
