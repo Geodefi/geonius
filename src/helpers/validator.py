@@ -187,9 +187,9 @@ def check_and_propose(pool_id: int) -> list[str]:
         send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
         return []
 
-    pubkeys: list[bytes] = [bytes.fromhex(prop.pubkey) for prop in proposal_data]
-    signatures1: list[bytes] = [bytes.fromhex(prop.signature) for prop in proposal_data]
-    signatures31: list[bytes] = [bytes.fromhex(prop.signature) for prop in stake_data]
+    pubkeys: list[bytes] = [bytes.fromhex(prop["pubkey"]) for prop in proposal_data]
+    signatures1: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in proposal_data]
+    signatures31: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in stake_data]
 
     print(f"Pubkeys for proposals: {pubkeys}")
     print(f"Signatures1 for proposals: {signatures1}")
