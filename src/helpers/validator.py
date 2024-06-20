@@ -101,7 +101,7 @@ def max_proposals_count(pool_id: int) -> int:
         return 0
 
     # every 32 ether is 1 validator.
-    eth_per_prop: int = surplus // DEPOSIT_SIZE.STAKE
+    eth_per_prop: int = surplus // (DEPOSIT_SIZE.STAKE * 1_000_000_000)
 
     print(f"ETH per proposal for pool {pool_id}: {eth_per_prop}")
 
@@ -114,7 +114,7 @@ def max_proposals_count(pool_id: int) -> int:
 
     print(f"Wallet balance for operator {OPERATOR_ID}: {wallet_balance}")
 
-    eth_per_wallet_balance: int = wallet_balance // DEPOSIT_SIZE.PROPOSAL
+    eth_per_wallet_balance: int = wallet_balance // (DEPOSIT_SIZE.PROPOSAL * 1_000_000_000)
 
     print(f"ETH per wallet balance for operator {OPERATOR_ID}: {eth_per_wallet_balance}")
 
