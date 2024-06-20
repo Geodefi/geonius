@@ -195,9 +195,9 @@ def check_and_propose(pool_id: int) -> list[str]:
     print(f"Signatures1 for proposals: {signatures1}")
     print(f"Signatures31 for proposals: {signatures31}")
 
-    last_proposal_timestamp: int = fetch_last_proposal_timestamp(pool_id)
+    # last_proposal_timestamp: int = fetch_last_proposal_timestamp(pool_id)
 
-    print(f"Last proposal timestamp for pool {pool_id}: {last_proposal_timestamp}")
+    # print(f"Last proposal timestamp for pool {pool_id}: {last_proposal_timestamp}")
 
     pks: list[str] = []
     for i in range(0, len(pubkeys), 50):
@@ -209,12 +209,12 @@ def check_and_propose(pool_id: int) -> list[str]:
         print(f"Temp signatures1 for proposals: {temp_sigs1}")
         print(f"Temp signatures31 for proposals: {temp_sigs31}")
 
-        if i >= len(pubkeys) - CONFIG.strategy.min_proposal_queue:
-            if (
-                CONFIG.strategy.max_proposal_delay
-                >= int(round(datetime.now().timestamp())) - last_proposal_timestamp
-            ):
-                break
+        # if i >= len(pubkeys) - CONFIG.strategy.min_proposal_queue:
+        #     if (
+        #         CONFIG.strategy.max_proposal_delay
+        #         >= int(round(datetime.now().timestamp())) - last_proposal_timestamp
+        #     ):
+        #         break
 
         print(f"Proposing for pool {pool_id} with pubkeys {temp_pks}")
 
