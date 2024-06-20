@@ -64,8 +64,8 @@ def get_withdrawal_address(pool_id: int) -> str:
         str: Withdrawal address of the pool.
     """
 
-    log.debug("Fetching the withdrawalCredential of a pool: {pool_id}")
-    res = SDK.portal.functions.readAddress(pool_id, to_bytes32("withdrawalCredential")).call()
+    log.debug("Fetching the withdrawal address of a pool: {pool_id}")
+    res = SDK.portal.functions.readAddress(pool_id, to_bytes32("withdrawalPackage")).call()
 
     print(f"withdrawal address: {res}")
 
