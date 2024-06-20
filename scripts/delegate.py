@@ -13,7 +13,7 @@ import sys
 
 sys.path.append(".")
 
-from src.globals import SDK
+from src.globals import SDK, PRIVATE_KEY
 from src.helpers import get_name
 from src.logger import log
 from src.utils import get_gas
@@ -49,6 +49,7 @@ ice_op = operators[1]
 
 # DELEGATE
 while True:
+
     for op_id in operators:
         try:
             allowance = random.randint(0, 100)
@@ -56,17 +57,28 @@ while True:
             log.info(
                 f"Delegating {allowance} to operator {get_name(op_id)} in pool {get_name(pool_id)}"
             )
-            priority_fee, base_fee = get_gas()
-            tx_hash: str = SDK.portal.contract.functions.delegate(
+
+            # priority_fee, base_fee = get_gas()
+
+            address = SDK.w3.eth.defaultAccount.address
+
+            tx: dict = SDK.portal.contract.functions.delegate(
                 pool_id, [op_id], [allowance]
-            ).transact(
+            ).build_transaction(
                 {
-                    "from": SDK.w3.eth.defaultAccount.address,
-                    "maxPriorityFeePerGas": priority_fee,
-                    "maxFeePerGas": base_fee,
+                    "nonce": SDK.w3.eth.get_transaction_count(address),
+                    "from": address,
+                    # "maxPriorityFeePerGas": priority_fee,
+                    # "maxFeePerGas": base_fee,
                 }
             )
-            log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
-        except:
+
+            signed_tx = SDK.w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
+            tx_hash: bytes = SDK.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+
+            log.info(f"tx:\nhttps://holesky.etherscan.io/tx/0x{tx_hash.hex()}\n\n")
+
+        except Exception as err:
             log.error("Tx failed, trying again.")
+            log.error(err)
         sleep(87)

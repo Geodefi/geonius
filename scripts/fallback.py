@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from geodefi import Geode
 from geodefi.globals import ID_TYPE
 
-from src.globals import SDK
+from src.globals import SDK, PRIVATE_KEY
 from src.helpers import get_name
 from src.logger import log
 
@@ -51,17 +51,27 @@ while True:
             log.info(
                 f"Setting fallback operator for pool {get_name(pool_id)} to operator {get_name(operator_id)} with threshold {fallback_threshold}"
             )
-            priority_fee, base_fee = get_gas()
-            tx_hash: str = SDK.portal.contract.functions.setFallbackOperator(
+
+            # priority_fee, base_fee = get_gas()
+
+            address = SDK.w3.eth.defaultAccount.address
+
+            tx: dict = SDK.portal.contract.functions.setFallbackOperator(
                 pool_id, operator_id, fallback_threshold
-            ).transact(
+            ).build_transaction(
                 {
-                    "from": SDK.w3.eth.defaultAccount.address,
-                    "maxPriorityFeePerGas": priority_fee,
-                    "maxFeePerGas": base_fee,
+                    "nonce": SDK.w3.eth.get_transaction_count(address),
+                    "from": address,
+                    # "maxPriorityFeePerGas": priority_fee,
+                    # "maxFeePerGas": base_fee,
                 }
             )
-            log.info(f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n")
+
+            signed_tx = SDK.w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
+            tx_hash: bytes = SDK.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+
+            log.info(f"tx:\nhttps://holesky.etherscan.io/tx/0x{tx_hash.hex()}\n\n")
+
         except Exception as e:
             log.exception(
                 "Tx failed, trying again.",

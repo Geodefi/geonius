@@ -36,7 +36,9 @@ while True:
         pool_id = random.choice(pools)
         log.info(f"Depositing 1 wei to pool {get_name(pool_id)}")
 
-        priority_fee, base_fee = get_gas()
+        # priority_fee, base_fee = get_gas()
+
+        address = SDK.w3.eth.defaultAccount.address
 
         # TODO: need to fix fee calculation, sometimes it fails
         tx: dict = SDK.portal.contract.functions.deposit(
@@ -45,14 +47,14 @@ while True:
             [],
             0,
             1719127731,
-            SDK.w3.eth.defaultAccount.address,
+            address,
         ).build_transaction(
             {
-                "nonce": SDK.w3.eth.get_transaction_count(SDK.w3.eth.defaultAccount.address),
+                "nonce": SDK.w3.eth.get_transaction_count(address),
                 "value": 1_000_000_000,
-                "from": SDK.w3.eth.defaultAccount.address,
-                "maxPriorityFeePerGas": priority_fee,
-                "maxFeePerGas": base_fee,
+                "from": address,
+                # "maxPriorityFeePerGas": priority_fee,
+                # "maxFeePerGas": base_fee,
             }
         )
 
@@ -60,6 +62,7 @@ while True:
         tx_hash: bytes = SDK.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
         log.info(f"tx:\nhttps://holesky.etherscan.io/tx/0x{tx_hash.hex()}\n")
+
     except Exception as e:
         log.exception(
             "Tx failed, trying again.",
