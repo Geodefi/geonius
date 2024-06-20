@@ -125,13 +125,12 @@ class DelegationTrigger(Trigger):
             # if able to propose any new validators do so
             if (
                 pool_id
-                != 58051384563972203095105188535531542842616860810471359890274174995766880197138
+                == 58051384563972203095105188535531542842616860810471359890274174995766880197138
             ):
-                continue
-            print(f"{self.name} considering allowance for pool {pool_id}")
-            proposed_pks: list[str] = check_and_propose(pool_id)
-            print(f"{self.name} proposed pks for pool {pool_id}: ", proposed_pks)
-            all_proposed_pks.extend(proposed_pks)
+                print(f"{self.name} considering allowance for pool {pool_id}")
+                proposed_pks: list[str] = check_and_propose(pool_id)
+                print(f"{self.name} proposed pks for pool {pool_id}: ", proposed_pks)
+                all_proposed_pks.extend(proposed_pks)
 
         if all_proposed_pks:
             fill_validators_table(all_proposed_pks)
