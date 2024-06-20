@@ -87,20 +87,36 @@ def max_proposals_count(pool_id: int) -> int:
     """
 
     allowance: int = get_operatorAllowance(pool_id)
+
+    print(f"Allowance for pool {pool_id}: {allowance}")
+
     if allowance == 0:
         return 0
 
     surplus: int = get_surplus(pool_id)
+
+    print(f"Surplus for pool {pool_id}: {surplus}")
+
     if surplus == 0:
         return 0
 
     # every 32 ether is 1 validator.
     eth_per_prop: int = surplus // DEPOSIT_SIZE.STAKE
+
+    print(f"ETH per proposal for pool {pool_id}: {eth_per_prop}")
+
     curr_max: int = min(allowance, eth_per_prop)
+
+    print(f"Current max proposals for pool {pool_id}: {curr_max}")
 
     # considering the wallet balance of the operator since it might not be enough (1 eth per val)
     wallet_balance: int = SDK.portal.functions.readUint(OPERATOR_ID, to_bytes32("wallet")).call()
+
+    print(f"Wallet balance for operator {OPERATOR_ID}: {wallet_balance}")
+
     eth_per_wallet_balance: int = wallet_balance // DEPOSIT_SIZE.PROPOSAL
+
+    print(f"ETH per wallet balance for operator {OPERATOR_ID}: {eth_per_wallet_balance}")
 
     if curr_max > eth_per_wallet_balance:
         log.critical(
@@ -130,7 +146,11 @@ def check_and_propose(pool_id: int) -> list[str]:
         list[str]: list of pubkeys proposed
     """
 
+    print(f"Checking and proposing for pool {pool_id}")
+
     max_allowed: int = max_proposals_count(pool_id)
+
+    print(f"Max allowed proposals for pool {pool_id}: {max_allowed}")
 
     if max_allowed == 0:
         return []
@@ -138,18 +158,29 @@ def check_and_propose(pool_id: int) -> list[str]:
     try:
         # This returns the length of the validators array in the contract so it is same as the index of the next validator
         new_val_ind: int = SDK.portal.functions.readUint(OPERATOR_ID, to_bytes32('validators'))
+
+        print(f"New validator index for operator {OPERATOR_ID}: {new_val_ind}")
+
         for i in range(max_allowed):
+
+            print(f"Generating deposit data for proposal {new_val_ind + i}")
+
             proposal_data: list[Any] = generate_deposit_data(
                 withdrawal_address=get_withdrawal_address(pool_id),
                 deposit_value=DEPOSIT_SIZE.PROPOSAL,
                 index=new_val_ind + i,
             )
 
+            print(f"Proposal data for proposal {new_val_ind + i}: {proposal_data}")
+
             stake_data: list[Any] = generate_deposit_data(
                 withdrawal_address=get_withdrawal_address(pool_id),
                 deposit_value=DEPOSIT_SIZE.STAKE,
                 index=new_val_ind + i,
             )
+
+            print(f"Stake data for proposal {new_val_ind + i}: {stake_data}")
+
     except EthdoError as e:
         send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
         return []
@@ -158,12 +189,23 @@ def check_and_propose(pool_id: int) -> list[str]:
     signatures1: list[bytes] = [bytes.fromhex(prop.signature) for prop in proposal_data]
     signatures31: list[bytes] = [bytes.fromhex(prop.signature) for prop in stake_data]
 
+    print(f"Pubkeys for proposals: {pubkeys}")
+    print(f"Signatures1 for proposals: {signatures1}")
+    print(f"Signatures31 for proposals: {signatures31}")
+
     last_proposal_timestamp: int = fetch_last_proposal_timestamp(pool_id)
+
+    print(f"Last proposal timestamp for pool {pool_id}: {last_proposal_timestamp}")
+
     pks: list[str] = []
     for i in range(0, len(pubkeys), 50):
         temp_pks: list[str] = pubkeys[i : i + 50]
         temp_sigs1: list[str] = signatures1[i : i + 50]
         temp_sigs31: list[str] = signatures31[i : i + 50]
+
+        print(f"Temp pubkeys for proposals: {temp_pks}")
+        print(f"Temp signatures1 for proposals: {temp_sigs1}")
+        print(f"Temp signatures31 for proposals: {temp_sigs31}")
 
         if i >= len(pubkeys) - CONFIG.min_proposal_queue:
             if (
@@ -172,7 +214,10 @@ def check_and_propose(pool_id: int) -> list[str]:
             ):
                 break
 
+        print(f"Proposing for pool {pool_id} with pubkeys {temp_pks}")
+
         try:
+            print(f"Calling proposeStake for pool {pool_id} with pubkeys {temp_pks}")
             success: bool = call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
             save_last_proposal_timestamp(pool_id, int(round(datetime.now().timestamp())))
         except (CallFailedError, TimeExhausted) as e:

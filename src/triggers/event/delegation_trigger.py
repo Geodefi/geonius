@@ -118,10 +118,14 @@ class DelegationTrigger(Trigger):
         # gather pool ids from filtered events
         pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
+        print(f"{self.name} pool ids from filtered events: ", pool_ids)
+
         all_proposed_pks: list[str] = []
         for pool_id in pool_ids:
             # if able to propose any new validators do so
+            print(f"{self.name} considering allowance for pool {pool_id}")
             proposed_pks: list[str] = check_and_propose(pool_id)
+            print(f"{self.name} proposed pks for pool {pool_id}: ", proposed_pks)
             all_proposed_pks.extend(proposed_pks)
 
         if all_proposed_pks:

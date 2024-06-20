@@ -50,6 +50,8 @@ def call_proposeStake(
     """
 
     try:
+        print(f"Proposing stake for pool {pool_id} with pubkeys {pubkeys}")
+
         tx_hash: str = SDK.portal.functions.proposeStake(
             pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
         ).transact(tx_params())
