@@ -67,11 +67,7 @@ def get_withdrawal_address(pool_id: int) -> str:
     log.debug("Fetching the withdrawal address of a pool: {pool_id}")
     res = SDK.portal.functions.readAddress(pool_id, to_bytes32("withdrawalPackage")).call()
 
-    print(f"withdrawal address: {res}")
-
-    print(f"withdrawal address hex: {res.hex()}")
-
-    return "0x" + res.hex()
+    return res
 
 
 def get_surplus(pool_id: int) -> int:
