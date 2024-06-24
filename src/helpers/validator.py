@@ -102,6 +102,8 @@ def max_proposals_count(pool_id: int) -> int:
     if surplus == 0:
         return 0
 
+    # TODO: on geodefi its 32 gwei instead of ether consider fixing this or handle it in the code in a better way
+
     # every 32 ether is 1 validator.
     eth_per_prop: int = surplus // (DEPOSIT_SIZE.STAKE * 1_000_000_000)
 
@@ -189,9 +191,13 @@ def check_and_propose(pool_id: int) -> list[str]:
         send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
         return []
 
-    pubkeys: list[bytes] = [bytes.fromhex(prop["pubkey"]) for prop in proposal_data]
-    signatures1: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in proposal_data]
-    signatures31: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in stake_data]
+    # pubkeys: list[bytes] = [bytes.fromhex(prop["pubkey"]) for prop in proposal_data]
+    # signatures1: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in proposal_data]
+    # signatures31: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in stake_data]
+
+    pubkeys: list[str] = ["0x" + prop["pubkey"] for prop in proposal_data]
+    signatures1: list[str] = ["0x" + prop["signature"] for prop in proposal_data]
+    signatures31: list[str] = ["0x" + prop["signature"] for prop in stake_data]
 
     print(f"Pubkeys for proposals: {pubkeys}")
     print(f"Signatures1 for proposals: {signatures1}")
