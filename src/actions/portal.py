@@ -62,7 +62,7 @@ def call_proposeStake(
 
         tx: dict = SDK.portal.functions.proposeStake(
             pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
-        ).buildTransaction(tx_params())
+        ).build_transaction(tx_params())
 
         print(f"created proposeStake tx: {tx}")
 
