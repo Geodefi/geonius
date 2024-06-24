@@ -22,7 +22,7 @@ def tx_params() -> dict:
     #     }
 
     address: str = SDK.w3.eth.defaultAccount.address
-    nonce: int = SDK.w3.eth.getTransactionCount(address)
+    nonce: int = SDK.w3.eth.get_transaction_count(address)
 
     return {
         "from": address,
@@ -59,6 +59,12 @@ def call_proposeStake(
 
     try:
         print(f"Proposing stake for pool {pool_id} with pubkeys {pubkeys}")
+
+        print("type of pool_id: ", type(pool_id))
+        print("type of OPERATOR_ID: ", type(OPERATOR_ID))
+        print("type of pubkeys: ", type(pubkeys))
+        print("type of sig1s: ", type(sig1s))
+        print("type of sig31s: ", type(sig31s))
 
         tx: dict = SDK.portal.contract.functions.proposeStake(
             pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
