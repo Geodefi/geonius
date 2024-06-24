@@ -64,7 +64,12 @@ def call_proposeStake(
             pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
         ).buildTransaction(tx_params())
 
+        print(f"created proposeStake tx: {tx}")
+
         signed_tx = SDK.w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
+
+        print(f"signed proposeStake tx: {signed_tx}")
+
         tx_hash: bytes = SDK.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
         log.info(f"proposeStake tx is created: {tx_hash}")
