@@ -60,7 +60,7 @@ def call_proposeStake(
     try:
         print(f"Proposing stake for pool {pool_id} with pubkeys {pubkeys}")
 
-        tx: dict = SDK.portal.functions.proposeStake(
+        tx: dict = SDK.portal.contract.functions.proposeStake(
             pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
         ).build_transaction(tx_params())
 
