@@ -132,5 +132,6 @@ class DelegationTrigger(Trigger):
                 print(f"{self.name} proposed pks for pool {pool_id}: ", proposed_pks)
                 all_proposed_pks.extend(proposed_pks)
 
+        # TODO: proposed pks are not ready yet so it breaks the program, need to fix
         if all_proposed_pks:
             fill_validators_table(all_proposed_pks)

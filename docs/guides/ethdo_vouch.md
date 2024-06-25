@@ -43,7 +43,7 @@ Vouch is designed to work with multiple beacon nodes using strategies. A strateg
 
 ```bash
 go install github.com/attestantio/vouch@latest
-vouch version
+vouch --version
 ```
 
 #### Configuration
