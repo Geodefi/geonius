@@ -51,7 +51,7 @@ docker pull Geodefi/geonius
 
 ### Build from source
 
-We do not recommend usign `pip` and your local `python` packages.
+We do not recommend using `pip` and your local `python` packages.
 
 Use `pyenv` to manage your python version.
 
@@ -118,7 +118,7 @@ which poetry
 #### Clone repos
 
 ```bash
-git clone  https://github.com/Geodefi/geonius
+git clone https://github.com/Geodefi/geonius
 cd geonius
 ```
 
