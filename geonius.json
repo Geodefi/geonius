@@ -42,7 +42,7 @@
   },
   "ethdo": {
     "wallet": "geonius",
-    "account": "validators"
+    "account": "Validator"
   },
   "email": {
     "smtp_server": "smtp.gmail.com",

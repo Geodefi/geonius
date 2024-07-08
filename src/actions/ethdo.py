@@ -12,7 +12,7 @@ from src.exceptions import EthdoError
 # TODO: handle when ethdo is not installed or not in PATH
 
 
-def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int = None) -> dict:
+def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int) -> dict:
     """Generates the deposit data for a new validator proposal.
 
     Args:
@@ -31,10 +31,13 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
 
     account: str = CONFIG.ethdo.account
     wallet: str = CONFIG.ethdo.wallet
-    # if index is not None:
-    #     account += str(index)
+
+    if index is not None:
+        account += str(index)
 
     try:
+        create_account(index=index)
+
         res: str = check_output(
             [
                 "ethdo",
@@ -44,7 +47,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
                 f"--passphrase={ACCOUNT_PASSPHRASE}",
                 f"--withdrawaladdress={withdrawal_address}",
                 f"--depositvalue={deposit_value}",
-                f"--forkversion={geodefi.globals.GENESIS_FORK_VERSION[SDK.network].hex()}",  # TODO: may fix this on geo-sdk instead calling hex() here
+                f"--forkversion={geodefi.globals.GENESIS_FORK_VERSION[SDK.network].hex()}",
                 "--launchpad",
             ]
         )
@@ -118,8 +121,9 @@ def create_account(index: int = None) -> dict:
     """
 
     account = CONFIG.ethdo.account
-    if index:
-        account += f"_{index}_"
+
+    if index is not None:
+        account += f"{index}"
 
     log.info(f"Creating a new account: {account} on wallet: {CONFIG.ethdo.wallet}")
 
