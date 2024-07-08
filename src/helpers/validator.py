@@ -2,17 +2,17 @@
 
 from typing import Any
 from datetime import datetime
-from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE
+from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE, BEACON_DENOMINATOR
 from geodefi.utils import to_bytes32
 from web3.exceptions import TimeExhausted
 
 from src.classes import Database
 from src.logger import log
-from src.globals import SDK, OPERATOR_ID, chain, CONFIG
+from src.globals import CONFIG, SDK, OPERATOR_ID, chain
 from src.utils import send_email
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
-from src.daemons.time_daemon import TimeDaemon
 
+# from src.daemons.time_daemon import TimeDaemon
 # from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
 from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError, CallFailedError
 
@@ -105,7 +105,7 @@ def max_proposals_count(pool_id: int) -> int:
     # TODO: on geodefi its 32 gwei instead of ether consider fixing this or handle it in the code in a better way
 
     # every 32 ether is 1 validator.
-    eth_per_prop: int = surplus // (DEPOSIT_SIZE.STAKE * 1_000_000_000)
+    eth_per_prop: int = surplus // (DEPOSIT_SIZE.STAKE * BEACON_DENOMINATOR)
 
     print(f"ETH per proposal for pool {pool_id}: {eth_per_prop}")
 
@@ -118,7 +118,7 @@ def max_proposals_count(pool_id: int) -> int:
 
     print(f"Wallet balance for operator {OPERATOR_ID}: {wallet_balance}")
 
-    eth_per_wallet_balance: int = wallet_balance // (DEPOSIT_SIZE.PROPOSAL * 1_000_000_000)
+    eth_per_wallet_balance: int = wallet_balance // (DEPOSIT_SIZE.PROPOSAL * BEACON_DENOMINATOR)
 
     print(f"ETH per wallet balance for operator {OPERATOR_ID}: {eth_per_wallet_balance}")
 
