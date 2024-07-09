@@ -87,8 +87,6 @@ class DepositTrigger(Trigger):
         Args:
             events (Iterable[EventData]): list of events
         """
-        log.info(f"{self.name} is triggered.")
-
         # parse and save events
         filtered_events: Iterable[EventData] = event_handler(
             events, self.__parse_events, self.__save_events

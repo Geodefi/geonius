@@ -103,7 +103,6 @@ class DelegationTrigger(Trigger):
         Args:
             events (Iterable[EventData]): list of Delegation emits
         """
-        log.info(f"{self.name} is triggered.")
 
         # filter, parse and save events
         filtered_events: Iterable[EventData] = event_handler(

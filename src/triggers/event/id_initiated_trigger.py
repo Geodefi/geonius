@@ -98,7 +98,6 @@ class IdInitiatedTrigger(Trigger):
         Args:
             events (Iterable[EventData]): list of events
         """
-        log.info(f"{self.name} is triggered.")
 
         filtered_events: Iterable[EventData] = event_handler(
             events,

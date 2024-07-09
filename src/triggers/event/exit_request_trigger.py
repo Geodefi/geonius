@@ -102,7 +102,6 @@ class ExitRequestTrigger(Trigger):
         Args:
             events (Iterable[EventData]): The events to be processed and saved to the database.
         """
-        log.info(f"{self.name} is triggered.")
 
         # filter, parse and save events
         filtered_events: Iterable[EventData] = event_handler(

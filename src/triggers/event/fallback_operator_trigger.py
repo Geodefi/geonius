@@ -102,7 +102,6 @@ class FallbackOperatorTrigger(Trigger):
         Args:
             events (Iterable[EventData]): list of events
         """
-        log.info(f"{self.name} is triggered.")
 
         filtered_events: Iterable[EventData] = event_handler(
             events, self.__parse_events, self.__save_events, self.__filter_events

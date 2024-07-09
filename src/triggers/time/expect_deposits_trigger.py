@@ -17,6 +17,7 @@ def ping_pubkey(pubkey: str) -> bool:
         return False
 
 
+# TODO: Stop and throw error after x attempts: This should be fault tolerant. rely on config.json
 class ExpectDepositsTrigger(Trigger):
     """_summary_
 

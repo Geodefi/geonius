@@ -54,5 +54,5 @@ class Trigger:
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
-
+        log.info(f"{self.name} is triggered.")
         self.__action(*args, **kwargs)

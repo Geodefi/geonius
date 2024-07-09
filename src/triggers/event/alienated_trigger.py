@@ -98,8 +98,6 @@ class AlienatedTrigger(Trigger):
         Args:
             events (Iterable[EventData]): list of events
         """
-        log.info(f"{self.name} is triggered.")
-
         # filter, parse and save events
         filtered_events: Iterable[EventData] = event_handler(
             events,
