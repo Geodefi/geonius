@@ -37,12 +37,7 @@ class StakeTrigger(Trigger):
         log.debug(f"{self.name} is initated.")
 
     def activate_validators(self, *args, **kwargs) -> None:
-        """Checks for approved proposals and calls portal.stake() for them. Finalizes the validator creation.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
+        """Checks for approved proposals and calls portal.stake() for them. Finalizes the validator creation."""
         log.info(f"{self.name} is triggered.")
 
         # check if there are any pending validator proposals.

@@ -86,8 +86,6 @@ class DepositTrigger(Trigger):
 
         Args:
             events (Iterable[EventData]): list of events
-            *args: Variable length argument list
-            **kwargs: Arbitrary keyword arguments
         """
         log.info(f"{self.name} is triggered.")
 
