@@ -138,8 +138,6 @@ class ExitRequestTrigger(Trigger):
         for pubkey in exitted_pks:
             save_local_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
 
-            finalize_exit_trigger: FinalizeExitTrigger = FinalizeExitTrigger(pubkey)
-
             # calculate the delay for the daemon to run
             res: dict[str, Any] = SDK.beacon.beacon_headers_id("head")
             # pylint: disable=E1126:invalid-sequence-index
@@ -159,7 +157,7 @@ class ExitRequestTrigger(Trigger):
             # initialize and run the daemon
             finalize_exit_daemon: TimeDaemon = TimeDaemon(
                 interval=slot_interval + 1,
-                trigger=finalize_exit_trigger,
+                trigger=FinalizeExitTrigger(pubkey),
                 initial_delay=init_delay,
             )
 

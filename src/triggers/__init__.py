@@ -9,4 +9,4 @@ from .event import (
     DepositTrigger,
     ExitRequestTrigger,
 )
-from .time import FinalizeExitTrigger
+from .time import FinalizeExitTrigger, ExpectDepositsTrigger

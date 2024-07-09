@@ -9,12 +9,13 @@ from src.exceptions import DatabaseError
 from src.helpers import (
     create_deposit_table,
     event_handler,
-    fill_validators_table,
-    get_surplus,
     create_pools_table,
     check_and_propose,
     create_operators_table,
 )
+from src.daemons import TimeDaemon
+from src.triggers import ExpectDepositsTrigger
+from src.globals import one_minute, one_hour
 
 
 class DepositTrigger(Trigger):
@@ -104,4 +105,9 @@ class DepositTrigger(Trigger):
             all_proposed_pks.extend(proposed_pks)
 
         if all_proposed_pks:
-            fill_validators_table(all_proposed_pks)
+            all_deposits_daemon: TimeDaemon = TimeDaemon(
+                interval=one_minute * 15,
+                trigger=ExpectDepositsTrigger(all_proposed_pks),
+                initial_delay=12 * one_hour,
+            )
+            all_deposits_daemon.run()

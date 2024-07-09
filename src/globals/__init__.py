@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .config import CONFIG
-from .constants import hour_blocks, chain
+from .constants import hour_blocks, chain, one_minute, one_hour
 from .env import (
     EXECUTION_API,
     CONSENSUS_API,

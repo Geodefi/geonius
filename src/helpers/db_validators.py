@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from geodefi.globals import VALIDATOR_STATE
+from geodefi.classes import Validator
 
 from src.classes import Database
 from src.globals import SDK
@@ -71,7 +72,7 @@ def fetch_validator(pubkey: str) -> dict:
         dict: dictionary containing the validator info
     """
 
-    val = SDK.portal.validator(pubkey)
+    val: Validator = SDK.portal.validator(pubkey)
 
     return {
         "portal_index": val.portal_index,  # constant
