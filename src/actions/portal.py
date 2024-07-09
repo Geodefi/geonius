@@ -78,7 +78,7 @@ def call_proposeStake(
 
         tx_hash: bytes = SDK.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
-        log.info(f"proposeStake tx is created: {tx_hash}")
+        log.info(f"proposeStake tx is created: {tx_hash.hex()}")
 
         # Wait for the transaction to be mined, and get the transaction receipt
         tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)

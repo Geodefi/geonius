@@ -36,14 +36,18 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         account += str(index)
 
     try:
-        create_account(index=index)
-
+        try:
+            res: str = check_output(
+                ["ethdo", "account", "info", f"--validatoraccount={wallet}/{account}"]
+            )
+        except:
+            create_account(index=index)
         res: str = check_output(
             [
                 "ethdo",
                 "validator",
                 "depositdata",
-                f"--validatoraccount={wallet}/{account}",
+                f"--validatoraccount='{wallet}/{account}'",
                 f"--passphrase={ACCOUNT_PASSPHRASE}",
                 f"--withdrawaladdress={withdrawal_address}",
                 f"--depositvalue={deposit_value}",
