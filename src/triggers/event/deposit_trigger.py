@@ -14,8 +14,8 @@ from src.helpers import (
     create_operators_table,
 )
 from src.daemons import TimeDaemon
-from src.triggers import ExpectDepositsTrigger
 from src.globals import one_minute, one_hour
+from ..time import ExpectDepositsTrigger
 
 
 class DepositTrigger(Trigger):
