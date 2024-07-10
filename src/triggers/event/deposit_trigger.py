@@ -14,7 +14,7 @@ from src.helpers import (
 )
 from src.daemons import TimeDaemon
 from src.globals import get_constants, get_logger
-from ..time import ExpectDepositsTrigger
+from src.triggers.time import ExpectDepositsTrigger
 
 
 class DepositTrigger(Trigger):

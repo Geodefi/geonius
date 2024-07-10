@@ -16,10 +16,10 @@ from src.helpers import get_name
 # from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
 from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError, CallFailedError
 
-from .portal import get_operatorAllowance, get_surplus, get_withdrawal_address
-from .db_validators import fill_validators_table, save_local_state
-from .db_pools import save_last_proposal_timestamp
-from .db_operator import save_last_stake_timestamp
+from src.helpers.portal import get_operatorAllowance, get_surplus, get_withdrawal_address
+from src.helpers.db_validators import fill_validators_table, save_local_state
+from src.helpers.db_pools import save_last_proposal_timestamp
+from src.helpers.db_operator import save_last_stake_timestamp
 
 
 def fetch_last_proposal_timestamp(pool_id: int) -> int:

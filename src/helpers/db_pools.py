@@ -5,7 +5,7 @@ from src.utils import multithread
 from src.globals import get_env, get_logger
 from src.exceptions import DatabaseError
 
-from .portal import get_surplus, get_fallback_operator
+from src.helpers.portal import get_surplus, get_fallback_operator
 
 
 def create_pools_table() -> None:

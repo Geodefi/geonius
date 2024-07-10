@@ -7,7 +7,7 @@ from web3.exceptions import TimeExhausted
 
 from src.globals import get_logger
 from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError
-from .trigger import Trigger
+from src.classes.trigger import Trigger
 
 
 class Daemon:

@@ -22,10 +22,6 @@ from src.globals import (
 )
 
 
-# TODO: commit and push
-# TODO: look for print
-# TODO: look for from .
-# TODO: look for from ..
 # TODO:  fix the mailing issue
 # TODO: look for TODOS.
 
@@ -66,7 +62,7 @@ def collect_local_flags() -> dict:
     )
     flags, unknown = parser.parse_known_args()
     if unknown:
-        print(unknown)
+        get_logger().error(f"Unknown flags:{unknown}")
         raise UnknownFlagError
     return flags
 

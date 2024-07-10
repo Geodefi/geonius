@@ -7,7 +7,7 @@ from src.classes import Database
 from src.globals import get_logger, get_sdk
 from src.utils import multithread
 from src.exceptions import DatabaseError, DatabaseMismatchError
-from .portal import get_StakeParams
+from src.helpers.portal import get_StakeParams
 
 
 def create_validators_table() -> None:

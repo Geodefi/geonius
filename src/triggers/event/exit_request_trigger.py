@@ -21,7 +21,7 @@ from src.helpers import (
     check_pk_in_db,
 )
 
-from ..time.finalize_exit_trigger import FinalizeExitTrigger
+from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
 
 
 class ExitRequestTrigger(Trigger):
