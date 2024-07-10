@@ -1,84 +1,107 @@
-# Initilize Geode
+# TODO: convert all of these into 1 time use scripts
+
 from time import sleep
-from os import getenv
-import random
+from argparse import ArgumentParser
 
-from dotenv import load_dotenv
-
-from geodefi.globals import ID_TYPE
-
-from geodefi import Geode
-
-import sys
-
-sys.path.append(".")
-
-from src.globals import SDK, PRIVATE_KEY
+from src.exceptions import UnknownFlagError
+from src.globals import get_sdk, get_env, get_logger, get_flags
 from src.helpers import get_name
-from src.logger import log
 from src.utils import get_gas
 
-load_dotenv()
+from src.common.loggable import Loggable
+from src.globals.env import load_env
+from src.globals.config import apply_flags, init_config
+from src.globals.sdk import init_sdk
+from src.globals.constants import init_constants
+from src.globals import (
+    set_config,
+    set_env,
+    set_sdk,
+    set_flags,
+    set_constants,
+    set_logger,
+)
 
-geode = Geode(exec_api=getenv('EXECUTION_API'), cons_api=getenv('CONSENSUS_API'))
 
-portal = geode.portal
+def setup():
+    """_summary_
+    # TODO
+    """
+    set_env(load_env())
 
-pools = list()
-pools_type = ID_TYPE.POOL
-pools_len = portal.functions.allIdsByTypeLength(pools_type).call()
+    set_flags(collect_local_flags())
 
-if pools_len > 0:
-    for i in range(pools_len):
-        pools.append(portal.functions.allIdsByType(pools_type, i).call())
+    set_config(apply_flags(init_config()))
 
-### UNIQUE PART BELOW
+    set_logger(Loggable())
 
-# GET OPERATORS LIST
-operators = list()
-op_type = ID_TYPE.OPERATOR
-op_len = portal.functions.allIdsByTypeLength(op_type).call()
+    set_sdk(
+        init_sdk(
+            exec_api=get_env().EXECUTION_API,
+            cons_api=get_env().CONSENSUS_API,
+            priv_key=get_env().PRIVATE_KEY,
+        )
+    )
 
-if op_len > 0:
-    for i in range(op_len):
-        operators.append(portal.functions.allIdsByType(op_type, i).call())
+    set_constants(init_constants())
 
-# OUT OPERATORS
-crash_op = operators[0]
-ice_op = operators[1]
 
-# DELEGATE
-while True:
+def collect_local_flags() -> dict:
+    parser = ArgumentParser()
+    parser.add_argument("--allowance", action="store", dest="allowance", type=int, required=True)
+    parser.add_argument("--pool", action="store", dest="pool", type=int, required=True)
+    parser.add_argument("--operator", action="store", dest="operator", type=int, required=True)
+    parser.add_argument(
+        "--sleep",
+        action="store",
+        dest="sleep",
+        type=int,
+        required=False,
+        help="Will run as a daemon when provided, interpreted as seconds.",
+    )
+    flags, unknown = parser.parse_known_args()
+    if unknown:
+        print(unknown)
+        raise UnknownFlagError
+    return flags
 
-    for op_id in operators:
-        try:
-            allowance = random.randint(0, 100)
-            pool_id = random.choice(pools)
-            log.info(
-                f"Delegating {allowance} to operator {get_name(op_id)} in pool {get_name(pool_id)}"
-            )
 
-            # priority_fee, base_fee = get_gas()
+def tx_params() -> dict:
+    priority_fee, base_fee = get_gas()
+    if priority_fee and base_fee:
+        return {
+            "maxPriorityFeePerGas": priority_fee,
+            "maxFeePerGas": base_fee,
+        }
+    else:
+        return {}
 
-            address = SDK.w3.eth.defaultAccount.address
 
-            tx: dict = SDK.portal.contract.functions.delegate(
-                pool_id, [op_id], [allowance]
-            ).build_transaction(
-                {
-                    "nonce": SDK.w3.eth.get_transaction_count(address),
-                    "from": address,
-                    # "maxPriorityFeePerGas": priority_fee,
-                    # "maxFeePerGas": base_fee,
-                }
-            )
+def delegate(allowance: int, pool: int, operator: int):
+    try:
+        get_logger().info(
+            f"Delegating {allowance} to operator {get_name(get_env().OPERATOR_ID)} in pool {get_name(pool)}"
+        )
 
-            signed_tx = SDK.w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
-            tx_hash: bytes = SDK.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+        tx: dict = (
+            get_sdk().portal.functions.delegate(pool, [operator], [allowance]).transact(tx_params())
+        )
 
-            log.info(f"tx:\nhttps://holesky.etherscan.io/tx/0x{tx_hash.hex()}\n\n")
+        get_logger().etherscan(tx)
 
-        except Exception as err:
-            log.error("Tx failed, trying again.")
-            log.error(err)
-        sleep(87)
+    except Exception as err:
+        get_logger().error("Tx failed, trying again.")
+        get_logger().error(err)
+
+
+if __name__ == "__main__":
+    setup()
+    f: dict = get_flags()
+
+    if hasattr(f, 'sleep'):
+        while True:
+            delegate(f.allowance, f.pool, f.operator)
+
+            sleep(f.sleep)
+    else:
+        delegate(f.allowance, f.pool, f.operator)

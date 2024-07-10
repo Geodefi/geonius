@@ -1,10 +1,11 @@
 from time import sleep
 from argparse import ArgumentParser
+from geodefi.globals import ETHER_DENOMINATOR
 
 from src.exceptions import UnknownFlagError
-from src.globals import get_sdk, get_logger, get_env, get_flags
 from src.helpers import get_name
 from src.utils import get_gas
+from src.globals import get_sdk, get_env, get_logger, get_flags
 
 from src.common.loggable import Loggable
 from src.globals.env import load_env
@@ -19,6 +20,14 @@ from src.globals import (
     set_constants,
     set_logger,
 )
+
+
+# TODO: commit and push
+# TODO: look for print
+# TODO: look for from .
+# TODO: look for from ..
+# TODO:  fix the mailing issue
+# TODO: look for TODOS.
 
 
 def setup():
@@ -47,7 +56,6 @@ def setup():
 def collect_local_flags() -> dict:
     parser = ArgumentParser()
     parser.add_argument("--value", action="store", dest="value", type=int, required=True)
-    parser.add_argument("--pool", action="store", dest="pool", type=int, required=True)
     parser.add_argument(
         "--sleep",
         action="store",
@@ -58,6 +66,7 @@ def collect_local_flags() -> dict:
     )
     flags, unknown = parser.parse_known_args()
     if unknown:
+        print(unknown)
         raise UnknownFlagError
     return flags
 
@@ -73,28 +82,16 @@ def tx_params() -> dict:
         return {}
 
 
-def deposit(
-    pool: int,
-    value: int,
-):
+def increase_wallet(value: int):
     try:
-        get_logger().info(f"Depositing {value} to pool {get_name(pool)}")
+        _id = int(get_env().OPERATOR_ID)
+        get_logger().info(
+            f"Decreasing id wallet for {get_name(_id)} by {value/ETHER_DENOMINATOR} ether"
+        )
 
         params: dict = tx_params()
-        params.update({'value': value})
 
-        tx: dict = (
-            get_sdk()
-            .portal.contract.functions.deposit(
-                pool,
-                0,
-                [],
-                0,
-                1719127731,  # will fail in 2100
-                get_sdk().w3.eth.default_account,
-            )
-            .transact(params)
-        )
+        tx: dict = get_sdk().portal.functions.decreaseWalletBalance(_id, value).transact(params)
 
         get_logger().etherscan(tx)
 
@@ -106,10 +103,10 @@ def deposit(
 if __name__ == "__main__":
     setup()
     f: dict = get_flags()
-    print(hasattr(f, 'value'))
+
     if hasattr(f, 'sleep'):
         while True:
-            deposit(f.pool, f.value)
+            increase_wallet(f.value)
             sleep(f.sleep)
     else:
-        deposit(f.pool, f.value)
+        increase_wallet(f.value)

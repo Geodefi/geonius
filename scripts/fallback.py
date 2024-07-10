@@ -1,81 +1,105 @@
-# Initilize Geode
-from os import getenv
 from time import sleep
-import random
+from argparse import ArgumentParser
 
-import sys
-
-sys.path.append(".")
-from src.utils import get_gas
-from dotenv import load_dotenv
-
-from geodefi import Geode
-from geodefi.globals import ID_TYPE
-
-from src.globals import SDK, PRIVATE_KEY
+from src.exceptions import UnknownFlagError
+from src.globals import get_sdk, get_logger, get_env, get_flags
 from src.helpers import get_name
-from src.logger import log
+from src.utils import get_gas
 
-load_dotenv()
+from src.common.loggable import Loggable
+from src.globals.env import load_env
+from src.globals.config import apply_flags, init_config
+from src.globals.sdk import init_sdk
+from src.globals.constants import init_constants
+from src.globals import (
+    set_config,
+    set_env,
+    set_sdk,
+    set_flags,
+    set_constants,
+    set_logger,
+)
 
-geode = Geode(exec_api=getenv('EXECUTION_API'), cons_api=getenv('CONSENSUS_API'))
 
-portal = geode.portal
+def setup():
+    """_summary_
+    # TODO
+    """
+    set_env(load_env())
 
-pools = list()
-pools_type = ID_TYPE.POOL
-pools_len = portal.functions.allIdsByTypeLength(pools_type).call()
+    set_flags(collect_local_flags())
 
-if pools_len > 0:
-    for i in range(pools_len):
-        pools.append(portal.functions.allIdsByType(pools_type, i).call())
+    set_config(apply_flags(init_config()))
 
-### UNIQUE PART BELOW
+    set_logger(Loggable())
 
-# GET OPERATORS LIST
-operators = list()
-op_type = ID_TYPE.OPERATOR
-op_len = portal.functions.allIdsByTypeLength(op_type).call()
+    set_sdk(
+        init_sdk(
+            exec_api=get_env().EXECUTION_API,
+            cons_api=get_env().CONSENSUS_API,
+            priv_key=get_env().PRIVATE_KEY,
+        )
+    )
 
-if op_len > 0:
-    for i in range(op_len):
-        operators.append(portal.functions.allIdsByType(op_type, i).call())
+    set_constants(init_constants())
 
-thresholds = range(5 * 10**8, 10**10 + 1, 5 * 10**8)
 
-while True:
-    for operator_id in operators:
-        try:
-            pool_id = random.choice(pools)
-            fallback_threshold = random.choice(thresholds)
-            log.info(
-                f"Setting fallback operator for pool {get_name(pool_id)} to operator {get_name(operator_id)} with threshold {fallback_threshold}"
-            )
+def collect_local_flags() -> dict:
+    parser = ArgumentParser()
+    parser.add_argument("--pool", action="store", dest="pool", type=int, required=True)
+    parser.add_argument("--operator", action="store", dest="operator", type=int, required=True)
+    parser.add_argument("--threshold", action="store", dest="threshold", type=int, required=True)
+    parser.add_argument(
+        "--sleep",
+        action="store",
+        type=int,
+        dest="sleep",
+        required=False,
+        help="Will run as a daemon when provided, interpreted as seconds.",
+    )
+    flags, unknown = parser.parse_known_args()
+    if unknown:
+        raise UnknownFlagError
+    return flags
 
-            # priority_fee, base_fee = get_gas()
 
-            address = SDK.w3.eth.defaultAccount.address
+def tx_params() -> dict:
+    priority_fee, base_fee = get_gas()
+    if priority_fee and base_fee:
+        return {
+            "maxPriorityFeePerGas": priority_fee,
+            "maxFeePerGas": base_fee,
+        }
+    else:
+        return {}
 
-            tx: dict = SDK.portal.contract.functions.setFallbackOperator(
-                pool_id, operator_id, fallback_threshold
-            ).build_transaction(
-                {
-                    "nonce": SDK.w3.eth.get_transaction_count(address),
-                    "from": address,
-                    # "maxPriorityFeePerGas": priority_fee,
-                    # "maxFeePerGas": base_fee,
-                }
-            )
 
-            signed_tx = SDK.w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
-            tx_hash: bytes = SDK.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+def set_fallback_operator(pool: int, operator: int, threshold: int):
+    try:
+        get_logger().info(
+            f"Setting threshold as {threshold} from pool {get_name(pool)} for {get_name(operator)}"
+        )
 
-            log.info(f"tx:\nhttps://holesky.etherscan.io/tx/0x{tx_hash.hex()}\n\n")
+        tx: dict = (
+            get_sdk()
+            .portal.contract.functions.setFallbackOperator(pool, operator, threshold)
+            .transact(tx_params())
+        )
 
-        except Exception as e:
-            log.exception(
-                "Tx failed, trying again.",
-                exc_info=True,
-            )
-            log.error(e)
-        sleep(61)
+        get_logger().etherscan(tx)
+
+    except Exception as err:
+        get_logger().error("Tx failed, try again.")
+        get_logger().error(err)
+
+
+if __name__ == "__main__":
+    setup()
+    f: dict = get_flags()
+
+    if hasattr(f, 'sleep'):
+        while True:
+            set_fallback_operator(f.pool, f.operator, f.threshold)
+            sleep(f.sleep)
+    else:
+        set_fallback_operator(f.pool, f.operator, f.threshold)
