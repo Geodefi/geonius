@@ -2,3 +2,4 @@
 
 from .sdk import SDKError, MissingPrivateKeyError
 from .config import ConfigurationError
+from .flags import UnknownFlagError

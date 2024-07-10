@@ -5,8 +5,7 @@ from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
 
-from src.logger import log
-from src.globals import SDK, chain
+from src.globals import get_constants, get_sdk, get_logger
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
 from src.exceptions import BeaconStateMismatchError, DatabaseError, EthdoError
@@ -43,7 +42,7 @@ class ExitRequestTrigger(Trigger):
         # Runs finalize exit triggers if there are any validators to be finalized
         run_finalize_exit_triggers()
         create_exit_request_table()
-        log.debug(f"{self.name} is initated.")
+        get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is in the validators table.
@@ -92,7 +91,7 @@ class ExitRequestTrigger(Trigger):
                     "INSERT INTO ExitRequest VALUES (?,?,?,?)",
                     events,
                 )
-            log.debug(f"Inserted {len(events)} events into ExitRequest table")
+            get_logger().debug(f"Inserted {len(events)} events into ExitRequest table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table ExitRequest") from e
 
@@ -123,7 +122,7 @@ class ExitRequestTrigger(Trigger):
                 send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
                 continue
 
-            val: Validator = SDK.portal.validator(pubkey)
+            val: Validator = get_sdk().portal.validator(pubkey)
             if val.beacon_status == "active_exiting":
                 # write database the expected exit block
                 # TODO: validator.withdrawable_epoch instead of exit_epoch - today
@@ -138,10 +137,10 @@ class ExitRequestTrigger(Trigger):
             save_local_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
 
             # calculate the delay for the daemon to run
-            res: dict[str, Any] = SDK.beacon.beacon_headers_id("head")
+            res: dict[str, Any] = get_sdk().beacon.beacon_headers_id("head")
             # pylint: disable=E1126:invalid-sequence-index
-            slots_per_epoch: int = chain.slots_per_epoch
-            slot_interval: int = int(chain.interval)
+            slots_per_epoch: int = get_constants().chain.slots_per_epoch
+            slot_interval: int = int(get_constants().chain.interval)
 
             current_slot: int = int(res["header"]["message"]["slot"])
             current_epoch: int = current_slot // slots_per_epoch

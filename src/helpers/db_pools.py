@@ -2,8 +2,7 @@
 
 from src.classes import Database
 from src.utils import multithread
-from src.globals import OPERATOR_ID
-from src.logger import log
+from src.globals import get_env, get_logger
 from src.exceptions import DatabaseError
 
 from .portal import get_surplus, get_fallback_operator
@@ -28,7 +27,7 @@ def create_pools_table() -> None:
                 )
                 """
             )
-        log.debug(f"Created a new table: Pools")
+        get_logger().debug(f"Created a new table: Pools")
     except Exception as e:
         raise DatabaseError(f"Error creating Pools table") from e
 
@@ -43,7 +42,7 @@ def drop_pools_table() -> None:
     try:
         with Database() as db:
             db.execute("""DROP TABLE IF EXISTS Pools""")
-        log.debug(f"Dropped Table: Pools")
+        get_logger().debug(f"Dropped Table: Pools")
     except Exception as e:
         raise DatabaseError(f"Error dropping Pools table") from e
 
@@ -64,7 +63,7 @@ def fetch_pools_batch(ids: list[int]) -> list[dict]:
     Returns:
         list[dict]: list of dictionaries containing the pool info, in format of [{id: val, fallback: bool,...},...]
     """
-    log.debug(f"Fetching pools.")
+    get_logger().debug(f"Fetching pools.")
 
     fallback_operators: list[int] = multithread(get_fallback_operator, ids)
 
@@ -72,7 +71,7 @@ def fetch_pools_batch(ids: list[int]) -> list[dict]:
     pools_transposed: list[dict] = [
         {
             "id": str(id),
-            "fallback": 1 if fallback == OPERATOR_ID else 0,
+            "fallback": 1 if fallback == get_env().OPERATOR_ID else 0,
             "last_proposal_ts": 0,
         }
         for (id, fallback) in zip(ids, fallback_operators)
@@ -89,7 +88,7 @@ def insert_many_pools(new_pools: list[dict]) -> None:
     Raises:
         DatabaseError: Error inserting many pools into table
     """
-    log.debug(f"Inserting new pools to database.")
+    get_logger().debug(f"Inserting new pools to database.")
 
     try:
         with Database() as db:
@@ -128,7 +127,7 @@ def save_fallback_operator(pool_id: int, value: bool) -> None:
     Raises:
         DatabaseError: Error updating fallback of pool
     """
-    log.debug(f"Saving the fallback operator for {pool_id}")
+    get_logger().debug(f"Saving the fallback operator for {pool_id}")
 
     try:
         with Database() as db:
@@ -157,7 +156,7 @@ def save_last_proposal_timestamp(pool_id: int, timestamp: int) -> None:
     Raises:
         DatabaseError: Error updating last proposal timestamp of pool
     """
-    log.debug(f"Saving the last proposal timestamp for {pool_id}")
+    get_logger().debug(f"Saving the last proposal timestamp for {pool_id}")
 
     try:
         with Database() as db:

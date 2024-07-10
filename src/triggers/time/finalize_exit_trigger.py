@@ -3,8 +3,7 @@
 from geodefi.classes import Validator
 from geodefi.globals import VALIDATOR_STATE
 
-from src.globals import SDK
-from src.logger import log
+from src.globals import get_logger, get_sdk
 from src.classes import Trigger
 from src.daemons import TimeDaemon
 from src.helpers import save_portal_state, save_local_state, fetch_pool_id
@@ -33,7 +32,7 @@ class FinalizeExitTrigger(Trigger):
 
         Trigger.__init__(self, name=self.name, action=self.finalize_exit)
         self.pubkey: str = pubkey
-        log.debug(f"{self.name} is initated for pubkey: {pubkey}")
+        get_logger().debug(f"{self.name} is initated for pubkey: {pubkey}")
 
     def finalize_exit(self, daemon: TimeDaemon, *args, **kwargs) -> None:
         """Finalizes the exit of the validator. Stops the daemon after the exit is finalized.
@@ -44,7 +43,7 @@ class FinalizeExitTrigger(Trigger):
         """
 
         # Check if the validator is in the exit state on the beacon chain
-        val: Validator = SDK.portal.validator(self.pubkey)
+        val: Validator = get_sdk().portal.validator(self.pubkey)
         if val.beacon_status == "active_exiting":  # TODO: discuss these statuses what to do when
             # TODO: if it is too late from, after the initial delay is passed
             #       check current epoch and compare with the exit epoch
@@ -52,7 +51,7 @@ class FinalizeExitTrigger(Trigger):
             return
 
         pool_id: int = int(fetch_pool_id(self.pubkey))
-        SDK.portal.finalizeExit(pool_id, self.pubkey)
+        get_sdk().portal.finalizeExit(pool_id, self.pubkey)
 
         # set db portal and local status to EXITED for validator
         save_portal_state(self.pubkey, VALIDATOR_STATE.EXITED)

@@ -3,8 +3,7 @@
 from typing import Iterable
 from web3.types import EventData
 
-from src.logger import log
-from src.globals import OPERATOR_ID
+from src.globals import get_env, get_logger
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
 from src.helpers import (
@@ -38,7 +37,7 @@ class FallbackOperatorTrigger(Trigger):
         create_operators_table()
         create_pools_table()
         create_fallback_operator_table()
-        log.debug(f"{self.name} is initated.")
+        get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is for the script's OPERATOR_ID.
@@ -50,7 +49,7 @@ class FallbackOperatorTrigger(Trigger):
             bool: True if the event is for the script's OPERATOR_ID, False otherwise
         """
 
-        if event.args.operatorId == OPERATOR_ID:
+        if event.args.operatorId == get_env().OPERATOR_ID:
             return True
         else:
             return False
@@ -91,7 +90,7 @@ class FallbackOperatorTrigger(Trigger):
                     "INSERT INTO FallbackOperator VALUES (?,?,?,?,?)",
                     events,
                 )
-            log.debug(f"Inserted {len(events)} events into FallbackOperator table")
+            get_logger().debug(f"Inserted {len(events)} events into FallbackOperator table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table FallbackOperator") from e
 
@@ -116,7 +115,7 @@ class FallbackOperatorTrigger(Trigger):
 
             # check if the fallback id is OPERATOR_ID
             # if so, column value is set to 1, sqlite3 don't do booleans
-            save_fallback_operator(pool_id, fallback == OPERATOR_ID)
+            save_fallback_operator(pool_id, fallback == get_env().OPERATOR_ID)
 
             # if able to propose any new validators do so
             proposed_pks: list[str] = check_and_propose(pool_id)

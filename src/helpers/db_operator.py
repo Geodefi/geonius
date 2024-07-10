@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from src.classes import Database
-from src.globals import OPERATOR_ID
-from src.logger import log
+from src.globals import get_logger, get_env
 from src.exceptions import DatabaseError
 
 
@@ -12,7 +11,7 @@ def create_operators_table() -> None:
     Raises:
         DatabaseError: Error creating table Operators
     """
-    log.debug("Creating Operators table.")
+    get_logger().debug("Creating Operators table.")
     try:
         with Database() as db:
             db.execute(
@@ -33,7 +32,7 @@ def drop_operators_table() -> None:
     Raises:
         DatabaseError: Error dropping table Operators
     """
-    log.debug("Dropping Operators table.")
+    get_logger().debug("Dropping Operators table.")
     try:
         with Database() as db:
             db.execute("DROP TABLE IF EXISTS Operators")
@@ -43,7 +42,7 @@ def drop_operators_table() -> None:
 
 def reinitialize_operators_table() -> None:
     """Drops and recreates the Operators table in the database."""
-    log.debug("Reinitializing Operators table.")
+    get_logger().debug("Reinitializing Operators table.")
     drop_operators_table()
     create_operators_table()
     with Database() as db:
@@ -51,7 +50,7 @@ def reinitialize_operators_table() -> None:
             "INSERT INTO Operators VALUES (?,?)",
             [
                 (
-                    str(OPERATOR_ID),
+                    str(get_env().OPERATOR_ID),
                     0,
                 ),
             ],
@@ -64,7 +63,7 @@ def save_last_stake_timestamp(timestamp: int) -> None:
     Args:
         timestamp (int): The timestamp to save in the table
     """
-    log.debug(f"Saving last stake timestamp: {timestamp}")
+    get_logger().debug(f"Saving last stake timestamp: {timestamp}")
     try:
         with Database() as db:
             db.execute(
@@ -73,7 +72,7 @@ def save_last_stake_timestamp(timestamp: int) -> None:
                 SET last_stake_ts = ?
                 WHERE id = ?
                 """,
-                (timestamp, OPERATOR_ID),
+                (timestamp, get_env().OPERATOR_ID),
             )
     except Exception as e:
         raise DatabaseError("Error saving last stake timestamp") from e

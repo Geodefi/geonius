@@ -3,8 +3,7 @@
 from typing import Iterable
 from web3.types import EventData
 
-from src.logger import log
-from src.globals import OPERATOR_ID
+from src.globals import get_logger, get_env
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
 from src.helpers import (
@@ -36,7 +35,7 @@ class DelegationTrigger(Trigger):
         create_operators_table()
         create_pools_table()
         create_delegation_table()
-        log.debug(f"{self.name} is initated.")
+        get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is for the script's OPERATOR_ID.
@@ -48,7 +47,7 @@ class DelegationTrigger(Trigger):
             bool: True if the event is for the script's OPERATOR_ID, False otherwise
         """
 
-        if event.args.operatorId == OPERATOR_ID:
+        if event.args.operatorId == get_env().OPERATOR_ID:
             return True
         else:
             return False
@@ -91,7 +90,7 @@ class DelegationTrigger(Trigger):
                     "INSERT INTO Delegation VALUES (?,?,?,?,?,?)",
                     events,
                 )
-            log.debug(f"Inserted {len(events)} events into Delegation table")
+            get_logger().debug(f"Inserted {len(events)} events into Delegation table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Delegation") from e
 
@@ -123,7 +122,7 @@ class DelegationTrigger(Trigger):
             if (
                 pool_id
                 == 58051384563972203095105188535531542842616860810471359890274174995766880197138
-            ):
+            ):  # TODO: why is this constant??
                 print(f"{self.name} considering allowance for pool {pool_id}")
                 proposed_pks: list[str] = check_and_propose(pool_id)
                 print(f"{self.name} proposed pks for pool {pool_id}: ", proposed_pks)

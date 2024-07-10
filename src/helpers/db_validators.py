@@ -4,8 +4,7 @@ from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
 
 from src.classes import Database
-from src.globals import SDK
-from src.logger import log
+from src.globals import get_logger, get_sdk
 from src.utils import multithread
 from src.exceptions import DatabaseError, DatabaseMismatchError
 from .portal import get_StakeParams
@@ -36,7 +35,7 @@ def create_validators_table() -> None:
                 )
                 """
             )
-        log.debug(f"Created a new table: Validators")
+        get_logger().debug(f"Created a new table: Validators")
     except Exception as e:
         raise DatabaseError(f"Error creating Validators table") from e
 
@@ -72,7 +71,7 @@ def fetch_validator(pubkey: str) -> dict:
         dict: dictionary containing the validator info
     """
 
-    val: Validator = SDK.portal.validator(pubkey)
+    val: Validator = get_sdk().portal.validator(pubkey)
 
     return {
         "portal_index": val.portal_index,  # constant
@@ -163,7 +162,7 @@ def save_local_state(pubkey: str, local_state: VALIDATOR_STATE) -> None:
                 """,
                 (int(local_state), pubkey),
             )
-        log.debug(f"Updated local_state to: {local_state}")
+        get_logger().debug(f"Updated local_state to: {local_state}")
     except Exception as e:
         raise DatabaseError(
             f"Error updating local state of validator with pubkey {pubkey} \
@@ -192,7 +191,7 @@ def save_portal_state(pubkey: str, portal_state: VALIDATOR_STATE) -> None:
                 """,
                 (int(portal_state), pubkey),
             )
-            log.debug(f"Updated portal_state to: {portal_state}")
+            get_logger().debug(f"Updated portal_state to: {portal_state}")
     except Exception as e:
         raise DatabaseError(
             f"Error updating portal state of validator with pubkey {pubkey} \
@@ -212,7 +211,7 @@ def save_exit_epoch(pubkey: str, exit_epoch: str) -> None:
     """
     # did not we
     try:
-        log.debug(f"Updated the exit epoch: {exit_epoch}")
+        get_logger().debug(f"Updated the exit epoch: {exit_epoch}")
         with Database() as db:
             db.execute(
                 """
@@ -252,8 +251,8 @@ def fetch_verified_pks() -> list[str]:
                 (int(VALIDATOR_STATE.PROPOSED), verification_index),
             )
             approved_pks: list[str] = db.fetchall()
-            log.info(f"{len(approved_pks)} new verified public keys are detected.")
-            log.debug(",".join(map(str, approved_pks)))
+            get_logger().info(f"{len(approved_pks)} new verified public keys are detected.")
+            get_logger().debug(",".join(map(str, approved_pks)))
 
             return approved_pks
     except Exception as e:

@@ -2,32 +2,20 @@
 
 from web3.types import TxReceipt
 from web3.exceptions import TimeExhausted
-from src.globals import SDK, OPERATOR_ID, PRIVATE_KEY
+from src.globals import get_sdk, get_env, get_logger
 from src.exceptions import CannotStakeError, CallFailedError
-from src.logger import log
 from src.utils import send_email, get_gas
 
 
 def tx_params() -> dict:
-    # priority_fee, base_fee = get_gas()
-    # if priority_fee and base_fee:
-    #     return {
-    #         "from": SDK.w3.eth.defaultAccount.address,
-    #         "maxPriorityFeePerGas": priority_fee,
-    #         "maxFeePerGas": base_fee,
-    #     }
-    # else:
-    #     return {
-    #         "from": SDK.w3.eth.defaultAccount.address,
-    #     }
-
-    address: str = SDK.w3.eth.defaultAccount.address
-    nonce: int = SDK.w3.eth.get_transaction_count(address)
-
-    return {
-        "from": address,
-        "nonce": nonce,
-    }
+    priority_fee, base_fee = get_gas()
+    if priority_fee and base_fee:
+        return {
+            "maxPriorityFeePerGas": priority_fee,
+            "maxFeePerGas": base_fee,
+        }
+    else:
+        return {}
 
 
 # pylint: disable-next=invalid-name
@@ -58,36 +46,20 @@ def call_proposeStake(
     """
 
     try:
-        print(f"Proposing stake for pool {pool_id} with pubkeys {pubkeys}")
+        print(f"Proposing stake for pool {pool_id} with {len(pubkeys)} pubkeys")
 
-        print("type of pool_id: ", type(pool_id))
-        print("type of OPERATOR_ID: ", type(OPERATOR_ID))
-        print("type of pubkeys: ", type(pubkeys))
-        print("type of sig1s: ", type(sig1s))
-        print("type of sig31s: ", type(sig31s))
+        tx_hash = (
+            get_sdk()
+            .portal.functions.proposeStake(pool_id, get_env().OPERATOR_ID, pubkeys, sig1s, sig31s)
+            .transact(tx_params())
+        )
 
-        tx: dict = SDK.portal.contract.functions.proposeStake(
-            pool_id, OPERATOR_ID, pubkeys, sig1s, sig31s
-        ).build_transaction(tx_params())
-
-        print(f"created proposeStake tx: {tx}")
-
-        signed_tx = SDK.w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
-
-        print(f"signed proposeStake tx: {signed_tx}")
-
-        tx_hash: bytes = SDK.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
-
-        log.info(f"proposeStake tx is created: {tx_hash.hex()}")
-
-        # Wait for the transaction to be mined, and get the transaction receipt
-        tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
-        log.info(f"proposeStake tx is concluded: {tx_receipt}")
+        get_logger().info(f"Sent proposeStake transaction: {tx_hash.hex()}")
 
         return True
 
     except TimeExhausted as e:
-        log.error(f"proposeStake tx could not conclude in time.")
+        get_logger().error(f"proposeStake tx could not conclude in time.")
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call proposeStake on portal contract") from e
@@ -118,16 +90,20 @@ def call_stake(pubkeys: list[str]) -> bool:
             # Confirm all approves canStake before calling stake
 
             for pubkey in pubkeys:
-                if not SDK.portal.functions.canStake(pubkey).call():
-                    log.critical(f"Not allowed to finalize staking for provided pubkey: {pubkey}")
+                if not get_sdk().portal.functions.canStake(pubkey).call():
+                    get_logger().critical(
+                        f"Not allowed to finalize staking for provided pubkey: {pubkey}"
+                    )
                     raise CannotStakeError(f"Validator with pubkey {pubkey} cannot stake")
 
-            tx_hash: str = SDK.portal.functions.stake(pubkeys).transact(tx_params())
-            log.info(f"stake tx is created: {tx_hash}")
+            tx_hash: str = get_sdk().portal.functions.stake(pubkeys).transact(tx_params())
+            get_logger().info(f"stake tx is created: {tx_hash}")
 
             # Wait for the transaction to be mined, and get the transaction receipt
-            tx_receipt: TxReceipt = SDK.portal.w3.eth.wait_for_transaction_receipt(tx_hash)
-            log.info(f"stake tx is concluded: {tx_receipt}")
+            tx_receipt: TxReceipt = get_sdk().portal.w3.eth.wait_for_transaction_receipt(
+                tx_hash.hex()
+            )
+            get_logger().info(f"stake tx is concluded: {tx_receipt}")
 
             return True
 
@@ -135,7 +111,7 @@ def call_stake(pubkeys: list[str]) -> bool:
         send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
         return False
     except TimeExhausted as e:
-        log.error(f"stake tx could not conclude in time.")
+        get_logger().error(f"stake tx could not conclude in time.")
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call stake on portal contract") from e

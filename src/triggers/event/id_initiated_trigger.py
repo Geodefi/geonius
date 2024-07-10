@@ -4,7 +4,7 @@ from typing import Iterable
 from web3.types import EventData
 from geodefi.globals import ID_TYPE
 
-from src.logger import log
+from src.globals import get_logger
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
 from src.helpers import (
@@ -32,7 +32,7 @@ class IdInitiatedTrigger(Trigger):
         Trigger.__init__(self, name=self.name, action=self.insert_pool)
         create_pools_table()
         create_id_initiated_table()
-        log.debug(f"{self.name} is initated.")
+        get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is a pool event.
@@ -87,7 +87,7 @@ class IdInitiatedTrigger(Trigger):
                     "INSERT INTO IdInitiated VALUES(?,?,?,?)",
                     events,
                 )
-            log.debug(f"Inserted {len(events)} events into IdInitiated table")
+            get_logger().debug(f"Inserted {len(events)} events into IdInitiated table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table IdInitiated") from e
 

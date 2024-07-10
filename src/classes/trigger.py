@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Callable
-from src.logger import log
+from src.globals import get_logger
 
 
 class Trigger:
@@ -35,7 +35,7 @@ class Trigger:
             raise ValueError(f"Name length should be max {__name_len} characters.")
         self.name: str = name
 
-        log.debug(f"Trigger {name} is initalized.")
+        get_logger().debug(f"Trigger {name} is initalized.")
         self.__register_action(action)
 
     def __register_action(self, action: Callable) -> None:
@@ -54,5 +54,5 @@ class Trigger:
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
-        log.info(f"{self.name} is triggered.")
+        get_logger().info(f"{self.name} is triggered.")
         self.__action(*args, **kwargs)

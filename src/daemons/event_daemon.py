@@ -4,9 +4,7 @@ from typing import Iterable
 from web3.types import EventData
 from web3.contract.contract import ContractEvent
 from src.classes import Daemon, Trigger
-from src.globals import SDK, chain
-
-from src.logger import log
+from src.globals import get_sdk, get_constants, get_logger
 from src.helpers import get_all_events, find_latest_event
 from src.utils import send_email
 from src.common import AttributeDict
@@ -39,7 +37,7 @@ class EventDaemon(Daemon):
             event (ContractEvent): event to be checked.
             start_block (int, optional): block number to start checking for events. Default is what is set in the config.
         """
-
+        chain = get_constants().chain
         Daemon.__init__(
             self,
             interval=int(chain.interval),
@@ -54,7 +52,7 @@ class EventDaemon(Daemon):
         self.block_period: int = int(chain.period)
 
         self.__last_snapshot: AttributeDict = find_latest_event(event.event_name)
-        log.debug(f"{trigger.name} is attached to an Event Daemon")
+        get_logger().debug(f"{trigger.name} is attached to an Event Daemon")
 
     def filter_known_events(self, e: EventData) -> bool:
         """Filter events that are in the previous block, which are not processed."""
@@ -78,8 +76,8 @@ class EventDaemon(Daemon):
 
         # eth.block_number or eth.get_block_number() can also be used
         # but this allows block_identifier.
-        curr_block: int = (SDK.w3.eth.get_block(self.block_identifier)).number
-        log.debug(f"Processing Block: {curr_block}")
+        curr_block: int = (get_sdk().w3.eth.get_block(self.block_identifier)).number
+        get_logger().debug(f"Processing Block: {curr_block}")
 
         # check if required number of blocks have past:
         if curr_block >= self.__last_snapshot.block_number + self.block_period:
@@ -102,7 +100,7 @@ class EventDaemon(Daemon):
                 )
 
             except Exception as e:
-                log.error(e)
+                get_logger().error(e)
                 send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
 
             # take a snapshot after finishing processing the block.\
@@ -112,7 +110,7 @@ class EventDaemon(Daemon):
             )
 
             if unknown_events:
-                log.debug(
+                get_logger().debug(
                     f"{self.trigger.name} will be triggered with {len(unknown_events)} events"
                 )
                 return unknown_events
@@ -121,7 +119,7 @@ class EventDaemon(Daemon):
                 return None
 
         else:
-            log.debug(
+            get_logger().debug(
                 f"Block period have not been met yet.\
                 Expected block:{self.__last_snapshot.block_number + self.block_period}"
             )

@@ -3,7 +3,6 @@
 from typing import Iterable
 from web3.types import EventData
 
-from src.logger import log
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
 from src.helpers import (
@@ -14,7 +13,7 @@ from src.helpers import (
     create_operators_table,
 )
 from src.daemons import TimeDaemon
-from src.globals import one_minute, one_hour
+from src.globals import get_constants, get_logger
 from ..time import ExpectDepositsTrigger
 
 
@@ -37,7 +36,7 @@ class DepositTrigger(Trigger):
         create_operators_table()
         create_pools_table()
         create_deposit_table()
-        log.debug(f"{self.name} is initated.")
+        get_logger().debug(f"{self.name} is initated.")
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
@@ -76,7 +75,7 @@ class DepositTrigger(Trigger):
                     "INSERT INTO Deposit VALUES (?,?,?,?,?,?)",
                     events,
                 )
-            log.debug(f"Inserted {len(events)} events into Deposit table")
+            get_logger().debug(f"Inserted {len(events)} events into Deposit table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Deposit") from e
 
@@ -102,8 +101,8 @@ class DepositTrigger(Trigger):
 
         if all_proposed_pks:
             all_deposits_daemon: TimeDaemon = TimeDaemon(
-                interval=one_minute * 15,
+                interval=15 * get_constants().one_minute,
                 trigger=ExpectDepositsTrigger(all_proposed_pks),
-                initial_delay=12 * one_hour,
+                initial_delay=12 * get_constants().one_hour,
             )
             all_deposits_daemon.run()

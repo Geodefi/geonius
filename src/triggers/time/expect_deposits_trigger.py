@@ -1,16 +1,27 @@
 # -*- coding: utf-8 -*-
 
-from src.globals import SDK
+from src.globals import get_sdk, get_logger
 from src.classes import Trigger
 from src.daemons import TimeDaemon
 from src.utils import multithread
-from src.logger import log
 from src.helpers import fill_validators_table
+
+# TODO: docs
+# TODO: what if resetted but no validator found here? I mean we need to log some more as well.
+# check other todos first tho
 
 
 def ping_pubkey(pubkey: str) -> bool:
+    """_summary_
+
+    Args:
+        pubkey (str): _description_
+
+    Returns:
+        bool: _description_
+    """
     try:
-        SDK.beacon.beacon_states_validators_id(state_id="head", validator_id=pubkey)
+        get_sdk().beacon.beacon_states_validators_id(state_id="head", validator_id=pubkey)
         return True
     # pylint: disable=bare-except
     except:
@@ -36,7 +47,7 @@ class ExpectDepositsTrigger(Trigger):
         """
         Trigger.__init__(self, name=self.name, action=self.expect_deposits)
         self.pubkeys: str = pubkeys
-        log.debug(f"{self.name} is initated for pubkey: {pubkeys}")
+        get_logger().debug(f"{self.name} is initated for pubkey: {pubkeys}")
 
     def expect_deposits(self, daemon: TimeDaemon) -> None:
         """_summary_

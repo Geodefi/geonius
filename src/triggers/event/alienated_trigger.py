@@ -4,7 +4,7 @@ from typing import Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 
-from src.logger import log
+from src.globals import get_logger
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
 from src.utils import send_email
@@ -37,7 +37,7 @@ class AlienatedTrigger(Trigger):
         Trigger.__init__(self, name=self.name, action=self.alienate_validators)
         create_validators_table()
         create_alienated_table()
-        log.debug(f"{self.name} is initated.")
+        get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is in the validators table.
@@ -88,7 +88,7 @@ class AlienatedTrigger(Trigger):
                     "INSERT INTO Alienated VALUES (?,?,?,?)",
                     events,
                 )
-            log.debug(f"Inserted {len(events)} events into Alienated table")
+            get_logger().debug(f"Inserted {len(events)} events into Alienated table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Alienated") from e
 
@@ -107,11 +107,11 @@ class AlienatedTrigger(Trigger):
         )
 
         if filtered_events:
-            log.critical("You are possibly prisoned!")
+            get_logger().critical("You are possibly prisoned!")
 
             for event in filtered_events:
                 pubkey: str = event.args.pubkey
-                log.critical(f"Your validator is alienated: {pubkey}")
+                get_logger().critical(f"Your validator is alienated: {pubkey}")
                 save_portal_state(pubkey, VALIDATOR_STATE.ALIENATED)
                 save_local_state(pubkey, VALIDATOR_STATE.ALIENATED)
 

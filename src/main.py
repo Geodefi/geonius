@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+
 import sys
+
 from web3.contract.contract import ContractEvent
-from src.globals import SDK, FLAGS, hour_blocks
 from src.daemons import BlockDaemon, EventDaemon
 from src.triggers import (
     AlienatedTrigger,
@@ -25,6 +26,48 @@ from src.helpers import (
     reinitialize_operators_table,
 )
 
+from src.common.loggable import Loggable
+from src.globals import (
+    set_config,
+    set_env,
+    set_sdk,
+    set_flags,
+    set_constants,
+    set_logger,
+    get_env,
+    get_flags,
+    get_sdk,
+    get_constants,
+)
+from src.globals.env import load_env
+from src.globals.flags import collect_flags
+from src.globals.config import apply_flags, init_config
+from src.globals.sdk import init_sdk
+from src.globals.constants import init_constants
+
+
+def setup():
+    """_summary_
+    # TODO
+    """
+    set_env(load_env())
+
+    set_flags(collect_flags())
+
+    set_config(apply_flags(init_config()))
+
+    set_logger(Loggable())
+
+    set_sdk(
+        init_sdk(
+            exec_api=get_env().EXECUTION_API,
+            cons_api=get_env().CONSENSUS_API,
+            priv_key=get_env().PRIVATE_KEY,
+        )
+    )
+
+    set_constants(init_constants())
+
 
 def init_dbs():
     """Initializes the databases and fills them with the current data.
@@ -35,7 +78,7 @@ def init_dbs():
 
     # TODO: try to call multiple trigger for the same action each time may create a problem
 
-    if FLAGS.reset:
+    if get_flags().reset:
         reinitialize_operators_table()
         reinitialize_pools_table()
         reinitialize_validators_table()
@@ -53,7 +96,7 @@ def setup_daemons():
     This function is called at the beginning of the program to make sure the
     daemons are running.
     """
-    events: ContractEvent = SDK.portal.contract.events
+    events: ContractEvent = get_sdk().portal.contract.events
     # Triggers
 
     id_initiated_trigger: IdInitiatedTrigger = IdInitiatedTrigger()
@@ -89,7 +132,9 @@ def setup_daemons():
         trigger=exit_request_trigger,
         event=events.ExitRequest(),
     )
-    stake_daemon: BlockDaemon = BlockDaemon(trigger=stake_trigger, block_period=0.5 * hour_blocks)
+    stake_daemon: BlockDaemon = BlockDaemon(
+        trigger=stake_trigger, block_period=0.5 * get_constants().hour_blocks
+    )
 
     # Run the daemons
     id_initiated_daemon.run()
@@ -110,6 +155,7 @@ def main():
     """
 
     try:
+        setup()
         init_dbs()
         setup_daemons()
 

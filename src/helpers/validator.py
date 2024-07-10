@@ -7,10 +7,10 @@ from geodefi.utils import to_bytes32
 from web3.exceptions import TimeExhausted
 
 from src.classes import Database
-from src.logger import log
-from src.globals import CONFIG, SDK, OPERATOR_ID, chain
+from src.globals import get_sdk, get_config, get_env, get_constants, get_logger
 from src.utils import send_email
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
+from src.helpers import get_name
 
 # from src.daemons.time_daemon import TimeDaemon
 # from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
@@ -62,12 +62,12 @@ def fetch_last_stake_timestamp() -> int:
                 SELECT last_stake_ts FROM Operators
                 WHERE id = ?
                 """,
-                (str(OPERATOR_ID),),
+                (str(get_env().OPERATOR_ID),),
             )
             last_stake_ts: int = db.fetchone()[0]
     except Exception as e:
         raise DatabaseError(
-            f"Error fetching last stake timestamp for operator {OPERATOR_ID}"
+            f"Error fetching last stake timestamp for operator {get_env().OPERATOR_ID}"
         ) from e
 
     return last_stake_ts
@@ -114,23 +114,24 @@ def max_proposals_count(pool_id: int) -> int:
     print(f"Current max proposals for pool {pool_id}: {curr_max}")
 
     # considering the wallet balance of the operator since it might not be enough (1 eth per val)
-    wallet_balance: int = SDK.portal.functions.readUint(OPERATOR_ID, to_bytes32("wallet")).call()
+    wallet_balance: int = (
+        get_sdk().portal.functions.readUint(get_env().OPERATOR_ID, to_bytes32("wallet")).call()
+    )
 
-    print(f"Wallet balance for operator {OPERATOR_ID}: {wallet_balance}")
+    print(f"Wallet balance for operator {get_env().OPERATOR_ID}: {wallet_balance}")
 
     eth_per_wallet_balance: int = wallet_balance // (DEPOSIT_SIZE.PROPOSAL * BEACON_DENOMINATOR)
 
-    print(f"ETH per wallet balance for operator {OPERATOR_ID}: {eth_per_wallet_balance}")
+    print(f"ETH per wallet balance for operator {get_env().OPERATOR_ID}: {eth_per_wallet_balance}")
 
     if curr_max > eth_per_wallet_balance:
-        log.critical(
-            f"Could propose {curr_max} validators for {pool_id}. \
-                But wallet only has enough funds for {eth_per_wallet_balance}"
+        pool_name: str = get_name(pool_id)
+        get_logger().critical(
+            f"Could propose {curr_max} validators for {pool_name}. But wallet only has enough funds for {eth_per_wallet_balance}"
         )
         send_email(
             "Insufficient funds for proposals",
-            f"Could propose {curr_max} validators for {pool_id}. \
-                But wallet only has enough funds for {eth_per_wallet_balance}",
+            f"Could propose {curr_max} validators for {pool_name}. But wallet only has enough funds for {eth_per_wallet_balance}",
             [("<file_path>", "<file_name>.log")],
         )
         return eth_per_wallet_balance
@@ -161,11 +162,13 @@ def check_and_propose(pool_id: int) -> list[str]:
 
     try:
         # This returns the length of the validators array in the contract so it is same as the index of the next validator
-        new_val_ind: int = SDK.portal.functions.readUint(
-            OPERATOR_ID, to_bytes32('validators')
-        ).call()
+        new_val_ind: int = (
+            get_sdk()
+            .portal.functions.readUint(get_env().OPERATOR_ID, to_bytes32('validators'))
+            .call()
+        )
 
-        print(f"New validator index for operator {OPERATOR_ID}: {new_val_ind}")
+        print(f"New validator index for operator {get_env().OPERATOR_ID}: {new_val_ind}")
 
         for i in range(max_allowed):
 
@@ -217,9 +220,9 @@ def check_and_propose(pool_id: int) -> list[str]:
         print(f"Temp signatures1 for proposals: {temp_sigs1}")
         print(f"Temp signatures31 for proposals: {temp_sigs31}")
 
-        # if i >= len(pubkeys) - CONFIG.strategy.min_proposal_queue:
+        # if i >= len(pubkeys) - get_config().strategy.min_proposal_queue:
         #     if (
-        #         CONFIG.strategy.max_proposal_delay
+        #         get_config().strategy.max_proposal_delay
         #         >= int(round(datetime.now().timestamp())) - last_proposal_timestamp
         #     ):
         #         break
@@ -257,9 +260,9 @@ def check_and_stake(pks: list[str]) -> list[str]:
     for i in range(0, len(pks), 50):
         temp_pks: list[str] = pks[i : i + 50]
 
-        if i >= len(pks) - CONFIG.strategy.min_proposal_queue:
+        if i >= len(pks) - get_config().strategy.min_proposal_queue:
             if (
-                CONFIG.strategy.max_proposal_delay
+                get_config().strategy.max_proposal_delay
                 >= int(round(datetime.now().timestamp())) - last_stake_timestamp
             ):
                 break
@@ -298,7 +301,7 @@ def run_finalize_exit_triggers():
 
     for pk, exit_epoch in pks:
         # check portal status, if it is not EXITTED or EXIT_REQUESTED raise an error
-        chain_val_status: str = SDK.portal.validator(pk).state
+        chain_val_status: str = get_sdk().portal.validator(pk).state
         if chain_val_status not in ["EXIT_REQUESTED", "EXITTED"]:
             raise DatabaseMismatchError(
                 f"Validator status mismatch in chain and database for pubkey {pk}"
@@ -310,10 +313,10 @@ def run_finalize_exit_triggers():
             continue
 
         # calculate the delay for the daemon to run
-        res: dict[str, Any] = SDK.beacon.beacon_headers_id("head")
+        res: dict[str, Any] = get_sdk().beacon.beacon_headers_id("head")
 
-        slots_per_epoch: int = chain.slots_per_epoch
-        slot_interval: int = int(chain.interval)
+        slots_per_epoch: int = get_constants().chain.slots_per_epoch
+        slot_interval: int = int(get_constants().chain.interval)
 
         # pylint: disable=E1126:invalid-sequence-index
         current_slot: int = int(res["header"]["message"]["slot"])

@@ -2,7 +2,7 @@
 
 from typing_extensions import Self
 from src.classes import Daemon, Trigger
-from src.logger import log
+from src.globals import get_logger
 
 
 class TimeDaemon(Daemon):
@@ -32,5 +32,5 @@ class TimeDaemon(Daemon):
         Returns:
             Self: self
         """
-        log.debug(f"Time Daemon will be triggered.")
+        get_logger().debug(f"Time Daemon will be triggered.")
         return self

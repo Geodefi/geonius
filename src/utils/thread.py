@@ -4,7 +4,7 @@ from typing import Any, Callable
 from multiprocessing.pool import ThreadPool
 from threading import current_thread
 
-from ..logger import log
+# from ..logger import log
 
 from functools import wraps
 from multiprocessing.pool import ThreadPool
@@ -36,7 +36,7 @@ def multithread(func: Callable, *args, num_threads: int = None, chunk_size: int 
     Returns:
         list[Any]: list of results from the function calls
     """
-    log.debug(f"Calling {func.__name__:^21} multithreaded.")
+    # log.debug(f"Calling {func.__name__:^21} multithreaded.")
     with ThreadPool(processes=num_threads) as pool:
         res: Any = pool.starmap(func, zip(*args), chunksize=chunk_size)
 

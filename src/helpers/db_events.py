@@ -2,8 +2,7 @@
 
 
 from src.classes import Database
-from src.globals import chain
-from src.logger import log
+from src.globals import get_logger, get_constants
 from src.exceptions import DatabaseError
 from src.common import AttributeDict
 
@@ -33,7 +32,7 @@ def find_latest_event(event_name: str) -> AttributeDict:
             found_event = db.fetchone()
             if found_event:
                 e = found_event
-                log.debug(f"Found on database:{event_name} => {e[0]}/{e[1]}/{e[2]}")
+                get_logger().debug(f"Found on database:{event_name} => {e[0]}/{e[1]}/{e[2]}")
                 return AttributeDict.convert_recursive(
                     {"block_number": e[0], "transaction_index": e[1], "log_index": e[2]}
                 )
@@ -41,12 +40,13 @@ def find_latest_event(event_name: str) -> AttributeDict:
     except Exception as e:
         raise DatabaseError(f"Error finding latest block for {event_name}") from e
 
-    log.debug(
+    init_block = int(get_constants().chain.start)
+    get_logger().debug(
         f"Could not find the event:{event_name} on database. \
-            Proceeding with default initial block:{chain.start}"
+            Proceeding with default initial block:{init_block}"
     )
     return AttributeDict.convert_recursive(
-        {"block_number": int(chain.start), "transaction_index": 0, "log_index": 0}
+        {"block_number": init_block, "transaction_index": 0, "log_index": 0}
     )
 
 
@@ -70,7 +70,7 @@ def create_alienated_table() -> None:
                 )
                 """
             )
-        log.debug(f"Created a new table: Alienated")
+        get_logger().debug(f"Created a new table: Alienated")
     except Exception as e:
         raise DatabaseError("Error creating Alienated table") from e
 
@@ -85,7 +85,7 @@ def drop_alienated_table() -> None:
     try:
         with Database() as db:
             db.execute("""DROP TABLE IF EXISTS Alienated""")
-        log.debug(f"Dropped Table: Alienated")
+        get_logger().debug(f"Dropped Table: Alienated")
     except Exception as e:
         raise DatabaseError(f"Error dropping Alienated table") from e
 
@@ -119,7 +119,7 @@ def create_delegation_table() -> None:
                 )
                 """
             )
-        log.debug(f"Created a new table: Delegation")
+        get_logger().debug(f"Created a new table: Delegation")
     except Exception as e:
         raise DatabaseError("Error creating Delegation table") from e
 
@@ -134,7 +134,7 @@ def drop_delegation_table() -> None:
     try:
         with Database() as db:
             db.execute("""DROP TABLE IF EXISTS Delegation""")
-        log.debug(f"Dropped Table: Delegation")
+        get_logger().debug(f"Dropped Table: Delegation")
     except Exception as e:
         raise DatabaseError(f"Error dropping Delegation table") from e
 
@@ -168,7 +168,7 @@ def create_deposit_table() -> None:
                 )
                 """
             )
-        log.debug(f"Created a new table: Deposit")
+        get_logger().debug(f"Created a new table: Deposit")
     except Exception as e:
         raise DatabaseError("Error creating Deposit table") from e
 
@@ -183,7 +183,7 @@ def drop_deposit_table() -> None:
     try:
         with Database() as db:
             db.execute("""DROP TABLE IF EXISTS Deposit""")
-        log.debug(f"Dropped Table: Deposit")
+        get_logger().debug(f"Dropped Table: Deposit")
     except Exception as e:
         raise DatabaseError(f"Error dropping Deposit table") from e
 
@@ -216,7 +216,7 @@ def create_fallback_operator_table() -> None:
                 )
                 """
             )
-        log.debug(f"Created a new table: FallbackOperator")
+        get_logger().debug(f"Created a new table: FallbackOperator")
     except Exception as e:
         raise DatabaseError("Error creating FallbackOperator table") from e
 
@@ -231,7 +231,7 @@ def drop_fallback_operator_table() -> None:
     try:
         with Database() as db:
             db.execute("""DROP TABLE IF EXISTS FallbackOperator""")
-        log.debug(f"Dropped Table: FallbackOperator")
+        get_logger().debug(f"Dropped Table: FallbackOperator")
     except Exception as e:
         raise DatabaseError(f"Error dropping FallbackOperator table") from e
 
@@ -263,7 +263,7 @@ def create_id_initiated_table() -> None:
                 )
                 """
             )
-        log.debug(f"Created a new table: IdInitiated")
+        get_logger().debug(f"Created a new table: IdInitiated")
     except Exception as e:
         raise DatabaseError("Error creating IdInitiated table") from e
 
@@ -278,7 +278,7 @@ def drop_id_initiated_table() -> None:
     try:
         with Database() as db:
             db.execute("""DROP TABLE IF EXISTS IdInitiated""")
-        log.debug(f"Dropped Table: IdInitiated")
+        get_logger().debug(f"Dropped Table: IdInitiated")
     except Exception as e:
         raise DatabaseError(f"Error dropping IdInitiated table") from e
 
@@ -311,7 +311,7 @@ def create_exit_request_table() -> None:
                  )
                 """
             )
-        log.debug(f"Created a new table: ExitRequest")
+        get_logger().debug(f"Created a new table: ExitRequest")
     except Exception as e:
         raise DatabaseError("Error creating ExitRequest table") from e
 
@@ -326,7 +326,7 @@ def drop_exit_request_table() -> None:
     try:
         with Database() as db:
             db.execute("""DROP TABLE IF EXISTS ExitRequest""")
-        log.debug(f"Dropped Table: ExitRequest")
+        get_logger().debug(f"Dropped Table: ExitRequest")
     except Exception as e:
         raise DatabaseError(f"Error dropping ExitRequest table") from e
 

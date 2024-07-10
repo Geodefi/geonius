@@ -7,11 +7,7 @@ from web3.contract.contract import ContractEvent
 from geodefi.utils import multiple_attempt
 
 from src.utils import multithread
-from src.globals import chain
-from src.logger import log
-
-
-max_block_range = int(chain.range)
+from src.globals import get_logger, get_constants
 
 
 @multiple_attempt
@@ -29,14 +25,14 @@ def get_batch_events(event: ContractEvent, from_block: int, limit: int) -> Itera
     # if range is like [0,7,3] -> 0, 3, 6
     # get_batch_events would search 0-3, 3-6 and 6-9
     # but we want 0-3, 3-6, 6-7
-    to_block: int = from_block + max_block_range
+    to_block: int = from_block + int(get_constants().chain.range)
     if to_block > limit:
         to_block = limit
 
     # @dev do not use filters instead, some providers do not support it.
     logs = event.get_logs(fromBlock=from_block, toBlock=to_block)
     if logs:
-        log.info(
+        get_logger().info(
             f"Detected {event.event_name:^17} logs between {from_block}-{to_block} => {len(logs)}"
         )
     return logs
@@ -54,7 +50,7 @@ def get_all_events(event: ContractEvent, first_block: int, last_block: int) -> I
     Returns:
         Iterable[EventData]: list of events.
     """
-    r: range = range(first_block, last_block, max_block_range)
+    r: range = range(first_block, last_block, int(get_constants().chain.range))
     if first_block == last_block:
         r: range = range(first_block, first_block + 1)
 

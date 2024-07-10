@@ -6,7 +6,7 @@ import logging
 from logging import StreamHandler, Formatter
 from logging.handlers import TimedRotatingFileHandler
 
-from ..globals.config import CONFIG
+from src.globals import get_config
 
 
 class Loggable:
@@ -49,13 +49,13 @@ class Loggable:
         logger.propagate = False
 
         handlers: list = list()
-        if CONFIG.logger.stream:
+        if get_config().logger.stream:
             stream_handler: StreamHandler = self.__get_stream_handler()
             handlers.append(stream_handler)
             logger.addHandler(stream_handler)
             logger.info(f"Logger is provided with a stream handler. Level: {self.__level}")
 
-        if CONFIG.logger.file:
+        if get_config().logger.file:
             file_handler: TimedRotatingFileHandler = self.__get_file_handler()
             handlers.append(file_handler)
             logger.addHandler(file_handler)
@@ -71,7 +71,7 @@ class Loggable:
         Returns:
             str: Logger level name
         """
-        return CONFIG.logger.level
+        return get_config().logger.level
 
     @property
     def __formatter(self) -> Formatter:
@@ -109,8 +109,8 @@ class Loggable:
             TimedRotatingFileHandler: Initialized and Configured File Handler
         """
 
-        main_dir: str = CONFIG.directory
-        log_dir: str = CONFIG.logger.directory
+        main_dir: str = get_config().directory
+        log_dir: str = get_config().logger.directory
         path: str = os.path.join(main_dir, log_dir)
         if not os.path.exists(path):
             os.makedirs(path)
@@ -118,9 +118,9 @@ class Loggable:
         filename: str = os.path.join(path, prefix)
         fh: TimedRotatingFileHandler = TimedRotatingFileHandler(
             filename,
-            when=CONFIG.logger.when,
-            interval=CONFIG.logger.interval,
-            backupCount=CONFIG.logger.backup,
+            when=get_config().logger.when,
+            interval=get_config().logger.interval,
+            backupCount=get_config().logger.backup,
         )
 
         fh.setFormatter(self.__formatter)
@@ -138,3 +138,9 @@ class Loggable:
         """
 
         return getattr(self.logger, attr)
+
+    def etherscan(self, tx_hash: str) -> None:
+        # TODO: do this on every action (transact)
+        self.logger.info(
+            f"tx:\nhttps://holesky.etherscan.io/tx/{tx_hash.hex()}\n\n"
+        )  # TODO: this needs to change for mainnet
