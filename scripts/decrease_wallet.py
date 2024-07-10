@@ -22,10 +22,6 @@ from src.globals import (
 )
 
 
-# TODO:  fix the mailing issue
-# TODO: look for TODOS.
-
-
 def setup():
     """_summary_
     # TODO

@@ -50,7 +50,7 @@ def get_name(pool_id: int) -> str:
     """
 
     get_logger().debug("Fetching the name of a pool: {pool_id}")
-    return get_sdk().portal.functions.readBytes(pool_id, to_bytes32("NAME")).call()
+    return get_sdk().portal.functions.readBytes(pool_id, to_bytes32("NAME")).call().decode("utf-8")
 
 
 def get_withdrawal_address(pool_id: int) -> str:

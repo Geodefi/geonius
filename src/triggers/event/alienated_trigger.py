@@ -118,5 +118,4 @@ class AlienatedTrigger(Trigger):
             send_email(
                 "AlienatedAndPrisoned",
                 "Alienated event is triggered, you will be prisoned. Please contact the admin and exit the program.",
-                [("<file_path>", "<file_name>.log")],
             )

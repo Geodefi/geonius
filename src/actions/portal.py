@@ -108,7 +108,10 @@ def call_stake(pubkeys: list[str]) -> bool:
             return True
 
     except CannotStakeError as e:
-        send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
+        send_email(
+            e.__class__.__name__,
+            str(e),
+        )
         return False
     except TimeExhausted as e:
         get_logger().error(f"stake tx could not conclude in time.")

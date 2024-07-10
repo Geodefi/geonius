@@ -41,14 +41,11 @@ def get_gas() -> tuple[str]:
                 return __float_to_hexstring(priority_fee), __float_to_hexstring(base_fee)
             else:
                 get_logger().critical(
-                    f"Undesired GAS price => priority:{priority_fee}, fee:{base_fee}. \
-                        Tx will not be submitted."
+                    f"Undesired GAS price => priority:{priority_fee}, fee:{base_fee}. Tx will not be submitted."
                 )
                 send_email(
                     "High Gas Alert",
-                    f"On Chain gas api reported that \
-                    gas prices have surpassed the default max settings. Please fix.",
-                    [("<file_path>", "<file_name>.log")],
+                    f"On Chain gas api reported that gas prices have surpassed the default max settings. Please fix.",
                 )
                 raise HighGasException("Gas prices are too high!")
     return (None, None)

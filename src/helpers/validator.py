@@ -130,7 +130,6 @@ def max_proposals_count(pool_id: int) -> int:
         send_email(
             "Insufficient funds for proposals",
             f"Could propose {curr_max} validators for {pool_name}. But wallet only has enough funds for {eth_per_wallet_balance}",
-            [("<file_path>", "<file_name>.log")],
         )
         return eth_per_wallet_balance
 
@@ -183,7 +182,7 @@ def check_and_propose(pool_id: int) -> list[str]:
             get_logger().debug(f"Stake data for index {new_val_ind + i}: {proposal_data}")
 
     except EthdoError as e:
-        send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
+        send_email(e.__class__.__name__, str(e))
         return []
 
     # pubkeys: list[bytes] = [bytes.fromhex(prop["pubkey"]) for prop in proposal_data]

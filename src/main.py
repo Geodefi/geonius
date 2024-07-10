@@ -160,7 +160,7 @@ def main():
 
     # pylint: disable-next=broad-exception-caught
     except Exception as e:
-        send_email(e.__class__.__name__, str(e), [("<log_file_path>", "<file_name>.log")])
+        send_email(e.__class__.__name__, str(e))
         sys.exit(e)
 
 

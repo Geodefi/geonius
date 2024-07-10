@@ -101,7 +101,7 @@ class EventDaemon(Daemon):
 
             except Exception as e:
                 get_logger().error(e)
-                send_email(e.__class__.__name__, str(e), [("<file_path>", "<file_name>.log")])
+                send_email(e.__class__.__name__, str(e))
 
             # take a snapshot after finishing processing the block.\
             # Does not matter if there are events or not.
