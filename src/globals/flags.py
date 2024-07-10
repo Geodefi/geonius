@@ -3,6 +3,7 @@
 from argparse import ArgumentParser
 from src.exceptions import UnknownFlagError
 from src.common import AttributeDict
+from src.globals import get_logger
 
 
 def collect_flags() -> dict:
@@ -166,6 +167,7 @@ def collect_flags() -> dict:
     flags, unknown = parser.parse_known_args()
 
     if unknown:
+        get_logger().error(f"Unknown flags:{unknown}")
         raise UnknownFlagError
 
     return AttributeDict.convert_recursive(vars(flags))

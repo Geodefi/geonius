@@ -59,6 +59,7 @@ def collect_local_flags() -> dict:
     )
     flags, unknown = parser.parse_known_args()
     if unknown:
+        get_logger().error(f"Unknown flags:{unknown}")
         raise UnknownFlagError
     return flags
 

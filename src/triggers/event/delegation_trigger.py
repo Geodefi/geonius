@@ -3,6 +3,7 @@
 from typing import Iterable
 from web3.types import EventData
 
+from src.helpers import get_name
 from src.globals import get_logger, get_env
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
@@ -114,8 +115,6 @@ class DelegationTrigger(Trigger):
         # gather pool ids from filtered events
         pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        print(f"{self.name} pool ids from filtered events: ", pool_ids)
-
         all_proposed_pks: list[str] = []
         for pool_id in pool_ids:
             # if able to propose any new validators do so
@@ -123,9 +122,10 @@ class DelegationTrigger(Trigger):
                 pool_id
                 == 58051384563972203095105188535531542842616860810471359890274174995766880197138
             ):  # TODO: why is this constant??
-                print(f"{self.name} considering allowance for pool {pool_id}")
                 proposed_pks: list[str] = check_and_propose(pool_id)
-                print(f"{self.name} proposed pks for pool {pool_id}: ", proposed_pks)
+                get_logger().debug(
+                    f"Proposing {len(proposed_pks)} new validators for pool: {get_name(pool_id)}"
+                )
                 all_proposed_pks.extend(proposed_pks)
 
         # TODO: proposed pks are not ready yet so it breaks the program, need to fix

@@ -8,7 +8,6 @@ from src.helpers import fill_validators_table
 
 # TODO: docs
 # TODO: what if resetted but no validator found here? I mean we need to log some more as well.
-# check other todos first tho
 
 
 def ping_pubkey(pubkey: str) -> bool:

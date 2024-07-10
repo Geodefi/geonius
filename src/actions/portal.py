@@ -46,7 +46,7 @@ def call_proposeStake(
     """
 
     try:
-        print(f"Proposing stake for pool {pool_id} with {len(pubkeys)} pubkeys")
+        get_logger().info(f"Proposing stake for pool {pool_id} with {len(pubkeys)} pubkeys")
 
         tx_hash = (
             get_sdk()

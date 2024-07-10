@@ -29,7 +29,6 @@ def setup():
     set_env(load_env())
 
     set_flags(collect_local_flags())
-    print(get_flags())
 
     set_config(apply_flags(init_config()))
 
@@ -59,7 +58,7 @@ def collect_local_flags() -> dict:
     )
     flags, unknown = parser.parse_known_args()
     if unknown:
-        print(unknown)
+        get_logger().error(f"Unknown flags:{unknown}")
         raise UnknownFlagError
     return flags
 

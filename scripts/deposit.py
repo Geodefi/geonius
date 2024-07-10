@@ -58,6 +58,7 @@ def collect_local_flags() -> dict:
     )
     flags, unknown = parser.parse_known_args()
     if unknown:
+        get_logger().error(f"Unknown flags:{unknown}")
         raise UnknownFlagError
     return flags
 
@@ -106,7 +107,6 @@ def deposit(
 if __name__ == "__main__":
     setup()
     f: dict = get_flags()
-    print(hasattr(f, 'value'))
     if hasattr(f, 'sleep'):
         while True:
             deposit(f.pool, f.value)
