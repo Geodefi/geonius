@@ -46,7 +46,7 @@ from src.globals.sdk import init_sdk
 from src.globals.constants import init_constants
 
 
-def setup():
+def setup_globals():
     """_summary_
     # TODO
     """
@@ -77,17 +77,15 @@ def init_dbs():
     """
 
     # TODO: try to call multiple trigger for the same action each time may create a problem
-
-    if get_flags().reset:
-        reinitialize_operators_table()
-        reinitialize_pools_table()
-        reinitialize_validators_table()
-        reinitialize_alienated_table()
-        reinitialize_delegation_table()
-        reinitialize_deposit_table()
-        reinitialize_exit_request_table()
-        reinitialize_fallback_operator_table()
-        reinitialize_id_initiated_table()
+    reinitialize_operators_table()
+    reinitialize_pools_table()
+    reinitialize_validators_table()
+    reinitialize_alienated_table()
+    reinitialize_delegation_table()
+    reinitialize_deposit_table()
+    reinitialize_exit_request_table()
+    reinitialize_fallback_operator_table()
+    reinitialize_id_initiated_table()
 
 
 def setup_daemons():
@@ -155,8 +153,9 @@ def main():
     """
 
     try:
-        setup()
-        init_dbs()
+        setup_globals()
+        if get_flags().reset:
+            init_dbs()
         setup_daemons()
 
     # pylint: disable-next=broad-exception-caught
