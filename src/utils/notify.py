@@ -10,15 +10,13 @@ from email.mime.text import MIMEText
 from src.exceptions import EmailError
 from src.globals import get_env, get_config, get_logger
 
-from src.helpers.portal import get_name
-
 
 def send_email(
     subject,
     body,
     attachments: list[tuple[str, str]] = None,
     send_attachments: str = True,
-    dont_notify_geode=get_config().email.dont_notify_geode,
+    dont_notify_geode=None,
 ):
     """TODO
 
@@ -33,7 +31,8 @@ def send_email(
         e: _description_
     """
     env = get_env()
-
+    if dont_notify_geode is None:
+        dont_notify_geode = get_config().email.dont_notify_geode
     if send_attachments and not attachments:
         main_dir: str = get_config().directory
         log_dir: str = get_config().logger.directory
@@ -43,7 +42,7 @@ def send_email(
     msg: MIMEMultipart = MIMEMultipart()
     msg['From'] = env.SENDER_EMAIL
     msg['To'] = env.RECEIVER_EMAIL if env.RECEIVER_EMAIL else env.SENDER_EMAIL
-    msg['Subject'] = f"[🧠 Geonius Alert for {get_name(env.OPERATOR_ID)}]: {subject}"
+    msg['Subject'] = f"[🧠 Geonius Alert]: {subject}"
     if not dont_notify_geode:
         body += "\n\n Geodefi team was also notified of this error."
         msg['Cc'] = get_config().email.admin_email
