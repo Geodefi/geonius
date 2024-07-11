@@ -1,49 +1,11 @@
-# TODO: convert all of these into 1 time use scripts
-
 from time import sleep
 from argparse import ArgumentParser
 
 from src.exceptions import UnknownFlagError
+from src.setup import setup_globals
 from src.globals import get_sdk, get_env, get_logger, get_flags
 from src.helpers import get_name
 from src.utils import get_gas
-
-from src.common.loggable import Loggable
-from src.globals.env import load_env
-from src.globals.config import apply_flags, init_config
-from src.globals.sdk import init_sdk
-from src.globals.constants import init_constants
-from src.globals import (
-    set_config,
-    set_env,
-    set_sdk,
-    set_flags,
-    set_constants,
-    set_logger,
-)
-
-
-def setup():
-    """_summary_
-    # TODO
-    """
-    set_env(load_env())
-
-    set_flags(collect_local_flags())
-
-    set_config(apply_flags(init_config()))
-
-    set_logger(Loggable())
-
-    set_sdk(
-        init_sdk(
-            exec_api=get_env().EXECUTION_API,
-            cons_api=get_env().CONSENSUS_API,
-            priv_key=get_env().PRIVATE_KEY,
-        )
-    )
-
-    set_constants(init_constants())
 
 
 def collect_local_flags() -> dict:
@@ -95,7 +57,7 @@ def delegate(allowance: int, pool: int, operator: int):
 
 
 if __name__ == "__main__":
-    setup()
+    setup_globals(flag_collector=collect_local_flags)
     f: dict = get_flags()
 
     if hasattr(f, 'sleep'):

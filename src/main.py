@@ -25,48 +25,12 @@ from src.helpers import (
     reinitialize_id_initiated_table,
     reinitialize_operators_table,
 )
-
-from src.common.loggable import Loggable
 from src.globals import (
-    set_config,
-    set_env,
-    set_sdk,
-    set_flags,
-    set_constants,
-    set_logger,
-    get_env,
     get_flags,
     get_sdk,
     get_constants,
 )
-from src.globals.env import load_env
-from src.globals.flags import collect_flags
-from src.globals.config import apply_flags, init_config
-from src.globals.sdk import init_sdk
-from src.globals.constants import init_constants
-
-
-def setup_globals():
-    """_summary_
-    # TODO
-    """
-    set_env(load_env())
-
-    set_flags(collect_flags())
-
-    set_config(apply_flags(init_config()))
-
-    set_logger(Loggable())
-
-    set_sdk(
-        init_sdk(
-            exec_api=get_env().EXECUTION_API,
-            cons_api=get_env().CONSENSUS_API,
-            priv_key=get_env().PRIVATE_KEY,
-        )
-    )
-
-    set_constants(init_constants())
+from src.setup import setup_globals
 
 
 def init_dbs():
