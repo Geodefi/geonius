@@ -3,13 +3,15 @@
 from typing import Iterable
 from web3.types import EventData
 
-from src.globals import get_env, get_logger
+from src.globals import get_env, get_logger, get_constants
 from src.classes import Trigger, Database
+from src.daemons import TimeDaemon
+from src.triggers import ExpectDepositsTrigger
+
 from src.exceptions import DatabaseError
 from src.helpers import (
     create_fallback_operator_table,
     event_handler,
-    fill_validators_table,
     get_fallback_operator,
     create_pools_table,
     save_fallback_operator,
@@ -122,4 +124,9 @@ class FallbackOperatorTrigger(Trigger):
             all_proposed_pks.extend(proposed_pks)
 
         if all_proposed_pks:
-            fill_validators_table(all_proposed_pks)
+            all_deposits_daemon: TimeDaemon = TimeDaemon(
+                interval=15 * get_constants().one_minute,
+                trigger=ExpectDepositsTrigger(all_proposed_pks),
+                initial_delay=1,
+            )
+            all_deposits_daemon.run()

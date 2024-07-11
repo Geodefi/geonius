@@ -6,8 +6,6 @@ from src.daemons import TimeDaemon
 from src.utils import multithread
 from src.helpers import fill_validators_table
 
-# TODO: (now) what if resetted but no validator found here? I mean we need to log some more as well.
-
 
 def ping_pubkey(pubkey: str) -> bool:
     """Checks if a validator pubkey can be reached on beaconchain,

@@ -4,14 +4,15 @@ from typing import Iterable
 from web3.types import EventData
 
 from src.helpers import get_name
-from src.globals import get_logger, get_env
+from src.globals import get_logger, get_env, get_constants
 from src.classes import Trigger, Database
+from src.daemons import TimeDaemon
+from src.triggers import ExpectDepositsTrigger
 from src.exceptions import DatabaseError
 from src.helpers import (
     create_delegation_table,
     event_handler,
     check_and_propose,
-    fill_validators_table,
     create_pools_table,
     create_operators_table,
 )
@@ -128,6 +129,10 @@ class DelegationTrigger(Trigger):
                 )
                 all_proposed_pks.extend(proposed_pks)
 
-        # TODO: (ambigious) proposed pks are not ready yet so it breaks the program, need to fix
         if all_proposed_pks:
-            fill_validators_table(all_proposed_pks)
+            all_deposits_daemon: TimeDaemon = TimeDaemon(
+                interval=15 * get_constants().one_minute,
+                trigger=ExpectDepositsTrigger(all_proposed_pks),
+                initial_delay=1,
+            )
+            all_deposits_daemon.run()

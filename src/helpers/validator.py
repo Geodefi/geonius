@@ -11,13 +11,15 @@ from src.globals import get_sdk, get_config, get_env, get_constants, get_logger
 from src.utils import send_email
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.helpers import get_name
+from src.daemons import TimeDaemon
+from src.triggers import ExpectDepositsTrigger
 
 # from src.daemons.time_daemon import TimeDaemon
 # from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
 from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError, CallFailedError
 
 from src.helpers.portal import get_operatorAllowance, get_surplus, get_withdrawal_address
-from src.helpers.db_validators import fill_validators_table, save_local_state
+from src.helpers.db_validators import save_local_state
 from src.helpers.db_pools import save_last_proposal_timestamp
 from src.helpers.db_operator import save_last_stake_timestamp
 
@@ -219,7 +221,12 @@ def check_and_propose(pool_id: int) -> list[str]:
             save_last_proposal_timestamp(pool_id, int(round(datetime.now().timestamp())))
         except (CallFailedError, TimeExhausted) as e:
             if len(pks) > 0:
-                fill_validators_table(pks)
+                all_deposits_daemon: TimeDaemon = TimeDaemon(
+                    interval=15 * get_constants().one_minute,
+                    trigger=ExpectDepositsTrigger(pks),
+                    initial_delay=1,
+                )
+                all_deposits_daemon.run()
             raise e
 
         if success:
@@ -256,7 +263,12 @@ def check_and_stake(pks: list[str]) -> list[str]:
                 save_last_stake_timestamp(int(round(datetime.now().timestamp())))
             except (CallFailedError, TimeExhausted) as e:
                 if len(pks) > 0:
-                    fill_validators_table(pks)
+                    all_deposits_daemon: TimeDaemon = TimeDaemon(
+                        interval=15 * get_constants().one_minute,
+                        trigger=ExpectDepositsTrigger(pks),
+                        initial_delay=1,
+                    )
+                    all_deposits_daemon.run()
                 raise e
 
             if success:
@@ -314,11 +326,9 @@ def run_finalize_exit_triggers():
             init_delay: int = epoch_diff * seconds_per_epoch
 
         # initialize and run the daemon
-        # finalize_exit_trigger: FinalizeExitTrigger = FinalizeExitTrigger(pk)
-
         # finalize_exit_daemon: TimeDaemon = TimeDaemon(
         #     interval=slot_interval + 1,
-        #     trigger=finalize_exit_trigger,
+        #     trigger=FinalizeExitTrigger(pk),
         #     initial_delay=init_delay,
         # )
 
