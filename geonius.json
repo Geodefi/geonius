@@ -47,7 +47,7 @@
   "email": {
     "smtp_server": "smtp.gmail.com",
     "smtp_port": 587,
-    "admin_email": "bandicoot@geode.fi",
-    "notify_geode": true
+    "admin_email": "icebear@geode.fi",
+    "dont_notify_geode": false
   }
 }

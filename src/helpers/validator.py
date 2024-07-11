@@ -130,6 +130,7 @@ def max_proposals_count(pool_id: int) -> int:
         send_email(
             "Insufficient funds for proposals",
             f"Could propose {curr_max} validators for {pool_name}. But wallet only has enough funds for {eth_per_wallet_balance}",
+            dont_notify_geode=True,
         )
         return eth_per_wallet_balance
 
