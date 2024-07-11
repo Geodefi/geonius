@@ -166,7 +166,7 @@ PYTHONPATH=. poetry run python src/main.py --flags
 | Parameter              | Description                                                                                                           |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | --reset                | Clears database on reboot. Useful when mitigating issues such as migration.                                           |
-| --not-notify-geode     | Don't send email to Geode in order to notify about any alerts                                                         |
+| --dont-notify-devs     | Don't send email to Geode in order to notify about any alerts                                                         |
 | --no-log-stream        | Don't print log messages to stdout                                                                                    |
 | --no-log-file          | Don't save log messages to files                                                                                      |
 | --main-directory       | Main directory name that will be created, and used to store data                                                      |
@@ -201,3 +201,5 @@ PYTHONPATH=. poetry run python src/main.py --flags
 ## License
 
 `geonius` is licensed under [MIT](./LICENSE).
+
+<!-- https://myaccount.google.com/u/1/apppasswords -->

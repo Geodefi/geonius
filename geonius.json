@@ -48,6 +48,6 @@
     "smtp_server": "smtp.gmail.com",
     "smtp_port": 587,
     "admin_email": "icebear@geode.fi",
-    "dont_notify_geode": false
+    "dont_notify_devs": false
   }
 }

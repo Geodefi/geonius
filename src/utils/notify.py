@@ -12,39 +12,43 @@ from src.globals import get_env, get_config, get_logger
 
 
 def send_email(
-    subject,
-    body,
+    subject: str,
+    body: str,
     attachments: list[tuple[str, str]] = None,
-    send_attachments: str = True,
-    dont_notify_geode=None,
+    dont_notify_devs=None,
 ):
-    """TODO
+    """Sends an email to the provided developer address, as well as admin when allowed and applicable.
 
     Args:
-        subject (_type_): _description_
-        body (_type_): _description_
-        attachments (list[tuple[str, str]], optional): _description_. Defaults to None.
-        send_attachments (str, optional): _description_. Defaults to True.
+        subject (_type_): The header for the mail
+        body (_type_): Contents of th mail
+        attachments (list[tuple[str, str]], optional): Defaults to None, in which case
+        the log file will be provided as an attachment.
+        attachments (list[tuple[str, str]], optional): Defaults to None, in which case
+        will rely on --dont-notify-devs flag, to inform geodefi developers on crashes.
 
     Raises:
         e: _description_
         e: _description_
     """
-    env = get_env()
-    if dont_notify_geode is None:
-        dont_notify_geode = get_config().email.dont_notify_geode
-    if send_attachments and not attachments:
+
+    if not attachments:
         main_dir: str = get_config().directory
         log_dir: str = get_config().logger.directory
         path: str = os.path.join(main_dir, log_dir, "log")
         attachments: list[tuple[str, str]] = [(path, "log.txt")]
 
+    if dont_notify_devs is None:
+        dont_notify_devs = get_config().email.dont_notify_devs
+
+    env = get_env()
+
     msg: MIMEMultipart = MIMEMultipart()
     msg['From'] = env.SENDER_EMAIL
     msg['To'] = env.RECEIVER_EMAIL if env.RECEIVER_EMAIL else env.SENDER_EMAIL
     msg['Subject'] = f"[🧠 Geonius Alert]: {subject}"
-    if not dont_notify_geode:
-        body += "\n\nGeodefi team also notified of this error. You can use '--dont-notify-geodefi' flag to prevent this."
+    if not dont_notify_devs:
+        body += "\n\nGeodefi team also notified of this error. You can use '--dont-notify-devs' flag to prevent this."
         msg['Cc'] = get_config().email.admin_email
 
     msg.attach(MIMEText(body, 'plain'))

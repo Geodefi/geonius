@@ -15,9 +15,9 @@ def collect_flags() -> dict:
         help="reinitializes the databases",
     )
     parser.add_argument(
-        "--dont-notify-geode",
+        "--dont-notify-devs",
         action="store_false",
-        dest="dont_notify_geode",
+        dest="dont_notify_devs",
         help="don't send email notifications to geode for any alerts",
     )
     parser.add_argument(
