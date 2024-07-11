@@ -6,18 +6,19 @@ from src.daemons import TimeDaemon
 from src.utils import multithread
 from src.helpers import fill_validators_table
 
-# TODO: docs
 # TODO: what if resetted but no validator found here? I mean we need to log some more as well.
 
 
 def ping_pubkey(pubkey: str) -> bool:
-    """_summary_
+    """Checks if a validator pubkey can be reached on beaconchain,
+    if it exists without considering its status/state. Unusually, it just checks if the underlying call
+    fires an error since it got 404 as a response instead of 200.
 
     Args:
-        pubkey (str): _description_
+        pubkey (str): public key of the validator to be pinged
 
     Returns:
-        bool: _description_
+        bool: True if the validator exists on the beaconchain, False if not.
     """
     try:
         get_sdk().beacon.beacon_states_validators_id(state_id="head", validator_id=pubkey)
@@ -29,11 +30,15 @@ def ping_pubkey(pubkey: str) -> bool:
 
 # TODO: Stop and throw error after x attempts: This should be fault tolerant. rely on config.json
 class ExpectDepositsTrigger(Trigger):
-    """_summary_
+    """Trigger for the EXPECT_DEPOSITS. This time trigger waits until deposits for the
+    multiple validators become processed on beaconchain. Works every 15 minutes.
+    Validators should be proposed in a proposeStake call previously.
+    Initial delay is proposed to be 12 hours after the call, which is usual. However, there is non
+    if the script is rebooted. It stops the daemon after all the validators are recorded in db.
 
     Attributes:
         name (str): The name of the trigger to be used when logging etc. (value: EXPECT_DEPOSIT)
-        pubkey (str): The public key of the validator to finalize the exit
+        pubkeys (str): The list of validator pubkeys to be finalized when ALL exited.
     """
 
     name: str = "EXPECT_DEPOSITS"

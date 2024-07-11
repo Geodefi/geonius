@@ -6,7 +6,7 @@ from src.common.attribute_dict import AttributeDict
 
 
 def load_env():
-    # catch environment variables
+    # TODO: path can be provided through flags or config json
     load_dotenv()
     return AttributeDict.convert_recursive(
         {
