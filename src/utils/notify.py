@@ -44,7 +44,7 @@ def send_email(
     msg['To'] = env.RECEIVER_EMAIL if env.RECEIVER_EMAIL else env.SENDER_EMAIL
     msg['Subject'] = f"[🧠 Geonius Alert]: {subject}"
     if not dont_notify_geode:
-        body += "\n\n Geodefi team was also notified of this error."
+        body += "\n\nGeodefi team also notified of this error. You can use '--dont-notify-geodefi' flag to prevent this."
         msg['Cc'] = get_config().email.admin_email
 
     msg.attach(MIMEText(body, 'plain'))
