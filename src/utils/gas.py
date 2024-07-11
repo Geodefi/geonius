@@ -46,6 +46,7 @@ def get_gas() -> tuple[str]:
                 send_email(
                     "High Gas Alert",
                     f"On Chain gas api reported that gas prices have surpassed the default max settings. Please fix.",
+                    dont_notify_geode=True,
                 )
                 raise HighGasException("Gas prices are too high!")
     return (None, None)

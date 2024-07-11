@@ -119,7 +119,7 @@ class ExitRequestTrigger(Trigger):
             try:
                 exit_validator(pubkey)
             except EthdoError as e:
-                send_email(e.__class__.__name__, str(e))
+                send_email(e.__class__.__name__, str(e), dont_notify_geode=True)
                 continue
 
             val: Validator = get_sdk().portal.validator(pubkey)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from src.classes import Database
+from src.classes.database import Database
 from src.globals import get_logger, get_constants
 from src.exceptions import DatabaseError
 from src.common import AttributeDict

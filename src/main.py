@@ -13,7 +13,7 @@ from src.triggers import (
     DepositTrigger,
     ExitRequestTrigger,
 )
-from src.utils import send_email
+from src.utils.notify import send_email
 from src.helpers import (
     reinitialize_validators_table,
     reinitialize_pools_table,
@@ -25,11 +25,7 @@ from src.helpers import (
     reinitialize_id_initiated_table,
     reinitialize_operators_table,
 )
-from src.globals import (
-    get_flags,
-    get_sdk,
-    get_constants,
-)
+from src.globals import get_flags, get_sdk, get_constants
 from src.setup import setup_globals
 
 

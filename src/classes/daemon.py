@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-
+import os
+import signal
 from time import sleep
 from typing import Callable
 from threading import Thread, Event
 from web3.exceptions import TimeExhausted
 
 from src.globals import get_logger
-from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError
+from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError, EmailError
 from src.classes.trigger import Trigger
+from src.utils.notify import send_email
 
 
 class Daemon:
@@ -149,20 +151,44 @@ class Daemon:
                 else:
                     pass
 
-            except CallFailedError:
+            except (TimeExhausted, CallFailedError):
                 get_logger().warning(
                     f"One of the calls failed for {self.trigger.name:^17}. Continuing but may need to be checked in case of a problem."
                 )
-            except (TimeExhausted, BeaconStateMismatchError):
+            except EmailError:
+                get_logger().warning(
+                    f"Can be not able to communicate with the owners. Continuing without an assistance."
+                )
+                send_email(
+                    f"Tx failed",
+                    f"A Portal transaction is either failed, or could not be called for some reason. Will continue operations as usual, but an investigation is suggested.",
+                )
+            except BeaconStateMismatchError:
+                # These Exceptions can not be handled but there is no need to close the whole thing down for it.
+                send_email(
+                    f"Daemon stopped: {self.trigger.name:^17}",
+                    f"One Daemon stopped, others will continue to operate. Come take a look!",
+                )
                 get_logger().exception(
-                    f"Stopping the Daemon for {self.trigger.name:^17} due to unhandled condition:",
+                    f"Daemon stopped: {self.trigger.name:^17}. Others will continue to operate...",
                     exc_info=True,
                 )
                 self.start_flag.clear()
                 self.stop_flag.set()
-            except Exception as e:
-                get_logger().error("Stopping Geonius")
-                raise DaemonError("Daemon stopped due to an exception.") from e
+            except Exception:
+                # All of the remaining Exceptions will force the MainThread to exit.
+                get_logger().exception(
+                    f"Stopping Geonius due to unhandled exception on a Daemon for : {self.trigger.name:^17}"
+                )
+                try:
+                    send_email(
+                        "STOPPED",
+                        f"All Daemons stopped, script exited. Come take a look!",
+                    )
+                except Exception:
+                    get_logger().warning(f"Could not send email while exiting Geonius. Well...")
+
+                os.kill(os.getpid(), signal.SIGUSR1)
 
     def run(self) -> None:
         """Starts the daemon, runs the loop when called.

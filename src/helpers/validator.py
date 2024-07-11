@@ -6,7 +6,7 @@ from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE, BEACON_DENOMINATOR
 from geodefi.utils import to_bytes32
 from web3.exceptions import TimeExhausted
 
-from src.classes import Database
+from src.classes.database import Database
 from src.globals import get_sdk, get_config, get_env, get_constants, get_logger
 from src.utils import send_email
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
@@ -182,7 +182,7 @@ def check_and_propose(pool_id: int) -> list[str]:
             get_logger().debug(f"Stake data for index {new_val_ind + i}: {proposal_data}")
 
     except EthdoError as e:
-        send_email(e.__class__.__name__, str(e))
+        send_email(e.__class__.__name__, str(e), dont_notify_geode=True)
         return []
 
     # pubkeys: list[bytes] = [bytes.fromhex(prop["pubkey"]) for prop in proposal_data]

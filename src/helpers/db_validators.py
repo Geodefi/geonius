@@ -3,7 +3,7 @@
 from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
 
-from src.classes import Database
+from src.classes.database import Database
 from src.globals import get_logger, get_sdk
 from src.utils import multithread
 from src.exceptions import DatabaseError, DatabaseMismatchError

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from src.classes import Database
+from src.classes.database import Database
 from src.utils import multithread
 from src.globals import get_env, get_logger
 from src.exceptions import DatabaseError

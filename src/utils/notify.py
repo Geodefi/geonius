@@ -7,12 +7,18 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from src.exceptions import EmailError
 from src.globals import get_env, get_config, get_logger
+
 from src.helpers.portal import get_name
 
 
 def send_email(
-    subject, body, attachments: list[tuple[str, str]] = None, send_attachments: str = True
+    subject,
+    body,
+    attachments: list[tuple[str, str]] = None,
+    send_attachments: str = True,
+    dont_notify_geode=get_config().email.dont_notify_geode,
 ):
     """TODO
 
@@ -38,7 +44,8 @@ def send_email(
     msg['From'] = env.SENDER_EMAIL
     msg['To'] = env.RECEIVER_EMAIL if env.RECEIVER_EMAIL else env.SENDER_EMAIL
     msg['Subject'] = f"[🧠 Geonius Alert for {get_name(env.OPERATOR_ID)}]: {subject}"
-    if get_config().email.notify_geode:
+    if not dont_notify_geode:
+        body += "\n\n Geodefi team was also notified of this error."
         msg['Cc'] = get_config().email.admin_email
 
     msg.attach(MIMEText(body, 'plain'))
@@ -52,8 +59,7 @@ def send_email(
             part.add_header('Content-Disposition', f'attachment; filename= {file_name}')
             msg.attach(part)
     except Exception as e:
-        get_logger().error(f"Failed to attach file {file_path}: {e}")
-        raise e
+        get_logger().error(f"Failed to attach file {file_path}: {e}. Will try to send without it.")
 
     try:
         server = smtplib.SMTP(get_config().email.smtp_server, get_config().email.smtp_port)
@@ -62,5 +68,5 @@ def send_email(
         server.send_message(msg)
         server.quit()
     except Exception as e:
-        get_logger().error(f"Failed to send email: {e}")
-        raise e
+        get_logger().error(f"Failed to send email!")
+        raise EmailError(f"Failed to send an email!") from e
