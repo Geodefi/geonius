@@ -142,4 +142,4 @@ class Loggable:
     def etherscan(self, function_name: str, tx_hash: str) -> None:
         self.logger.info(
             f"{function_name} tx sent: https://holesky.etherscan.io/tx/{tx_hash.hex()}"
-        )  # TODO: this needs to change for mainnet
+        )  # TODO: (later) this needs to change for mainnet

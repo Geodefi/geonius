@@ -56,7 +56,7 @@ class EventDaemon(Daemon):
 
     def filter_known_events(self, e: EventData) -> bool:
         """Filter events that are in the previous block, which are not processed."""
-        # TODO: it might be useful to not check the events once any is found
+        # TODO: (ambiguous) it might be useful to not check the events once any is found
         if int(e.blockNumber) > self.__last_snapshot.block_number:
             return True
         if int(e.transactionIndex) > self.__last_snapshot.transaction_index:

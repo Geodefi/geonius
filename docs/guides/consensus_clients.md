@@ -33,12 +33,12 @@ build/nimbus_beacon_node --help
 
 # Lighthouse
 
-<!-- TODO -->
+<!-- TODO: was internal not needed  -->
 
 # Prysm
 
-<!-- TODO -->
+<!-- TODO: was internal not needed  -->
 
 # Teku
 
-<!-- TODO -->
+<!-- TODO: was internal not needed  -->

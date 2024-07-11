@@ -24,7 +24,7 @@ Geonius is a multi**daemon**tional daemonic python script that allows Node Opera
 
 ## Validator Creation Explained
 
-<!-- TODO -->
+<!-- TODO: docs -->
 
 1. Delegation
 2. Proposal
@@ -159,7 +159,7 @@ PYTHONPATH=. poetry run python src/main.py --flags
 
 ## Usage
 
-<!-- TODO: add more information on usage -->
+<!-- TODO: docs -->
 
 ### Flags
 
@@ -191,7 +191,7 @@ PYTHONPATH=. poetry run python src/main.py --flags
 
 ### Scripts
 
-<!-- TODO: add more information on additional scripts when coded -->
+<!-- TODO: docs -->
 
 ## Contacts
 

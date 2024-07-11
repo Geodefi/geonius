@@ -89,7 +89,7 @@ def max_proposals_count(pool_id: int) -> int:
         DatabaseError: Error fetching allowance and surplus for pool from table
     """
 
-    # TODO: monopoly log
+    # TODO: monopoly log & send email as well (not sure if needed)
 
     allowance: int = get_operatorAllowance(pool_id)
 
@@ -105,7 +105,7 @@ def max_proposals_count(pool_id: int) -> int:
     if surplus == 0:
         return 0
 
-    # TODO: on geodefi its 32 gwei instead of ether consider fixing this or handle it in the code in a better way
+    # TODO: (solved?) on geodefi its 32 gwei instead of ether consider fixing this or handle it in the code in a better way
 
     # every 32 ether is 1 validator.
     eth_per_prop: int = surplus // (DEPOSIT_SIZE.STAKE * BEACON_DENOMINATOR)

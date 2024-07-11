@@ -121,13 +121,13 @@ class DelegationTrigger(Trigger):
             if (
                 pool_id
                 == 58051384563972203095105188535531542842616860810471359890274174995766880197138
-            ):  # TODO: why is this constant??
+            ):  # TODO: (ambigious) why is this constant??
                 proposed_pks: list[str] = check_and_propose(pool_id)
                 get_logger().debug(
                     f"Proposing {len(proposed_pks)} new validators for pool: {get_name(pool_id)}"
                 )
                 all_proposed_pks.extend(proposed_pks)
 
-        # TODO: proposed pks are not ready yet so it breaks the program, need to fix
+        # TODO: (ambigious) proposed pks are not ready yet so it breaks the program, need to fix
         if all_proposed_pks:
             fill_validators_table(all_proposed_pks)

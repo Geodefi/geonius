@@ -9,7 +9,7 @@ from src.daemons import TimeDaemon
 from src.helpers import save_portal_state, save_local_state, fetch_pool_id
 
 
-# TODO: Stop and throw error after x attempts: This should be fault tolerant. rely on config.json
+# TODO: (now) Stop and throw error after x attempts: This should be fault tolerant. rely on config.json
 class FinalizeExitTrigger(Trigger):
     """Trigger for the FINALIZE_EXIT. This time trigger is used to finalize the exit of a validator.
     It is triggered after the initial delay is passed. Initial delay is set according to exit epoch.
@@ -44,8 +44,8 @@ class FinalizeExitTrigger(Trigger):
 
         # Check if the validator is in the exit state on the beacon chain
         val: Validator = get_sdk().portal.validator(self.pubkey)
-        if val.beacon_status == "active_exiting":  # TODO: discuss these statuses what to do when
-            # TODO: if it is too late from, after the initial delay is passed
+        if val.beacon_status == "active_exiting":  # TODO: (discuss) these statuses what to do when
+            # TODO: (discuss)  if it is too late from, after the initial delay is passed
             #       check current epoch and compare with the exit epoch
             #       Too late => 1 week send mail to operator and us no raise here
             return

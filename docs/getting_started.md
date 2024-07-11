@@ -32,7 +32,7 @@ We should be careful and set a hotwallet address to `maintainer`, while keeping 
 `changeMaintainer` can be called by:
 
 - [etherscan on holesky](https://holesky.etherscan.io/address/0x181C0F3103116Cc02665365c7a5E5574db011D38#writeProxyContract#F5).
-<!-- TODO below script -->
+<!-- TODO: how to achieve this? -->
 - geonius change-maintainer <_new_maintainer_address_>
 
 #### Deposit ether to internal wallet
@@ -51,8 +51,8 @@ You will be reimbursed after activating the validator. However, this amount limi
 `increaseWalletBalance` can be called by:
 
 - [etherscan on holesky](https://holesky.etherscan.io/address/0x181C0F3103116Cc02665365c7a5E5574db011D38#writeProxyContract#F12).
-<!-- TODO below script -->
-- geonius deposit-portal <_eth_amount_>
+<!-- TODO: how to achieve this? -->
+- geonius increase_wallet <_eth_amount_>
 
 > Similarly, `decreaseWalletBalance` can be called by:
 >
@@ -93,7 +93,7 @@ Checkout [this guide](./docs/guides/ethdo_vouch.md) for more.
 
 ## Running Geonius
 
-<!-- TODO -->
+<!-- TODO: check -->
 
 ```bash
 geth  --holesky --authrpc.addr localhost --authrpc.port 8551 --authrpc.vhosts localhost --authrpc.jwtsecret /tmp/jwtsecret --http --http.api eth,net,engine,admin --snapshot=false

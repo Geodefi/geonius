@@ -6,7 +6,7 @@ from src.daemons import TimeDaemon
 from src.utils import multithread
 from src.helpers import fill_validators_table
 
-# TODO: what if resetted but no validator found here? I mean we need to log some more as well.
+# TODO: (now) what if resetted but no validator found here? I mean we need to log some more as well.
 
 
 def ping_pubkey(pubkey: str) -> bool:
@@ -28,7 +28,7 @@ def ping_pubkey(pubkey: str) -> bool:
         return False
 
 
-# TODO: Stop and throw error after x attempts: This should be fault tolerant. rely on config.json
+# TODO: (later) Stop and throw error after x attempts: This should be fault tolerant. rely on config.json
 class ExpectDepositsTrigger(Trigger):
     """Trigger for the EXPECT_DEPOSITS. This time trigger waits until deposits for the
     multiple validators become processed on beaconchain. Works every 15 minutes.

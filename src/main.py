@@ -36,7 +36,7 @@ def init_dbs():
     databases are up to date.
     """
 
-    # TODO: try to call multiple trigger for the same action each time may create a problem
+    # TODO: (solved) try to call multiple trigger for the same action each time may create a problem
     reinitialize_operators_table()
     reinitialize_pools_table()
     reinitialize_validators_table()

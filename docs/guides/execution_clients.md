@@ -63,12 +63,12 @@ geth version
 
 ## Nethermind
 
-<!-- TODO -->
+<!-- TODO: was internal not needed  -->
 
 ## Besu
 
-<!-- TODO -->
+<!-- TODO: was internal not needed  -->
 
 ## Erigon
 
-<!-- TODO -->
+<!-- TODO: was internal not needed  -->
