@@ -51,7 +51,7 @@ def increase_wallet(value: int):
             get_sdk().portal.functions.increaseWalletBalance(get_env().OPERATOR_ID).transact(params)
         )
 
-        get_logger().etherscan(tx)
+        get_logger().etherscan("increaseWalletBalance", tx)
 
     except Exception as err:
         get_logger().error("Tx failed, try again.")

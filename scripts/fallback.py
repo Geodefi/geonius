@@ -50,8 +50,7 @@ def set_fallback_operator(pool: int, operator: int, threshold: int):
             .portal.contract.functions.setFallbackOperator(pool, operator, threshold)
             .transact(tx_params())
         )
-
-        get_logger().etherscan(tx)
+        get_logger().etherscan("setFallbackOperator", tx)
 
     except Exception as err:
         get_logger().error("Tx failed, try again.")

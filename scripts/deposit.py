@@ -61,7 +61,7 @@ def deposit(
             .transact(params)
         )
 
-        get_logger().etherscan(tx)
+        get_logger().etherscan("deposit", tx)
 
     except Exception as err:
         get_logger().error("Tx failed, try again.")

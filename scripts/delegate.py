@@ -49,7 +49,7 @@ def delegate(allowance: int, pool: int, operator: int):
             get_sdk().portal.functions.delegate(pool, [operator], [allowance]).transact(tx_params())
         )
 
-        get_logger().etherscan(tx)
+        get_logger().etherscan("delegate", tx)
 
     except Exception as err:
         get_logger().error("Tx failed, trying again.")

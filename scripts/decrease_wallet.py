@@ -39,7 +39,7 @@ def tx_params() -> dict:
         return {}
 
 
-def increase_wallet(value: int):
+def decrease_wallet(value: int):
     try:
         _id = int(get_env().OPERATOR_ID)
         get_logger().info(
@@ -50,7 +50,7 @@ def increase_wallet(value: int):
 
         tx: dict = get_sdk().portal.functions.decreaseWalletBalance(_id, value).transact(params)
 
-        get_logger().etherscan(tx)
+        get_logger().etherscan("decreaseWalletBalance", tx)
 
     except Exception as err:
         get_logger().error("Tx failed, try again.")
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     if hasattr(f, 'sleep'):
         while True:
-            increase_wallet(f.value)
+            decrease_wallet(f.value)
             sleep(f.sleep)
     else:
-        increase_wallet(f.value)
+        decrease_wallet(f.value)

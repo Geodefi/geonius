@@ -54,7 +54,7 @@ def call_proposeStake(
             .transact(tx_params())
         )
 
-        get_logger().info(f"Sent proposeStake transaction: {tx_hash.hex()}")
+        get_logger().etherscan("proposeStake", tx_hash)
 
         return True
 
@@ -97,7 +97,7 @@ def call_stake(pubkeys: list[str]) -> bool:
                     raise CannotStakeError(f"Validator with pubkey {pubkey} cannot stake")
 
             tx_hash: str = get_sdk().portal.functions.stake(pubkeys).transact(tx_params())
-            get_logger().info(f"stake tx is created: {tx_hash}")
+            get_logger().etherscan("stake", tx_hash)
 
             # Wait for the transaction to be mined, and get the transaction receipt
             tx_receipt: TxReceipt = get_sdk().portal.w3.eth.wait_for_transaction_receipt(
