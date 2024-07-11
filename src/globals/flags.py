@@ -17,7 +17,7 @@ def collect_flags() -> dict:
     parser.add_argument(
         "--dont-notify-geode",
         action="store_false",
-        dest="not_notify_geode",
+        dest="dont_notify_geode",
         help="don't send email notifications to geode for any alerts",
     )
     parser.add_argument(
