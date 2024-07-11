@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-
 from typing import Any
+from threading import Lock
 from datetime import datetime
 from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE, BEACON_DENOMINATOR
 from geodefi.utils import to_bytes32
@@ -20,6 +20,9 @@ from src.helpers.portal import get_operatorAllowance, get_surplus, get_withdrawa
 from src.helpers.db_validators import fill_validators_table, save_local_state
 from src.helpers.db_pools import save_last_proposal_timestamp
 from src.helpers.db_operator import save_last_stake_timestamp
+
+propose_mutex = Lock()
+stake_mutex = Lock()
 
 
 def fetch_last_proposal_timestamp(pool_id: int) -> int:
@@ -148,43 +151,43 @@ def check_and_propose(pool_id: int) -> list[str]:
     Returns:
         list[str]: list of pubkeys proposed
     """
+    with propose_mutex:
+        max_allowed: int = max_proposals_count(pool_id)
 
-    max_allowed: int = max_proposals_count(pool_id)
+        get_logger().debug(f"Max allowed proposals for pool {get_name(pool_id)}: {max_allowed}")
 
-    get_logger().debug(f"Max allowed proposals for pool {get_name(pool_id)}: {max_allowed}")
+        if max_allowed == 0:
+            return []
 
-    if max_allowed == 0:
-        return []
-
-    try:
-        # This returns the length of the validators array in the contract so it is same as the index of the next validator
-        new_val_ind: int = (
-            get_sdk()
-            .portal.functions.readUint(get_env().OPERATOR_ID, to_bytes32('validators'))
-            .call()
-        )
-
-        for i in range(max_allowed):
-
-            proposal_data: list[Any] = generate_deposit_data(
-                withdrawal_address=get_withdrawal_address(pool_id),
-                deposit_value=DEPOSIT_SIZE.PROPOSAL * 1_000_000_000,
-                index=new_val_ind + i,
+        try:
+            # This returns the length of the validators array in the contract so it is same as the index of the next validator
+            new_val_ind: int = (
+                get_sdk()
+                .portal.functions.readUint(get_env().OPERATOR_ID, to_bytes32('validators'))
+                .call()
             )
 
-            get_logger().debug(f"Proposal data for index {new_val_ind + i}: {proposal_data}")
+            for i in range(max_allowed):
 
-            stake_data: list[Any] = generate_deposit_data(
-                withdrawal_address=get_withdrawal_address(pool_id),
-                deposit_value=DEPOSIT_SIZE.STAKE * 1_000_000_000,
-                index=new_val_ind + i,
-            )
+                proposal_data: list[Any] = generate_deposit_data(
+                    withdrawal_address=get_withdrawal_address(pool_id),
+                    deposit_value=DEPOSIT_SIZE.PROPOSAL * 1_000_000_000,
+                    index=new_val_ind + i,
+                )
 
-            get_logger().debug(f"Stake data for index {new_val_ind + i}: {proposal_data}")
+                get_logger().debug(f"Proposal data for index {new_val_ind + i}: {proposal_data}")
 
-    except EthdoError as e:
-        send_email(e.__class__.__name__, str(e), dont_notify_geode=True)
-        return []
+                stake_data: list[Any] = generate_deposit_data(
+                    withdrawal_address=get_withdrawal_address(pool_id),
+                    deposit_value=DEPOSIT_SIZE.STAKE * 1_000_000_000,
+                    index=new_val_ind + i,
+                )
+
+                get_logger().debug(f"Stake data for index {new_val_ind + i}: {proposal_data}")
+
+        except EthdoError as e:
+            send_email(e.__class__.__name__, str(e), dont_notify_geode=True)
+            return []
 
     # pubkeys: list[bytes] = [bytes.fromhex(prop["pubkey"]) for prop in proposal_data]
     # signatures1: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in proposal_data]
@@ -235,31 +238,31 @@ def check_and_stake(pks: list[str]) -> list[str]:
     Returns:
         list[str]: list of pubkeys staked
     """
+    with stake_mutex:
+        last_stake_timestamp: int = fetch_last_stake_timestamp()
+        pks: list[str] = []
+        for i in range(0, len(pks), 50):
+            temp_pks: list[str] = pks[i : i + 50]
 
-    last_stake_timestamp: int = fetch_last_stake_timestamp()
-    pks: list[str] = []
-    for i in range(0, len(pks), 50):
-        temp_pks: list[str] = pks[i : i + 50]
+            if i >= len(pks) - get_config().strategy.min_proposal_queue:
+                if (
+                    get_config().strategy.max_proposal_delay
+                    >= int(round(datetime.now().timestamp())) - last_stake_timestamp
+                ):
+                    break
 
-        if i >= len(pks) - get_config().strategy.min_proposal_queue:
-            if (
-                get_config().strategy.max_proposal_delay
-                >= int(round(datetime.now().timestamp())) - last_stake_timestamp
-            ):
-                break
+            try:
+                success: bool = call_stake(temp_pks)
+                save_last_stake_timestamp(int(round(datetime.now().timestamp())))
+            except (CallFailedError, TimeExhausted) as e:
+                if len(pks) > 0:
+                    fill_validators_table(pks)
+                raise e
 
-        try:
-            success: bool = call_stake(temp_pks)
-            save_last_stake_timestamp(int(round(datetime.now().timestamp())))
-        except (CallFailedError, TimeExhausted) as e:
-            if len(pks) > 0:
-                fill_validators_table(pks)
-            raise e
+            if success:
+                pks.extend(temp_pks)
 
-        if success:
-            pks.extend(temp_pks)
-
-    return pks
+        return pks
 
 
 def run_finalize_exit_triggers():
