@@ -33,8 +33,12 @@ def setup_globals(flag_collector: Callable = collect_flags):
     """
     set_flags(flag_collector())
     set_env(load_env())
-    set_config(preflight_checks(apply_flags(init_config())))
-    set_logger(Loggable())
+
+    config = apply_flags(init_config())
+    preflight_checks(config)
+    set_config(config)
+
+    set_logger(Loggable().logger)
     set_sdk(
         init_sdk(
             exec_api=get_env().EXECUTION_API,

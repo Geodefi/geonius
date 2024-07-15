@@ -116,7 +116,7 @@ def main():
 
     # pylint: disable-next=broad-exception-caught
     except Exception as e:
-        print("Could not initiate geonius.\nExiting...")
+        print(str(e) + "\nCould not initiate geonius.\nExiting...")
         raise e
 
 

@@ -35,8 +35,8 @@ class Loggable:
     def __init__(self) -> None:
         """Initializes a Loggable object."""
         logger: logging.Logger = self.__get_logger()
-        self.logger = logger
         logger.info("Initalized a global logger.")
+        self.logger = logger
 
     def __get_logger(self) -> logging.Logger:
         """Initializes and returns a logger object with given streams and files.
@@ -125,18 +125,6 @@ class Loggable:
         fh.setFormatter(self.__formatter)
         fh.setLevel(self.__level)
         return fh
-
-    def __getattr__(self, attr: str) -> Any:
-        """Added so, `self.info()` can be used instead of `self.logger.<log_level>()`
-
-        Args:
-            attr (str): Attribute to be get.
-
-        Returns:
-            Any: Attribute of the object.
-        """
-
-        return getattr(self.logger, attr)
 
     def etherscan(self, function_name: str, tx_hash: str) -> None:
         network: str = get_sdk().network
