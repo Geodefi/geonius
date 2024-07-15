@@ -11,11 +11,7 @@ from src.globals import get_sdk, get_config, get_env, get_constants, get_logger
 from src.utils import send_email
 from src.actions import generate_deposit_data, call_proposeStake, call_stake
 from src.helpers import get_name
-from src.daemons import TimeDaemon
-from src.triggers import ExpectDepositsTrigger
 
-# from src.daemons.time_daemon import TimeDaemon
-# from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
 from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError, CallFailedError
 
 from src.helpers.portal import get_operatorAllowance, get_surplus, get_withdrawal_address
@@ -91,8 +87,6 @@ def max_proposals_count(pool_id: int) -> int:
         DatabaseError: Error fetching allowance and surplus for pool from table
     """
 
-    # TODO: monopoly log & send email as well (not sure if needed)
-
     allowance: int = get_operatorAllowance(pool_id)
 
     get_logger().debug(f"Allowance for pool {get_name(pool_id)}: {allowance}")
@@ -106,8 +100,6 @@ def max_proposals_count(pool_id: int) -> int:
 
     if surplus == 0:
         return 0
-
-    # TODO: (solved?) on geodefi its 32 gwei instead of ether consider fixing this or handle it in the code in a better way
 
     # every 32 ether is 1 validator.
     eth_per_prop: int = surplus // (DEPOSIT_SIZE.STAKE * BEACON_DENOMINATOR)
@@ -191,48 +183,41 @@ def check_and_propose(pool_id: int) -> list[str]:
             send_email(e.__class__.__name__, str(e), dont_notify_devs=True)
             return []
 
-    # pubkeys: list[bytes] = [bytes.fromhex(prop["pubkey"]) for prop in proposal_data]
-    # signatures1: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in proposal_data]
-    # signatures31: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in stake_data]
+        # pubkeys: list[bytes] = [bytes.fromhex(prop["pubkey"]) for prop in proposal_data]
+        # signatures1: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in proposal_data]
+        # signatures31: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in stake_data]
 
-    pubkeys: list[str] = ["0x" + prop["pubkey"] for prop in proposal_data]
-    signatures1: list[str] = ["0x" + prop["signature"] for prop in proposal_data]
-    signatures31: list[str] = ["0x" + prop["signature"] for prop in stake_data]
+        pubkeys: list[str] = ["0x" + prop["pubkey"] for prop in proposal_data]
+        signatures1: list[str] = ["0x" + prop["signature"] for prop in proposal_data]
+        signatures31: list[str] = ["0x" + prop["signature"] for prop in stake_data]
 
-    # last_proposal_timestamp: int = fetch_last_proposal_timestamp(pool_id)
+        # last_proposal_timestamp: int = fetch_last_proposal_timestamp(pool_id)
 
-    # get_logger().info(f"Last proposal timestamp for pool {pool_id}: {last_proposal_timestamp}")
+        # get_logger().info(f"Last proposal timestamp for pool {pool_id}: {last_proposal_timestamp}")
 
-    pks: list[str] = []
-    for i in range(0, len(pubkeys), 50):
-        temp_pks: list[str] = pubkeys[i : i + 50]
-        temp_sigs1: list[str] = signatures1[i : i + 50]
-        temp_sigs31: list[str] = signatures31[i : i + 50]
+        pks: list[str] = []
+        for i in range(0, len(pubkeys), 50):
+            temp_pks: list[str] = pubkeys[i : i + 50]
+            temp_sigs1: list[str] = signatures1[i : i + 50]
+            temp_sigs31: list[str] = signatures31[i : i + 50]
 
-        # if i >= len(pubkeys) - get_config().strategy.min_proposal_queue:
-        #     if (
-        #         get_config().strategy.max_proposal_delay
-        #         >= int(round(datetime.now().timestamp())) - last_proposal_timestamp
-        #     ):
-        #         break
+            # if i >= len(pubkeys) - get_config().strategy.min_proposal_queue:
+            #     if (
+            #         get_config().strategy.max_proposal_delay
+            #         >= int(round(datetime.now().timestamp())) - last_proposal_timestamp
+            #     ):
+            #         break
 
-        try:
-            success: bool = call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
-            save_last_proposal_timestamp(pool_id, int(round(datetime.now().timestamp())))
-        except (CallFailedError, TimeExhausted) as e:
-            if len(pks) > 0:
-                all_deposits_daemon: TimeDaemon = TimeDaemon(
-                    interval=15 * get_constants().one_minute,
-                    trigger=ExpectDepositsTrigger(pks),
-                    initial_delay=1,
-                )
-                all_deposits_daemon.run()
-            raise e
+            try:
+                success: bool = call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
+                save_last_proposal_timestamp(pool_id, int(round(datetime.now().timestamp())))
+            except (CallFailedError, TimeExhausted) as e:
+                # TODO: (now) somehow here, we should be checking if there are any succesful, from many 50 batch and handle
+                raise e
 
-        if success:
-            pks.extend(temp_pks)
-
-    return pks
+            if success:
+                pks.extend(temp_pks)
+        return pks
 
 
 def check_and_stake(pks: list[str]) -> list[str]:
@@ -262,13 +247,7 @@ def check_and_stake(pks: list[str]) -> list[str]:
                 success: bool = call_stake(temp_pks)
                 save_last_stake_timestamp(int(round(datetime.now().timestamp())))
             except (CallFailedError, TimeExhausted) as e:
-                if len(pks) > 0:
-                    all_deposits_daemon: TimeDaemon = TimeDaemon(
-                        interval=15 * get_constants().one_minute,
-                        trigger=ExpectDepositsTrigger(pks),
-                        initial_delay=1,
-                    )
-                    all_deposits_daemon.run()
+                # TODO: (now) somehow here, we should be checking if there are any succesful, from many 50 batch and handle
                 raise e
 
             if success:
