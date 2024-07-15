@@ -5,8 +5,9 @@ from typing import Any
 import logging
 from logging import StreamHandler, Formatter
 from logging.handlers import TimedRotatingFileHandler
+from geodefi.globals import Network
 
-from src.globals import get_config
+from src.globals import get_config, get_sdk
 
 
 class Loggable:
@@ -34,8 +35,8 @@ class Loggable:
     def __init__(self) -> None:
         """Initializes a Loggable object."""
         logger: logging.Logger = self.__get_logger()
-        logger.info("Initalized a global logger.")
         self.logger = logger
+        logger.info("Initalized a global logger.")
 
     def __get_logger(self) -> logging.Logger:
         """Initializes and returns a logger object with given streams and files.
@@ -43,19 +44,17 @@ class Loggable:
         Returns:
             logging.Logger: Logger object to be used in the class.
         """
-
         logger: logging.Logger = logging.getLogger()
         logger.setLevel(self.__level)
         logger.propagate = False
-
         handlers: list = list()
-        if get_config().logger.stream:
+        if not get_config().logger.no_stream:
             stream_handler: StreamHandler = self.__get_stream_handler()
             handlers.append(stream_handler)
             logger.addHandler(stream_handler)
             logger.info(f"Logger is provided with a stream handler. Level: {self.__level}")
 
-        if get_config().logger.file:
+        if not get_config().logger.no_file:
             file_handler: TimedRotatingFileHandler = self.__get_file_handler()
             handlers.append(file_handler)
             logger.addHandler(file_handler)
@@ -140,6 +139,10 @@ class Loggable:
         return getattr(self.logger, attr)
 
     def etherscan(self, function_name: str, tx_hash: str) -> None:
-        self.logger.info(
-            f"{function_name} tx sent: https://holesky.etherscan.io/tx/{tx_hash.hex()}"
-        )  # TODO: (later) this needs to change for mainnet
+        network: str = get_sdk().network
+        if network == Network.holesky:
+            self.logger.info(
+                f"{function_name} tx sent: https://holesky.etherscan.io/tx/{tx_hash.hex()}"
+            )
+        elif network == Network.ethereum:
+            self.logger.info(f"{function_name} tx sent: https://etherscan.io/tx/{tx_hash.hex()}")
