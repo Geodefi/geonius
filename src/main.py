@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 
-import sys
-
 from web3.contract.contract import ContractEvent
 from src.daemons import BlockDaemon, EventDaemon
-from src.triggers import (
+from src.triggers.event import (
     AlienatedTrigger,
     DelegationTrigger,
     FallbackOperatorTrigger,
     IdInitiatedTrigger,
-    StakeTrigger,
     DepositTrigger,
     ExitRequestTrigger,
 )
-from src.utils.notify import send_email
+from src.triggers.block import (
+    StakeTrigger,
+)
 from src.helpers import (
     reinitialize_validators_table,
     reinitialize_pools_table,
@@ -35,8 +34,6 @@ def init_dbs():
     This function is called at the beginning of the program to make sure the
     databases are up to date.
     """
-
-    # TODO: (solved) try to call multiple trigger for the same action each time may create a problem
     reinitialize_operators_table()
     reinitialize_pools_table()
     reinitialize_validators_table()
@@ -111,7 +108,6 @@ def main():
 
     initializes the databases and sets up the daemons.
     """
-
     try:
         setup_globals()
         if get_flags().reset:
@@ -120,8 +116,8 @@ def main():
 
     # pylint: disable-next=broad-exception-caught
     except Exception as e:
-        send_email(e.__class__.__name__, str(e))
-        sys.exit(e)
+        print("Could not initiate geonius.\nExiting...")
+        raise e
 
 
 if __name__ == "__main__":
