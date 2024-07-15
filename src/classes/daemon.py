@@ -155,28 +155,36 @@ class Daemon:
                 get_logger().warning(
                     f"One of the calls failed for {self.trigger.name:^17}. Continuing but may need to be checked in case of a problem."
                 )
-            except EmailError:
-                get_logger().warning(
-                    f"Can be not able to communicate with the owners. Continuing without an assistance."
-                )
-                send_email(
-                    f"Tx failed",
-                    f"A Portal transaction is either failed, or could not be called for some reason. Will continue operations as usual, but an investigation is suggested.",
-                )
+                try:
+                    send_email(
+                        f"Tx failed",
+                        f"A Portal transaction is either failed, or could not be called for some reason. Will continue operations as usual, but an investigation is suggested.",
+                    )
+                except EmailError:
+                    get_logger().warning(
+                        f"Not able to communicate with the owners. Continuing without an assistance."
+                    )
             except BeaconStateMismatchError:
                 # These Exceptions can not be handled but there is no need to close the whole thing down for it.
-                send_email(
-                    f"Daemon stopped: {self.trigger.name:^17}",
-                    f"One Daemon stopped, others will continue to operate. Come take a look!",
-                )
                 get_logger().exception(
                     f"Daemon stopped: {self.trigger.name:^17}. Others will continue to operate...",
                     exc_info=True,
                 )
+                try:
+                    send_email(
+                        f"Daemon stopped: {self.trigger.name:^17}",
+                        f"One Daemon stopped, others will continue to operate. Come take a look!",
+                    )
+                except EmailError:
+                    get_logger().warning(
+                        f"Can be not able to communicate with the owners. Continuing without an assistance."
+                    )
                 self.start_flag.clear()
                 self.stop_flag.set()
+
+            # pylint: disable-next=broad-exception-caught
             except Exception:
-                # All of the remaining Exceptions will force the MainThread to exit.
+                # All of the remaining Exceptions will force the MainThread to exit.>
                 get_logger().exception(
                     f"Stopping Geonius due to unhandled exception on a Daemon for : {self.trigger.name:^17}"
                 )
@@ -185,7 +193,7 @@ class Daemon:
                         "STOPPED",
                         f"All Daemons stopped, script exited. Come take a look!",
                     )
-                except Exception:
+                except EmailError:
                     get_logger().warning(f"Could not send email while exiting Geonius. Well...")
 
                 os.kill(os.getpid(), signal.SIGUSR1)
