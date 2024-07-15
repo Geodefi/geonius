@@ -5,6 +5,7 @@ from src.classes import Trigger
 from src.daemons import TimeDaemon
 from src.utils import multithread
 from src.helpers import fill_validators_table
+from itertools import compress
 
 
 def ping_pubkey(pubkey: str) -> bool:
@@ -26,7 +27,8 @@ def ping_pubkey(pubkey: str) -> bool:
         return False
 
 
-# TODO: (later) Stop and throw error after x attempts: This should be fault tolerant. rely on config.json
+# TODO: (now) like fill_pools_table, implement a function to fill the database on reboot with available data:  propose event daemon
+# TODO: (later) Stop and throw error after x attempts: This should be fault tolerant. Rely on config.json
 class ExpectDepositsTrigger(Trigger):
     """Trigger for the EXPECT_DEPOSITS. This time trigger waits until deposits for the
     multiple validators become processed on beaconchain. Works every 15 minutes.
@@ -57,9 +59,21 @@ class ExpectDepositsTrigger(Trigger):
         Args:
             daemon (TimeDaemon): _description_
         """
-        all_pubkeys_exist: bool = all(multithread(ping_pubkey, self.pubkeys))
-        if all_pubkeys_exist:
+        response_filter: bool = multithread(ping_pubkey, self.pubkeys)
+
+        responded = list()
+        remaining = list()
+        for pk, res in zip(self.pubkeys, response_filter):
+            if res:
+                remaining.append(pk)
+            else:
+                remaining.append(pk)
+
+        if len(responded) > 0:
             fill_validators_table(self.pubkeys)
-            daemon.stop()
+
+        if len(remaining) > 0:
+            self.pubkeys = remaining
         else:
-            return
+            daemon.stop()
+        return
