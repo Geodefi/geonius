@@ -79,7 +79,7 @@ def apply_flags(config: AttributeDict):
 
 def preflight_checks(config: AttributeDict):
     """Checks if the config.json file is missing any values. 'gas' and 'email' sections are Optional,
-    however they should be valid if provided.  # TODO: (now) check if they are in the implementation
+    however they should be valid if provided.  # TODO: (now) check if they are optional in the code as well
 
     Args:
         config (AttributeDict): Provided config.json as a dictionary
@@ -88,92 +88,92 @@ def preflight_checks(config: AttributeDict):
         MissingConfigurationError: One of the required fields on configuration file is missing.
     """
     # Sections
-    if not config.chains:
+    if not 'chains' in config:
         raise MissingConfigurationError("'chains' section on config.json is missing or empty.")
-    if not config.network:
+    if not 'network' in config:
         raise MissingConfigurationError("'network' section on config.json is missing or empty.")
-    if not config.strategy:
+    if not 'strategy' in config:
         raise MissingConfigurationError("'strategy' section on config.json is missing or empty.")
-    if not config.logger:
+    if not 'logger' in config:
         raise MissingConfigurationError("'logger' section on config.json is missing or empty.")
-    if not config.database:
+    if not 'database' in config:
         raise MissingConfigurationError("'database' section on config.json is missing or empty.")
-    if not config.ethdo:
+    if not 'ethdo' in config:
         raise MissingConfigurationError("'ethdo' section on config.json is missing or empty.")
 
     # Fields
-    # TODO: (later) chain related checks should be implemented.
+    # TODO: (later) chain related checks should be implemented...
     # chain: AttributeDict = config.chains[get_flags().chain] #
 
     network: AttributeDict = config.network
-    if not network.refresh_rate:
+    if not 'refresh_rate' in network:
         raise MissingConfigurationError("'network' section is missing the 'refresh_rate' field.")
     elif network.refresh_rate <= 0 or network.refresh_rate > 360:
         raise ConfigurationFieldError("Provided value is unexpected: (0-360] seconds")
 
-    if not network.max_attempt:
+    if not 'max_attempt' in network:
         raise MissingConfigurationError("'network' section is missing the 'max_attempt' field.")
     elif network.max_attempt <= 0 or network.max_attempt > 100:
         raise ConfigurationFieldError("Provided value is unexpected: (0-100] attempts")
 
-    if not network.attempt_rate:
+    if not 'attempt_rate' in network:
         raise MissingConfigurationError("'network' section is missing the 'attempt_rate' field.")
     elif network.max_attempt <= 0 or network.attempt_rate > 10:
         raise ConfigurationFieldError("Provided value is unexpected: (0-10] seconds")
 
     strategy: AttributeDict = config.strategy
-    if not strategy.min_proposal_queue:
+    if not 'min_proposal_queue' in strategy:
         raise MissingConfigurationError(
             "'strategy' section is missing the 'min_proposal_queue' field."
         )
-    elif network.min_proposal_queue < 0 or strategy.min_proposal_queue > 50:
+    elif strategy.min_proposal_queue < 0 or strategy.min_proposal_queue > 50:
         raise ConfigurationFieldError("Provided value is unexpected: [0-50] pubkeys")
 
-    if not strategy.max_proposal_delay:
+    if not 'max_proposal_delay' in strategy:
         raise MissingConfigurationError(
             "'strategy' section is missing the 'max_proposal_delay' field."
         )
-    elif network.max_proposal_delay < 0 or strategy.max_proposal_delay > 604800:
+    elif strategy.max_proposal_delay < 0 or strategy.max_proposal_delay > 604800:
         raise ConfigurationFieldError("Provided value is unexpected: [0-604800] seconds")
 
     logger: AttributeDict = config.logger
-    if not logger.no_stream:  # This can be False
+    if not 'no_stream' in logger:
         raise MissingConfigurationError("'logger' section is missing the 'no_stream' field.")
 
-    if not logger.no_file:  # This can be False
+    if not 'no_file' in logger:
         raise MissingConfigurationError("'logger' section is missing the 'no_file' field.")
 
-    if logger.no_file is False:
-        if not logger.level:  # can add more checks
+    if not 'no_file' in logger:
+        if not 'level' in logger:  # can add more checks
             raise MissingConfigurationError("'logger' section is missing the 'level' field.")
 
-        if not logger.when:  # can add more checks
+        if not 'when' in logger:  # can add more checks
             raise MissingConfigurationError("'logger' section is missing the 'when' field.")
 
-        if not logger.interval:  # can add more checks
+        if not 'interval' in logger:  # can add more checks
             raise MissingConfigurationError("'logger' section is missing the 'interval' field.")
 
-        if not logger.backup:  # can add more checks
+        if not 'backup' in logger:  # can add more checks
             raise MissingConfigurationError("'logger' section is missing the 'backup' field.")
 
     database: AttributeDict = config.database
-    if not database.directory:
+    if not 'directory' in database:
         raise MissingConfigurationError("'database' section is missing the 'directory' field.")
 
     ethdo: AttributeDict = config.ethdo
-    if not ethdo.wallet:  # TODO: (now) check if exists
+    if not 'wallet' in ethdo:  # TODO: (now) check if exists
         raise MissingConfigurationError("'ethdo' section is missing the 'wallet' field.")
-    if not ethdo.account:  # TODO: (now) check if exists
+    if not 'account' in ethdo:  # TODO: (now) check if exists
         raise MissingConfigurationError("'ethdo' section is missing the 'account' field.")
 
     if config.gas:
         gas: AttributeDict = config.gas
-        if not gas.max_priority:
+        if not 'max_priority' in gas:
             raise MissingConfigurationError("'gas' section is missing the 'max_priority' field.")
-        if not gas.max_fee:
+        if not 'max_fee' in gas:
             raise MissingConfigurationError("'gas' section is missing the 'max_fee' field.")
         if gas.api:  # Optional
-            if not gas.parser:
+            if not 'parser' in gas:
                 raise MissingConfigurationError(
                     "No parser could be identified for the provided gas api"
                 )
@@ -182,15 +182,15 @@ def preflight_checks(config: AttributeDict):
     if config.email:
         email: AttributeDict = config.email
 
-        if not email.smtp_server:
+        if not 'smtp_server' in email:
             raise MissingConfigurationError(
                 "'email' section is missing the required 'smtp_server' field."
             )
-        if not email.smtp_port:
+        if not 'smtp_port' in email:
             raise MissingConfigurationError(
                 "'email' section is missing the required 'smtp_port' field."
             )
-        if not email.dont_notify_devs:
+        if not 'dont_notify_devs' in email:
             email.dont_notify_devs = False
 
 
