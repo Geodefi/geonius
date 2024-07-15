@@ -4,7 +4,7 @@ from src.globals import get_env
 from src.common.loggable import Loggable
 from src.globals.env import load_env
 from src.globals.flags import collect_flags
-from src.globals.config import apply_flags, init_config
+from src.globals.config import apply_flags, init_config, preflight_checks
 from src.globals.sdk import init_sdk
 from src.globals.constants import init_constants
 from src.globals import (
@@ -33,7 +33,7 @@ def setup_globals(flag_collector: Callable = collect_flags):
     """
     set_flags(flag_collector())
     set_env(load_env())
-    set_config(apply_flags(init_config()))
+    set_config(preflight_checks(apply_flags(init_config())))
     set_logger(Loggable())
     set_sdk(
         init_sdk(
