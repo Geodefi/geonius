@@ -3,11 +3,13 @@
 from typing import Iterable
 from web3.types import EventData
 from web3.contract.contract import ContractEvent
+
 from src.classes import Daemon, Trigger
-from src.globals import get_sdk, get_constants, get_logger
-from src.helpers import get_all_events, find_latest_event
-from src.utils import send_email
 from src.common import AttributeDict
+from src.globals import get_sdk, get_constants, get_logger
+from src.database.events import find_latest_event
+from src.helpers.event import get_all_events
+from src.utils.notify import send_email
 
 
 class EventDaemon(Daemon):

@@ -3,10 +3,10 @@
 from geodefi.classes import Validator
 from geodefi.globals import VALIDATOR_STATE
 
-from src.globals import get_logger, get_sdk
 from src.classes import Trigger
 from src.daemons import TimeDaemon
-from src.helpers import save_portal_state, save_local_state, fetch_pool_id
+from src.database.validators import save_portal_state, save_local_state, fetch_pool_id
+from src.globals import get_logger, get_sdk
 
 
 # TODO: (later) Stop and throw error after x attempts: This should be fault tolerant. rely on config.json

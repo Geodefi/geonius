@@ -4,17 +4,15 @@ from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
-from src.exceptions import DatabaseError
-from src.helpers import (
-    create_deposit_table,
-    event_handler,
-    create_pools_table,
-    check_and_propose,
-    create_operators_table,
-)
 from src.daemons import TimeDaemon
-from src.globals import get_constants, get_logger
 from src.triggers.time import ExpectDepositsTrigger
+from src.exceptions import DatabaseError
+from src.database.events import create_deposit_table
+from src.database.pools import create_pools_table
+from src.database.operators import create_operators_table
+from src.helpers.event import event_handler
+from src.helpers.validator import check_and_propose
+from src.globals import get_logger, get_constants
 
 
 class DepositTrigger(Trigger):

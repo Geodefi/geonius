@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from src.classes.database import Database
-from src.utils import multithread
-from src.globals import get_env, get_logger
+from src.classes import Database
 from src.exceptions import DatabaseError
-
 from src.helpers.portal import get_fallback_operator
+from src.globals import get_env, get_logger
+from src.utils.thread import multithread
 
 
 def create_pools_table() -> None:

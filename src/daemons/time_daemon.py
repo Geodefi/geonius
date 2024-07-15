@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing_extensions import Self
+
 from src.classes import Daemon, Trigger
 from src.globals import get_logger
 

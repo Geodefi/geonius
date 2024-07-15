@@ -6,18 +6,24 @@ from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE, BEACON_DENOMINATOR
 from geodefi.utils import to_bytes32
 from web3.exceptions import TimeExhausted
 
-from src.classes.database import Database
+# from src.classes import Database
 from src.globals import get_sdk, get_config, get_env, get_constants, get_logger
-from src.utils import send_email
-from src.actions import generate_deposit_data, call_proposeStake, call_stake
-from src.helpers import get_name
+from src.utils.notify import send_email
+from src.actions.ethdo import generate_deposit_data
+from src.actions.portal import call_proposeStake, call_stake
 
-from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError, CallFailedError
+from src.exceptions import (
+    # DatabaseError,
+    DatabaseMismatchError,
+    EthdoError,
+    CallFailedError,
+)
 
-from src.helpers.portal import get_operatorAllowance, get_surplus, get_withdrawal_address
-from src.helpers.db_validators import save_local_state, fetch_filtered_pubkeys
-from src.helpers.db_pools import save_last_proposal_timestamp, fetch_last_proposal_timestamp
-from src.helpers.db_operator import save_last_stake_timestamp, fetch_last_stake_timestamp
+from src.helpers.portal import get_operatorAllowance, get_surplus, get_withdrawal_address, get_name
+from src.database.validators import save_local_state, fetch_filtered_pubkeys
+from src.database.pools import save_last_proposal_timestamp, fetch_last_proposal_timestamp
+from src.database.operators import save_last_stake_timestamp, fetch_last_stake_timestamp
+
 
 propose_mutex = Lock()
 stake_mutex = Lock()

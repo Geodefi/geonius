@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from src.globals import get_sdk, get_logger
 from src.classes import Trigger
 from src.daemons import TimeDaemon
-from src.utils import multithread
-from src.helpers import fill_validators_table
+from src.utils.thread import multithread
+from src.database.validators import fill_validators_table
+from src.globals import get_sdk, get_logger
 
 
 def ping_pubkey(pubkey: str) -> bool:

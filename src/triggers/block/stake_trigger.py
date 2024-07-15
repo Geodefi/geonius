@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from itertools import repeat
+
 from geodefi.globals import VALIDATOR_STATE
 
-from src.globals import get_logger
 from src.classes import Trigger
-from src.helpers import (
+from src.database.validators import (
     create_validators_table,
     save_local_state,
     save_portal_state,
-    check_and_stake,
     fetch_verified_pks,
-    create_operators_table,
 )
-from src.utils import multithread
+from src.database.operators import create_operators_table
+from src.helpers.validator import check_and_stake
+from src.globals import get_logger
+from src.utils.thread import multithread
 
 
 class StakeTrigger(Trigger):

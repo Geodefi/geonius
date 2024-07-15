@@ -4,15 +4,13 @@ from typing import Iterable
 from web3.types import EventData
 from geodefi.globals import ID_TYPE
 
-from src.globals import get_logger
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
-from src.helpers import (
-    create_pools_table,
-    fill_pools_table,
-    create_id_initiated_table,
-    event_handler,
-)
+from src.database.events import create_id_initiated_table
+from src.database.pools import create_pools_table, fill_pools_table
+
+from src.helpers.event import event_handler
+from src.globals import get_logger
 
 
 class IdInitiatedTrigger(Trigger):

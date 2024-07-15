@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-from typing import Any
-import logging
-from logging import StreamHandler, Formatter
+from logging import StreamHandler, Formatter, Logger, basicConfig, getLogger
 from logging.handlers import TimedRotatingFileHandler
+
 from geodefi.globals import Network
 
 from src.globals import get_config, get_sdk
@@ -34,17 +33,17 @@ class Loggable:
 
     def __init__(self) -> None:
         """Initializes a Loggable object."""
-        logger: logging.Logger = self.__get_logger()
+        logger: Logger = self.__get_logger()
         logger.info("Initalized a global logger.")
         self.logger = logger
 
-    def __get_logger(self) -> logging.Logger:
+    def __get_logger(self) -> Logger:
         """Initializes and returns a logger object with given streams and files.
 
         Returns:
-            logging.Logger: Logger object to be used in the class.
+            Logger: Logger object to be used in the class.
         """
-        logger: logging.Logger = logging.getLogger()
+        logger: Logger = getLogger()
         logger.setLevel(self.__level)
         logger.propagate = False
         handlers: list = list()
@@ -60,7 +59,7 @@ class Loggable:
             logger.addHandler(file_handler)
             logger.info(f"Logger is provided with a file handler. Level: {self.__level}")
 
-        logging.basicConfig(handlers=handlers, force=True)
+        basicConfig(handlers=handlers, force=True)
         return logger
 
     @property

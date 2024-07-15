@@ -6,7 +6,7 @@ from geodefi.globals import ID_TYPE
 from geodefi.utils import to_bytes32, get_key
 
 from src.globals import get_sdk, get_env, get_logger
-from src.utils import multithread
+from src.utils.thread import multithread
 
 
 # pylint: disable-next=invalid-name

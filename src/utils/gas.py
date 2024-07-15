@@ -2,10 +2,10 @@
 import struct
 from geodefi.utils import wrappers
 
-from src.globals import get_logger, get_config
 from src.common import AttributeDict
-from src.utils import send_email
 from src.exceptions import HighGasException
+from src.globals import get_logger, get_config
+from src.utils.notify import send_email
 
 
 def __float_to_hexstring(f):

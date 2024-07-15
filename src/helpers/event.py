@@ -4,10 +4,11 @@ from itertools import repeat
 from eth_abi import abi
 from web3.types import EventData
 from web3.contract.contract import ContractEvent
+
 from geodefi.utils import multiple_attempt
 
-from src.utils import multithread
 from src.globals import get_logger, get_constants
+from src.utils.thread import multithread
 
 
 @multiple_attempt

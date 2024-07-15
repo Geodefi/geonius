@@ -2,8 +2,9 @@
 
 import os
 from argparse import ArgumentParser
-from src.exceptions import UnknownFlagError
+
 from src.common import AttributeDict
+from src.exceptions import UnknownFlagError
 
 
 def collect_flags() -> dict:

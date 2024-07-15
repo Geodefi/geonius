@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from src.classes.database import Database
-from src.globals import get_logger, get_env
+from src.classes import Database
 from src.exceptions import DatabaseError
+from src.globals import get_logger, get_env
 
 
 # TODO: this seemed unnecessary

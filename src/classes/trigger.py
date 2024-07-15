@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Callable
+
 from src.globals import get_logger
 
 

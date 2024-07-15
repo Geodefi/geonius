@@ -5,23 +5,23 @@ from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 from geodefi.classes import Validator
 
-from src.globals import get_constants, get_sdk, get_logger
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
+from src.triggers.time import FinalizeExitTrigger
 from src.exceptions import BeaconStateMismatchError, DatabaseError, EthdoError
-from src.utils import send_email
-from src.actions import exit_validator
-from src.helpers import (
-    create_exit_request_table,
-    event_handler,
+from src.actions.ethdo import exit_validator
+from src.database.validators import (
     save_portal_state,
     save_local_state,
     save_exit_epoch,
-    run_finalize_exit_triggers,
     check_pk_in_db,
 )
+from src.database.events import create_exit_request_table
 
-from src.triggers.time.finalize_exit_trigger import FinalizeExitTrigger
+from src.helpers.event import event_handler
+from src.helpers.validator import run_finalize_exit_triggers
+from src.globals import get_constants, get_sdk, get_logger
+from src.utils.notify import send_email
 
 
 class ExitRequestTrigger(Trigger):

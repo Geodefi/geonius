@@ -3,21 +3,17 @@
 from typing import Iterable
 from web3.types import EventData
 
-from src.globals import get_env, get_logger, get_constants
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
 from src.triggers.time import ExpectDepositsTrigger
-
 from src.exceptions import DatabaseError
-from src.helpers import (
-    create_fallback_operator_table,
-    event_handler,
-    get_fallback_operator,
-    create_pools_table,
-    save_fallback_operator,
-    check_and_propose,
-    create_operators_table,
-)
+from src.database.events import create_fallback_operator_table
+from src.database.pools import create_pools_table, save_fallback_operator
+from src.database.operators import create_operators_table
+from src.helpers.event import event_handler
+from src.helpers.portal import get_fallback_operator
+from src.helpers.validator import check_and_propose
+from src.globals import get_env, get_logger, get_constants
 
 
 class FallbackOperatorTrigger(Trigger):

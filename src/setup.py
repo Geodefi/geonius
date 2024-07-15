@@ -1,14 +1,7 @@
 from typing import Callable
 
-from src.common import AttributeDict
-from src.common.loggable import Loggable
-from src.globals import get_env
-from src.globals import get_config
-from src.globals.env import load_env
-from src.globals.flags import collect_flags
-from src.globals.config import apply_flags, init_config
-from src.globals.sdk import init_sdk
-from src.globals.constants import init_constants
+from src.common import AttributeDict, Loggable
+from src.exceptions import ConfigurationFieldError, MissingConfigurationError
 from src.globals import (
     set_config,
     set_env,
@@ -16,8 +9,14 @@ from src.globals import (
     set_flags,
     set_constants,
     set_logger,
+    get_env,
+    get_config,
 )
-from src.exceptions import ConfigurationFieldError, MissingConfigurationError
+from src.globals.config import apply_flags, init_config
+from src.globals.constants import init_constants
+from src.globals.env import load_env
+from src.globals.flags import collect_flags
+from src.globals.sdk import init_sdk
 
 
 def preflight_checks():

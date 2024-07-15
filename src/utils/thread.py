@@ -3,11 +3,9 @@
 from typing import Any, Callable
 from multiprocessing.pool import ThreadPool
 from threading import current_thread
+from functools import wraps
 
 from src.globals import get_logger
-
-from functools import wraps
-from multiprocessing.pool import ThreadPool
 
 
 def rename_worker(fn):

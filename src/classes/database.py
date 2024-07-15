@@ -3,8 +3,9 @@
 import os
 import sqlite3 as sql
 from typing import Any
-from src.globals import get_config, get_logger
+
 from src.exceptions import DatabaseError
+from src.globals import get_config, get_logger
 
 
 class Database:

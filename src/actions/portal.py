@@ -2,9 +2,11 @@
 
 from web3.types import TxReceipt
 from web3.exceptions import TimeExhausted
-from src.globals import get_sdk, get_env, get_logger
+
 from src.exceptions import CannotStakeError, CallFailedError
-from src.utils import send_email, get_gas
+from src.globals import get_sdk, get_env, get_logger
+from src.utils.notify import send_email
+from src.utils.gas import get_gas
 
 
 def tx_params() -> dict:

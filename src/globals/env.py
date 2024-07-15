@@ -2,8 +2,9 @@
 
 import os
 from dotenv import load_dotenv
+
+from src.common import AttributeDict
 from src.globals import get_flags
-from src.common.attribute_dict import AttributeDict
 
 
 def load_env():

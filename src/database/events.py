@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from threading import Lock
 
 from src.classes.database import Database
-from src.globals import get_logger, get_constants
-from src.exceptions import DatabaseError
 from src.common import AttributeDict
-from threading import Lock
+from src.exceptions import DatabaseError
+from src.globals import get_logger, get_constants
 
 alienated_mutex = Lock()
 delegation_mutex = Lock()

@@ -3,18 +3,16 @@
 from typing import Iterable
 from web3.types import EventData
 
-from src.globals import get_logger, get_env, get_constants
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
 from src.triggers.time import ExpectDepositsTrigger
 from src.exceptions import DatabaseError
-from src.helpers import (
-    create_delegation_table,
-    event_handler,
-    check_and_propose,
-    create_pools_table,
-    create_operators_table,
-)
+from src.database.events import create_delegation_table
+from src.database.pools import create_pools_table
+from src.database.operators import create_operators_table
+from src.helpers.event import event_handler
+from src.helpers.validator import check_and_propose
+from src.globals import get_logger, get_env, get_constants
 
 
 class DelegationTrigger(Trigger):

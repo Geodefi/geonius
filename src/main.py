@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from web3.contract.contract import ContractEvent
+
 from src.daemons import BlockDaemon, EventDaemon
 from src.triggers.event import (
     AlienatedTrigger,
@@ -13,17 +14,17 @@ from src.triggers.event import (
 from src.triggers.block import (
     StakeTrigger,
 )
-from src.helpers import (
-    reinitialize_validators_table,
-    reinitialize_pools_table,
+from src.database.events import (
     reinitialize_alienated_table,
     reinitialize_delegation_table,
     reinitialize_deposit_table,
     reinitialize_exit_request_table,
     reinitialize_fallback_operator_table,
     reinitialize_id_initiated_table,
-    reinitialize_operators_table,
 )
+from src.database.operators import reinitialize_operators_table
+from src.database.pools import reinitialize_pools_table
+from src.database.validators import reinitialize_validators_table
 from src.globals import get_flags, get_sdk, get_constants
 from src.setup import setup
 

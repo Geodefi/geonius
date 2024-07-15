@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
+import os
 from time import sleep
 from argparse import ArgumentParser
-import os
+
 from src.common import AttributeDict
 from src.exceptions import UnknownFlagError
-from src.setup import setup
 from src.globals import get_sdk, get_logger, get_flags
-from src.helpers import get_name
-from src.utils import get_gas
+from src.helpers.portal import get_name
+from src.utils.gas import get_gas
+from src.setup import setup
 
 
 def collect_local_flags() -> dict:

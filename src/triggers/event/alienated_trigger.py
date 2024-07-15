@@ -4,18 +4,18 @@ from typing import Iterable
 from web3.types import EventData
 from geodefi.globals import VALIDATOR_STATE
 
-from src.globals import get_logger
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
-from src.utils import send_email
-from src.helpers import (
-    create_alienated_table,
-    event_handler,
+from src.database.events import create_alienated_table
+from src.database.validators import (
     create_validators_table,
     save_portal_state,
     save_local_state,
     check_pk_in_db,
 )
+from src.globals import get_logger
+from src.helpers.event import event_handler
+from src.utils.notify import send_email
 
 
 class AlienatedTrigger(Trigger):

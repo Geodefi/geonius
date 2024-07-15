@@ -6,9 +6,9 @@ from typing import Callable
 from threading import Thread, Event
 from web3.exceptions import TimeExhausted
 
-from src.globals import get_logger
-from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError, EmailError
 from src.classes.trigger import Trigger
+from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError, EmailError
+from src.globals import get_logger
 from src.utils.notify import send_email
 
 

@@ -2,12 +2,11 @@
 
 import json
 from subprocess import check_output
+
 import geodefi
 
-from src.globals import get_sdk, get_env, get_config, get_logger
-from threading import Lock
-
 from src.exceptions import EthdoError
+from src.globals import get_sdk, get_env, get_config, get_logger
 
 
 def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int) -> dict:

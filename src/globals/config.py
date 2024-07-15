@@ -5,12 +5,7 @@ import json
 import geodefi
 
 from src.common import AttributeDict
-from src.exceptions import (
-    ConfigurationFileError,
-    MissingConfigurationError,
-)
-
-
+from src.exceptions import ConfigurationFileError, MissingConfigurationError
 from src.globals import get_flags, get_env
 
 
