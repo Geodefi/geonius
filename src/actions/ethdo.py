@@ -36,11 +36,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
     fork_version = geodefi.globals.GENESIS_FORK_VERSION[get_sdk().network].hex()
 
     try:
-        try:
-            res: str = check_output(
-                ["ethdo", "account", "info", f"--validatoraccount={wallet}/{account}"]
-            )
-        except Exception:
+        if not ping_account(wallet=wallet, account=account):
             create_account(index=index)
 
         res: str = check_output(
@@ -70,41 +66,22 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         raise EthdoError(f"Failed to interpret the response from ethdo: {res}") from e
 
 
-def create_wallet() -> dict:
-    """Creates a new wallet to be used on ethdo
+def ping_account(wallet: str, account: str) -> bool:
+    """Checks if an account exist on ethdo.
+
+    Args:
+        wallet (str): Provided ethdo wallet
+        account (str): Provided ethdo account
 
     Returns:
-        dict: Returns the wallet data in JSON format.
-
-    Raises:
-        EthdoError: Raised if the wallet creation fails.
-        JSONDecodeError: Raised if the response cannot be decoded to JSON.
-        TypeError: Raised if the response is not type of str, bytes or bytearray.
+        bool: True if exists, False if not.
     """
-    get_logger().info(f"Creating a new wallet: {get_config().ethdo.wallet}")
-
     try:
-        res: str = check_output(
-            [
-                "ethdo",
-                "wallet",
-                "create",
-                f"--wallet={get_config().ethdo.wallet}",
-                f"--wallet-passphrase={get_env().WALLET_PASSPHRASE}",
-                f"-type=hd",
-            ]
-        )
-
-    except Exception as e:
-        raise EthdoError(f"Failed to create wallet {get_config().ethdo.wallet}") from e
-
-    try:
-        return json.loads(res)
-    except (json.JSONDecodeError, TypeError) as e:
-        get_logger().error(f"Failed to interpret the response from ethdo: {res}")
-        raise e
-    except Exception as e:
-        raise e
+        check_output(["ethdo", "account", "info", f"--validatoraccount={wallet}/{account}"])
+        return True
+    # pylint: disable-next=broad-exception-caught
+    except Exception:
+        return False
 
 
 def create_account(index: int = None) -> dict:
@@ -140,6 +117,43 @@ def create_account(index: int = None) -> dict:
 
     except Exception as e:
         raise EthdoError(f"Failed to create account {account}") from e
+
+    try:
+        return json.loads(res)
+    except (json.JSONDecodeError, TypeError) as e:
+        get_logger().error(f"Failed to interpret the response from ethdo: {res}")
+        raise e
+    except Exception as e:
+        raise e
+
+
+def create_wallet() -> dict:
+    """Creates a new wallet to be used on ethdo
+
+    Returns:
+        dict: Returns the wallet data in JSON format.
+
+    Raises:
+        EthdoError: Raised if the wallet creation fails.
+        JSONDecodeError: Raised if the response cannot be decoded to JSON.
+        TypeError: Raised if the response is not type of str, bytes or bytearray.
+    """
+    get_logger().info(f"Creating a new wallet: {get_config().ethdo.wallet}")
+
+    try:
+        res: str = check_output(
+            [
+                "ethdo",
+                "wallet",
+                "create",
+                f"--wallet={get_config().ethdo.wallet}",
+                f"--wallet-passphrase={get_env().WALLET_PASSPHRASE}",
+                f"-type=hd",
+            ]
+        )
+
+    except Exception as e:
+        raise EthdoError(f"Failed to create wallet {get_config().ethdo.wallet}") from e
 
     try:
         return json.loads(res)
