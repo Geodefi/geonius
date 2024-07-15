@@ -173,3 +173,29 @@ def save_last_proposal_timestamp(pool_id: int, timestamp: int) -> None:
             f"Error updating last proposal timestamp of pool with id {pool_id} and timestamp {timestamp} \
                 in table Pools"
         ) from e
+
+
+def fetch_last_proposal_timestamp(pool_id: int) -> int:
+    """Fetches the last proposal timestamp for given pool
+
+    Args:
+        pool_id (int): ID of the pool to get last proposal timestamp for
+
+    Returns:
+        int: Last proposal timestamp
+    """
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                SELECT last_proposal_ts FROM Pools
+                WHERE id = ?
+                """,
+                (str(pool_id),),
+            )
+            last_proposal_ts: int = db.fetchone()[0]
+    except Exception as e:
+        raise DatabaseError(f"Error fetching last proposal timestamp for pool {pool_id}") from e
+
+    return last_proposal_ts

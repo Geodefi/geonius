@@ -15,63 +15,12 @@ from src.helpers import get_name
 from src.exceptions import DatabaseError, DatabaseMismatchError, EthdoError, CallFailedError
 
 from src.helpers.portal import get_operatorAllowance, get_surplus, get_withdrawal_address
-from src.helpers.db_validators import save_local_state
-from src.helpers.db_pools import save_last_proposal_timestamp
-from src.helpers.db_operator import save_last_stake_timestamp
+from src.helpers.db_validators import save_local_state, fetch_filtered_pubkeys
+from src.helpers.db_pools import save_last_proposal_timestamp, fetch_last_proposal_timestamp
+from src.helpers.db_operator import save_last_stake_timestamp, fetch_last_stake_timestamp
 
 propose_mutex = Lock()
 stake_mutex = Lock()
-
-
-def fetch_last_proposal_timestamp(pool_id: int) -> int:
-    """Fetches the last proposal timestamp for given pool
-
-    Args:
-        pool_id (int): ID of the pool to get last proposal timestamp for
-
-    Returns:
-        int: Last proposal timestamp
-    """
-
-    try:
-        with Database() as db:
-            db.execute(
-                """
-                SELECT last_proposal_ts FROM Pools
-                WHERE id = ?
-                """,
-                (str(pool_id),),
-            )
-            last_proposal_ts: int = db.fetchone()[0]
-    except Exception as e:
-        raise DatabaseError(f"Error fetching last proposal timestamp for pool {pool_id}") from e
-
-    return last_proposal_ts
-
-
-def fetch_last_stake_timestamp() -> int:
-    """Fetches the last stake timestamp for the operator
-
-    Returns:
-        int: Last stake timestamp
-    """
-
-    try:
-        with Database() as db:
-            db.execute(
-                """
-                SELECT last_stake_ts FROM Operators
-                WHERE id = ?
-                """,
-                (str(get_env().OPERATOR_ID),),
-            )
-            last_stake_ts: int = db.fetchone()[0]
-    except Exception as e:
-        raise DatabaseError(
-            f"Error fetching last stake timestamp for operator {get_env().OPERATOR_ID}"
-        ) from e
-
-    return last_stake_ts
 
 
 def max_proposals_count(pool_id: int) -> int:
@@ -259,20 +208,7 @@ def check_and_stake(pks: list[str]) -> list[str]:
 def run_finalize_exit_triggers():
     """Run finalize exit trigger for all validators which are in EXIT_REQUESTED state"""
 
-    try:
-        with Database() as db:
-            db.execute(
-                """
-                SELECT pubkey,exit_epoch  FROM Validators 
-                WHERE portal_state = ?
-                """,
-                (int(VALIDATOR_STATE.EXIT_REQUESTED),),
-            )
-            pks: list[str] = db.fetchall()
-    except Exception as e:
-        raise DatabaseError(
-            f"Error fetching validators in EXIT_REQUESTED state from table Validators"
-        ) from e
+    pks: list[str] = fetch_filtered_pubkeys(portal_state=VALIDATOR_STATE.EXIT_REQUESTED)
 
     for pk, exit_epoch in pks:
         # check portal status, if it is not EXITTED or EXIT_REQUESTED raise an error

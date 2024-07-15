@@ -26,6 +26,7 @@ from .db_operator import (
     drop_operators_table,
     reinitialize_operators_table,
     save_last_stake_timestamp,
+    fetch_last_stake_timestamp,
 )
 from .db_pools import (
     create_pools_table,
@@ -36,6 +37,7 @@ from .db_pools import (
     fill_pools_table,
     save_fallback_operator,
     save_last_proposal_timestamp,
+    fetch_last_proposal_timestamp,
 )
 from .db_validators import (
     create_validators_table,
@@ -51,6 +53,7 @@ from .db_validators import (
     fetch_verified_pks,
     check_pk_in_db,
     fetch_pool_id,
+    fetch_filtered_pubkeys,
 )
 from .event import get_batch_events, get_all_events, decode_abi, event_handler
 from .portal import (

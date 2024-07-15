@@ -295,3 +295,30 @@ def fetch_pool_id(pubkey: str) -> str:
             return db.fetchone()[0]
     except Exception as e:
         raise DatabaseMismatchError(f"Validator pubkey {pubkey} not found in the database") from e
+
+
+def fetch_filtered_pubkeys(portal_state: VALIDATOR_STATE) -> list[str]:
+    """Fetches the pubkeys that matches with the provided Validator State.
+
+    Args:
+        portal_state (VALIDATOR_STATE): Validator State as identified in geodefi portal.
+
+    Returns:
+        list[str]: list of pubkeys
+    """
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                SELECT pubkey,exit_epoch  FROM Validators 
+                WHERE portal_state = ?
+                """,
+                (int(portal_state),),
+            )
+            pks: list[str] = db.fetchall()
+            return pks
+    except Exception as e:
+        raise DatabaseError(
+            f"Error fetching validators in EXIT_REQUESTED state from table Validators"
+        ) from e

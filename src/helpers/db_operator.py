@@ -5,6 +5,9 @@ from src.globals import get_logger, get_env
 from src.exceptions import DatabaseError
 
 
+# TODO: this seemed unnecessary
+
+
 def create_operators_table() -> None:
     """Creates the Operators table in the database.
 
@@ -76,3 +79,28 @@ def save_last_stake_timestamp(timestamp: int) -> None:
             )
     except Exception as e:
         raise DatabaseError("Error saving last stake timestamp") from e
+
+
+def fetch_last_stake_timestamp() -> int:
+    """Fetches the last stake timestamp for the operator
+
+    Returns:
+        int: Last stake timestamp
+    """
+
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                SELECT last_stake_ts FROM Operators
+                WHERE id = ?
+                """,
+                (str(get_env().OPERATOR_ID),),
+            )
+            last_stake_ts: int = db.fetchone()[0]
+    except Exception as e:
+        raise DatabaseError(
+            f"Error fetching last stake timestamp for operator {get_env().OPERATOR_ID}"
+        ) from e
+
+    return last_stake_ts
