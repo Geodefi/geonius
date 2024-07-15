@@ -9,8 +9,6 @@ from threading import Lock
 
 from src.exceptions import EthdoError
 
-ethdo_mutex = Lock()
-
 
 def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int) -> dict:
     """Generates the deposit data for a new validator proposal.
@@ -27,50 +25,49 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
-    with ethdo_mutex:
-        get_logger().info(f"Generating deposit data{f'index: {index}'if index else '' }")
+    get_logger().info(f"Generating deposit data{f'index: {index}'if index else '' }")
 
-        account: str = get_config().ethdo.account
-        wallet: str = get_config().ethdo.wallet
+    account: str = get_config().ethdo.account
+    wallet: str = get_config().ethdo.wallet
 
-        if index is not None:
-            account += str(index)
+    if index is not None:
+        account += str(index)
 
-        fork_version = geodefi.globals.GENESIS_FORK_VERSION[get_sdk().network].hex()
+    fork_version = geodefi.globals.GENESIS_FORK_VERSION[get_sdk().network].hex()
 
+    try:
         try:
-            try:
-                res: str = check_output(
-                    ["ethdo", "account", "info", f"--validatoraccount={wallet}/{account}"]
-                )
-            except:
-                create_account(index=index)
-
             res: str = check_output(
-                [
-                    "ethdo",
-                    "validator",
-                    "depositdata",
-                    f"--validatoraccount='{wallet}/{account}'",
-                    f"--passphrase={get_env().ACCOUNT_PASSPHRASE}",
-                    f"--withdrawaladdress={withdrawal_address}",
-                    f"--depositvalue={deposit_value}",
-                    f"--forkversion={fork_version}",
-                    "--launchpad",
-                ]
+                ["ethdo", "account", "info", f"--validatoraccount={wallet}/{account}"]
             )
+        except Exception:
+            create_account(index=index)
 
-        except Exception as e:
-            raise EthdoError(
-                f"Failed to generate deposit data from account {account} \
-                    with withdrawal address {withdrawal_address}, deposit value {deposit_value} \
-                    and fork version {fork_version}",
-            ) from e
+        res: str = check_output(
+            [
+                "ethdo",
+                "validator",
+                "depositdata",
+                f"--validatoraccount='{wallet}/{account}'",
+                f"--passphrase={get_env().ACCOUNT_PASSPHRASE}",
+                f"--withdrawaladdress={withdrawal_address}",
+                f"--depositvalue={deposit_value}",
+                f"--forkversion={fork_version}",
+                "--launchpad",
+            ]
+        )
 
-        try:
-            return json.loads(res)
-        except (json.JSONDecodeError, TypeError) as e:
-            raise EthdoError(f"Failed to interpret the response from ethdo: {res}") from e
+    except Exception as e:
+        raise EthdoError(
+            f"Failed to generate deposit data from account {account} \
+                with withdrawal address {withdrawal_address}, deposit value {deposit_value} \
+                and fork version {fork_version}",
+        ) from e
+
+    try:
+        return json.loads(res)
+    except (json.JSONDecodeError, TypeError) as e:
+        raise EthdoError(f"Failed to interpret the response from ethdo: {res}") from e
 
 
 def create_wallet() -> dict:
