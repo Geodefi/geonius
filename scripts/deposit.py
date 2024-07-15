@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 import os
 from src.common import AttributeDict
 from src.exceptions import UnknownFlagError
-from src.setup import setup_globals
+from src.setup import setup
 from src.globals import get_sdk, get_logger, get_flags
 from src.helpers import get_name
 from src.utils import get_gas
@@ -81,7 +81,7 @@ def deposit(
 
 
 if __name__ == "__main__":
-    setup_globals(flag_collector=collect_local_flags)
+    setup(flag_collector=collect_local_flags)
     f: dict = get_flags()
     if "interval" in f and f.interval:
         while True:

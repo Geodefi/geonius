@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+# TODO: rename this to database, move others into helpers then. utils btw
 from .db_events import (
     find_latest_event,
     create_alienated_table,

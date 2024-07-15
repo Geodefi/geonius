@@ -25,7 +25,7 @@ from src.helpers import (
     reinitialize_operators_table,
 )
 from src.globals import get_flags, get_sdk, get_constants
-from src.setup import setup_globals
+from src.setup import setup
 
 
 def init_dbs():
@@ -109,7 +109,7 @@ def main():
     initializes the databases and sets up the daemons.
     """
     try:
-        setup_globals()
+        setup()
         if get_flags().reset:
             init_dbs()
         setup_daemons()

@@ -5,7 +5,6 @@ from src.classes import Trigger
 from src.daemons import TimeDaemon
 from src.utils import multithread
 from src.helpers import fill_validators_table
-from itertools import compress
 
 
 def ping_pubkey(pubkey: str) -> bool:

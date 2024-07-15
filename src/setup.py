@@ -1,10 +1,12 @@
 from typing import Callable
 
-from src.globals import get_env
+from src.common import AttributeDict
 from src.common.loggable import Loggable
+from src.globals import get_env
+from src.globals import get_config
 from src.globals.env import load_env
 from src.globals.flags import collect_flags
-from src.globals.config import apply_flags, init_config, preflight_checks
+from src.globals.config import apply_flags, init_config
 from src.globals.sdk import init_sdk
 from src.globals.constants import init_constants
 from src.globals import (
@@ -15,9 +17,132 @@ from src.globals import (
     set_constants,
     set_logger,
 )
+from src.exceptions import ConfigurationFieldError, MissingConfigurationError
 
 
-def setup_globals(flag_collector: Callable = collect_flags):
+def preflight_checks():
+    """Checks if everything is ready for geonius to work.
+    - Checks if config missing any values. 'gas' and 'email' sections are Optional,
+        however they should be valid if provided.# TODO: (now) check if they are optional in the code as well
+    TODO:
+    - Checks if there is enough money in the operator wallet and prints
+    - Checks if given private key can control the provided Operator ID
+    - Checks if ethdo is available and
+    - Checks if gas api working, when provided
+    - What else?
+
+    Raises:
+        MissingConfigurationError: One of the required fields on configuration file is missing.
+    """
+    config = get_config()
+    # Sections
+    if not 'chains' in config:
+        raise MissingConfigurationError("'chains' section on config.json is missing or empty.")
+    if not 'network' in config:
+        raise MissingConfigurationError("'network' section on config.json is missing or empty.")
+    if not 'strategy' in config:
+        raise MissingConfigurationError("'strategy' section on config.json is missing or empty.")
+    if not 'logger' in config:
+        raise MissingConfigurationError("'logger' section on config.json is missing or empty.")
+    if not 'database' in config:
+        raise MissingConfigurationError("'database' section on config.json is missing or empty.")
+    if not 'ethdo' in config:
+        raise MissingConfigurationError("'ethdo' section on config.json is missing or empty.")
+
+    # Fields
+    # TODO: (later) chain related checks should be implemented...
+    # chain: AttributeDict = config.chains[get_flags().chain] #
+
+    network: AttributeDict = config.network
+    if not 'refresh_rate' in network:
+        raise MissingConfigurationError("'network' section is missing the 'refresh_rate' field.")
+    elif network.refresh_rate <= 0 or network.refresh_rate > 360:
+        raise ConfigurationFieldError("Provided value is unexpected: (0-360] seconds")
+
+    if not 'max_attempt' in network:
+        raise MissingConfigurationError("'network' section is missing the 'max_attempt' field.")
+    elif network.max_attempt <= 0 or network.max_attempt > 100:
+        raise ConfigurationFieldError("Provided value is unexpected: (0-100] attempts")
+
+    if not 'attempt_rate' in network:
+        raise MissingConfigurationError("'network' section is missing the 'attempt_rate' field.")
+    elif network.max_attempt <= 0 or network.attempt_rate > 10:
+        raise ConfigurationFieldError("Provided value is unexpected: (0-10] seconds")
+
+    strategy: AttributeDict = config.strategy
+    if not 'min_proposal_queue' in strategy:
+        raise MissingConfigurationError(
+            "'strategy' section is missing the 'min_proposal_queue' field."
+        )
+    elif strategy.min_proposal_queue < 0 or strategy.min_proposal_queue > 50:
+        raise ConfigurationFieldError("Provided value is unexpected: [0-50] pubkeys")
+
+    if not 'max_proposal_delay' in strategy:
+        raise MissingConfigurationError(
+            "'strategy' section is missing the 'max_proposal_delay' field."
+        )
+    elif strategy.max_proposal_delay < 0 or strategy.max_proposal_delay > 604800:
+        raise ConfigurationFieldError("Provided value is unexpected: [0-604800] seconds")
+
+    logger: AttributeDict = config.logger
+    if not 'no_stream' in logger:
+        raise MissingConfigurationError("'logger' section is missing the 'no_stream' field.")
+
+    if not 'no_file' in logger:
+        raise MissingConfigurationError("'logger' section is missing the 'no_file' field.")
+
+    if not 'no_file' in logger:
+        if not 'level' in logger:  # can add more checks
+            raise MissingConfigurationError("'logger' section is missing the 'level' field.")
+
+        if not 'when' in logger:  # can add more checks
+            raise MissingConfigurationError("'logger' section is missing the 'when' field.")
+
+        if not 'interval' in logger:  # can add more checks
+            raise MissingConfigurationError("'logger' section is missing the 'interval' field.")
+
+        if not 'backup' in logger:  # can add more checks
+            raise MissingConfigurationError("'logger' section is missing the 'backup' field.")
+
+    database: AttributeDict = config.database
+    if not 'directory' in database:
+        raise MissingConfigurationError("'database' section is missing the 'directory' field.")
+
+    ethdo: AttributeDict = config.ethdo
+    if not 'wallet' in ethdo:  # TODO: (now) check if exists
+        raise MissingConfigurationError("'ethdo' section is missing the 'wallet' field.")
+    if not 'account' in ethdo:  # TODO: (now) check if exists
+        raise MissingConfigurationError("'ethdo' section is missing the 'account' field.")
+
+    if config.gas:
+        gas: AttributeDict = config.gas
+        if not 'max_priority' in gas:
+            raise MissingConfigurationError("'gas' section is missing the 'max_priority' field.")
+        if not 'max_fee' in gas:
+            raise MissingConfigurationError("'gas' section is missing the 'max_fee' field.")
+        if gas.api:  # Optional
+            if not 'parser' in gas:
+                raise MissingConfigurationError(
+                    "No parser could be identified for the provided gas api"
+                )
+            # elif # TODO: (now) check if it is working.
+
+    if config.email:
+        email: AttributeDict = config.email
+
+        if not 'smtp_server' in email:
+            raise MissingConfigurationError(
+                "'email' section is missing the required 'smtp_server' field."
+            )
+        if not 'smtp_port' in email:
+            raise MissingConfigurationError(
+                "'email' section is missing the required 'smtp_port' field."
+            )
+        if not 'dont_notify_devs' in email:
+            email.dont_notify_devs = False
+
+
+def setup(flag_collector: Callable = collect_flags):
     """Initializes the required components from the geonius script:
     - Loads environment variables from specified .env file
     - Applies the provided flags to be utilized in the config step
@@ -35,7 +160,6 @@ def setup_globals(flag_collector: Callable = collect_flags):
     set_env(load_env())
 
     config = apply_flags(init_config())
-    preflight_checks(config)
     set_config(config)
 
     set_logger(Loggable().logger)
@@ -47,3 +171,4 @@ def setup_globals(flag_collector: Callable = collect_flags):
         )
     )
     set_constants(init_constants())
+    preflight_checks()
