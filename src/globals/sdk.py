@@ -53,5 +53,4 @@ def init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
 
     # pylint: disable-next=broad-exception-caught
     except Exception as e:
-        # log.exception("Could not connect to sdk. Please check your configuration.", exc_info=True)
-        sys.exit(e)
+        print("Could not connect to sdk. Please check your configuration.", exc_info=True)

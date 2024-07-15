@@ -115,7 +115,7 @@ class ExitRequestTrigger(Trigger):
             pubkey: str = event.args.pubkey
             save_portal_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
 
-            # TODO: (later) if this is not waiting for tx to be mined, there should be a way to handle and check the beacon_status
+            # TODO: (later) if this is not waiting for tx to be mined, there should be a way to handle and check the portal_state/beacon_status.
             try:
                 exit_validator(pubkey)
             except EthdoError as e:
@@ -125,13 +125,14 @@ class ExitRequestTrigger(Trigger):
             val: Validator = get_sdk().portal.validator(pubkey)
             if val.beacon_status == "active_exiting":
                 # write database the expected exit block
-                # TODO: (now) validator.withdrawable_epoch instead of exit_epoch - today
+                # TODO: (later) use validator.withdrawable_epoch instead of exit_epoch - today
+                # also check for default withdrawable_epoch which is too_far_epoch
                 save_exit_epoch(pubkey, val.exit_epoch)
                 exitted_pks.append(pubkey)
             else:
                 raise BeaconStateMismatchError(f"Beacon state mismatch for pubkey {pubkey}")
 
-        # TODO: (discuss) if exit_validator function (ethdo) is waiting for finalization, we do not need to
+        # TODO: (later) if exit_validator function (ethdo) is waiting for finalization, we do not need to
         #       seperate the for loops and we can continue under the same loop
         for pubkey in exitted_pks:
             save_local_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)

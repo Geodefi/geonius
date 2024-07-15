@@ -6,7 +6,7 @@ from web3.types import EventData
 from src.globals import get_env, get_logger, get_constants
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
-from src.triggers import ExpectDepositsTrigger
+from src.triggers.time import ExpectDepositsTrigger
 
 from src.exceptions import DatabaseError
 from src.helpers import (
@@ -127,6 +127,6 @@ class FallbackOperatorTrigger(Trigger):
             all_deposits_daemon: TimeDaemon = TimeDaemon(
                 interval=15 * get_constants().one_minute,
                 trigger=ExpectDepositsTrigger(all_proposed_pks),
-                initial_delay=1,
+                initial_delay=12 * get_constants().one_hour,
             )
             all_deposits_daemon.run()

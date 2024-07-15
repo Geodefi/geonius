@@ -3,11 +3,10 @@
 from typing import Iterable
 from web3.types import EventData
 
-from src.helpers import get_name
 from src.globals import get_logger, get_env, get_constants
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
-from src.triggers import ExpectDepositsTrigger
+from src.triggers.time import ExpectDepositsTrigger
 from src.exceptions import DatabaseError
 from src.helpers import (
     create_delegation_table,
@@ -119,20 +118,13 @@ class DelegationTrigger(Trigger):
         all_proposed_pks: list[str] = []
         for pool_id in pool_ids:
             # if able to propose any new validators do so
-            if (
-                pool_id
-                == 58051384563972203095105188535531542842616860810471359890274174995766880197138
-            ):  # TODO: (ambigious) why is this constant??
-                proposed_pks: list[str] = check_and_propose(pool_id)
-                get_logger().debug(
-                    f"Proposing {len(proposed_pks)} new validators for pool: {get_name(pool_id)}"
-                )
-                all_proposed_pks.extend(proposed_pks)
+            proposed_pks: list[str] = check_and_propose(pool_id)
+            all_proposed_pks.extend(proposed_pks)
 
         if all_proposed_pks:
             all_deposits_daemon: TimeDaemon = TimeDaemon(
                 interval=15 * get_constants().one_minute,
                 trigger=ExpectDepositsTrigger(all_proposed_pks),
-                initial_delay=1,
+                initial_delay=12 * get_constants().one_hour,
             )
             all_deposits_daemon.run()
