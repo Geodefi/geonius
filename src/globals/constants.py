@@ -10,7 +10,6 @@ def init_constants():
     # catch environment variables
     return AttributeDict.convert_recursive(
         {
-            "network": sdk.network.name,
             "chain": config.chains[sdk.network.name],
             "hour_blocks": 3600 // int(config.chains[sdk.network.name].interval),
             "one_minute": 60,

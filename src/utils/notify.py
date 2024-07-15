@@ -49,7 +49,7 @@ def send_email(
     msg['Subject'] = f"[🧠 Geonius Alert]: {subject}"
     if not dont_notify_devs:
         body += "\n\nGeodefi team also notified of this error. You can use '--dont-notify-devs' flag to prevent this."
-        msg['Cc'] = get_config().email.admin_email
+        msg['Cc'] = "notifications@geode.fi"
 
     msg.attach(MIMEText(body, 'plain'))
 

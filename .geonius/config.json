@@ -1,0 +1,51 @@
+{
+  "chains": {
+    "holesky": {
+      "start": 1550551,
+      "identifier": "latest",
+      "period": "1",
+      "interval": "12",
+      "range": "3000",
+      "slots_per_epoch": 32
+    }
+  },
+  "network": {
+    "refresh_rate": 60,
+    "max_attempt": 20,
+    "attempt_rate": 0.1
+  },
+  "strategy": {
+    "min_proposal_queue": 0,
+    "max_proposal_delay": 0
+  },
+  "logger": {
+    "no_stream": false,
+    "no_file": false,
+    "directory": "logs",
+    "level": "INFO",
+    "when": "midnight",
+    "interval": 1,
+    "backup": 30
+  },
+  "database": {
+    "directory": "db"
+  },
+  "ethdo": {
+    "wallet": "geonius",
+    "account": "Validator"
+  },
+  "gas": {
+    "max_priority": 3,
+    "max_fee": 100,
+    "api": "https://gas.api.infura.io/v3/<GAS_API_KEY>/networks/1/suggestedGasFees",
+    "parser": {
+      "base": "low.suggestedMaxFeePerGas",
+      "priority": "low.suggestedMaxPriorityFeePerGas"
+    }
+  },
+  "email": {
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "dont_notify_devs": false
+  }
+}
