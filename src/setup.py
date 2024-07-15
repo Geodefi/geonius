@@ -31,14 +31,10 @@ def setup_globals(flag_collector: Callable = collect_flags):
         Secondary scripts can have their own flags, then this should be speciifed.
         Otherwise, defaults to collect_flags.
     """
-    set_env(load_env())
-
     set_flags(flag_collector())
-
+    set_env(load_env())
     set_config(apply_flags(init_config()))
-
     set_logger(Loggable())
-
     set_sdk(
         init_sdk(
             exec_api=get_env().EXECUTION_API,
@@ -46,5 +42,4 @@ def setup_globals(flag_collector: Callable = collect_flags):
             priv_key=get_env().PRIVATE_KEY,
         )
     )
-
     set_constants(init_constants())
