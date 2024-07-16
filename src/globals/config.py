@@ -66,7 +66,7 @@ def apply_flags(config: AttributeDict):
 
     # put the execution api key in configuration from environment variables
     if "<EXECUTION_API_KEY>" in config.chains[flags.chain].execution_api:
-        if get_env().GAS_API_KEY:
+        if get_env().EXECUTION_API_KEY:
             config.chains[flags.chain].execution_api = config.chains[
                 flags.chain
             ].execution_api.replace("<EXECUTION_API_KEY>", get_env().EXECUTION_API_KEY)
@@ -75,7 +75,7 @@ def apply_flags(config: AttributeDict):
 
     # put the consensus api key in configuration from environment variables
     if "<CONSENSUS_API_KEY>" in config.chains[flags.chain].consensus_api:
-        if get_env().GAS_API_KEY:
+        if get_env().CONSENSUS_API_KEY:
             config.chains[flags.chain].consensus_api = config.chains[
                 flags.chain
             ].consensus_api.replace("<CONSENSUS_API_KEY>", get_env().CONSENSUS_API_KEY)

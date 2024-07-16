@@ -85,7 +85,7 @@ class ExpectDepositsTrigger(Trigger):
             remaining = list()
             for pk, res in zip(self.__pubkeys, response_filter):
                 if res:
-                    remaining.append(pk)
+                    responded.append(pk)
                 else:
                     remaining.append(pk)
 
