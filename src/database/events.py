@@ -7,14 +7,6 @@ from src.common import AttributeDict
 from src.exceptions import DatabaseError
 from src.globals import get_logger, get_constants
 
-alienated_mutex = Lock()
-delegation_mutex = Lock()
-deposit_mutex = Lock()
-fallback_mutex = Lock()
-id_initiated_mutex = Lock()
-exit_request_mutex = Lock()
-stake_proposal_mutex = Lock()
-
 
 def find_latest_event(event_name: str) -> AttributeDict:
     """Finds the latest eventt info for the given event_name in the database.
@@ -65,24 +57,22 @@ def create_alienated_table() -> None:
     Raises:
         DatabaseError: Error creating Alienated table
     """
-
-    with alienated_mutex:
-        try:
-            with Database() as db:
-                db.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS Alienated (
-                        pk TEXT NOT NULL,
-                        block_number INTEGER NOT NULL,
-                        transaction_index INTEGER NOT NULL,
-                        log_index INTEGER NOT NULL,
-                        FOREIGN KEY (pk) REFERENCES Validators (pk)
-                    )
-                    """
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS Alienated (
+                    pk TEXT NOT NULL,
+                    block_number INTEGER NOT NULL,
+                    transaction_index INTEGER NOT NULL,
+                    log_index INTEGER NOT NULL,
+                    FOREIGN KEY (pk) REFERENCES Validators (pk)
                 )
-            get_logger().debug(f"Created a new table: Alienated")
-        except Exception as e:
-            raise DatabaseError("Error creating Alienated table") from e
+                """
+            )
+        get_logger().debug(f"Created a new table: Alienated")
+    except Exception as e:
+        raise DatabaseError("Error creating Alienated table") from e
 
 
 def drop_alienated_table() -> None:
@@ -113,25 +103,24 @@ def create_delegation_table() -> None:
     Raises:
         DatabaseError: Error creating Delegation table
     """
-    with delegation_mutex:
-        try:
-            with Database() as db:
-                db.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS Delegation (
-                        pool_id TEXT NOT NULL,
-                        operator_id TEXT NOT NULL,
-                        allowance TEXT NOT NULL,
-                        block_number INTEGER NOT NULL,
-                        transaction_index INTEGER NOT NULL,
-                        log_index INTEGER NOT NULL,
-                        FOREIGN KEY (pool_id) REFERENCES Pools (id)
-                    )
-                    """
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS Delegation (
+                    pool_id TEXT NOT NULL,
+                    operator_id TEXT NOT NULL,
+                    allowance TEXT NOT NULL,
+                    block_number INTEGER NOT NULL,
+                    transaction_index INTEGER NOT NULL,
+                    log_index INTEGER NOT NULL,
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
-            get_logger().debug(f"Created a new table: Delegation")
-        except Exception as e:
-            raise DatabaseError("Error creating Delegation table") from e
+                """
+            )
+        get_logger().debug(f"Created a new table: Delegation")
+    except Exception as e:
+        raise DatabaseError("Error creating Delegation table") from e
 
 
 def drop_delegation_table() -> None:
@@ -140,13 +129,12 @@ def drop_delegation_table() -> None:
     Raises:
         DatabaseError: Error dropping Delegation table
     """
-    with deposit_mutex:
-        try:
-            with Database() as db:
-                db.execute("""DROP TABLE IF EXISTS Delegation""")
-            get_logger().debug(f"Dropped Table: Delegation")
-        except Exception as e:
-            raise DatabaseError(f"Error dropping Delegation table") from e
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS Delegation""")
+        get_logger().debug(f"Dropped Table: Delegation")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping Delegation table") from e
 
 
 def reinitialize_delegation_table() -> None:
@@ -162,25 +150,24 @@ def create_deposit_table() -> None:
     Raises:
         DatabaseError: Error creating Deposit table
     """
-    with deposit_mutex:
-        try:
-            with Database() as db:
-                db.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS Deposit (
-                        pool_id TEXT NOT NULL,
-                        bought_amount TEXT NOT NULL,
-                        minted_amount TEXT NOT NULL,
-                        block_number INTEGER NOT NULL,
-                        transaction_index INTEGER NOT NULL,
-                        log_index INTEGER NOT NULL,
-                        FOREIGN KEY (pool_id) REFERENCES Pools (id)
-                    )
-                    """
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS Deposit (
+                    pool_id TEXT NOT NULL,
+                    bought_amount TEXT NOT NULL,
+                    minted_amount TEXT NOT NULL,
+                    block_number INTEGER NOT NULL,
+                    transaction_index INTEGER NOT NULL,
+                    log_index INTEGER NOT NULL,
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
-            get_logger().debug(f"Created a new table: Deposit")
-        except Exception as e:
-            raise DatabaseError("Error creating Deposit table") from e
+                """
+            )
+        get_logger().debug(f"Created a new table: Deposit")
+    except Exception as e:
+        raise DatabaseError("Error creating Deposit table") from e
 
 
 def drop_deposit_table() -> None:
@@ -211,24 +198,23 @@ def create_fallback_operator_table() -> None:
     Raises:
         DatabaseError: Error creating FallbackOperator table
     """
-    with fallback_mutex:
-        try:
-            with Database() as db:
-                db.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS FallbackOperator (
-                        pool_id TEXT NOT NULL,
-                        fallback_threshold INTEGER NOT NULL,
-                        block_number INTEGER NOT NULL,
-                        transaction_index INTEGER NOT NULL,
-                        log_index INTEGER NOT NULL,
-                        FOREIGN KEY (pool_id) REFERENCES Pools (id)
-                    )
-                    """
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS FallbackOperator (
+                    pool_id TEXT NOT NULL,
+                    fallback_threshold INTEGER NOT NULL,
+                    block_number INTEGER NOT NULL,
+                    transaction_index INTEGER NOT NULL,
+                    log_index INTEGER NOT NULL,
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
-            get_logger().debug(f"Created a new table: FallbackOperator")
-        except Exception as e:
-            raise DatabaseError("Error creating FallbackOperator table") from e
+                """
+            )
+        get_logger().debug(f"Created a new table: FallbackOperator")
+    except Exception as e:
+        raise DatabaseError("Error creating FallbackOperator table") from e
 
 
 def drop_fallback_operator_table() -> None:
@@ -259,23 +245,22 @@ def create_id_initiated_table() -> None:
     Raises:
         DatabaseError: Error creating IdInitiated table
     """
-    with id_initiated_mutex:
-        try:
-            with Database() as db:
-                db.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS IdInitiated (
-                        pool_id TEXT UNIQUE NOT NULL,
-                        block_number INTEGER NOT NULL,
-                        transaction_index INTEGER NOT NULL,
-                        log_index INTEGER NOT NULL,
-                        FOREIGN KEY (pool_id) REFERENCES Pools (id)
-                    )
-                    """
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS IdInitiated (
+                    pool_id TEXT UNIQUE NOT NULL,
+                    block_number INTEGER NOT NULL,
+                    transaction_index INTEGER NOT NULL,
+                    log_index INTEGER NOT NULL,
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
-            get_logger().debug(f"Created a new table: IdInitiated")
-        except Exception as e:
-            raise DatabaseError("Error creating IdInitiated table") from e
+                """
+            )
+        get_logger().debug(f"Created a new table: IdInitiated")
+    except Exception as e:
+        raise DatabaseError("Error creating IdInitiated table") from e
 
 
 def drop_id_initiated_table() -> None:
@@ -306,24 +291,23 @@ def create_exit_request_table() -> None:
     Raises:
         DatabaseError: Error creating ExitRequest table
     """
-    with exit_request_mutex:
-        try:
-            with Database() as db:
-                db.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS ExitRequest (
-                        pk TEXT UNIQUE NOT NULL,
-                        block_number INTEGER NOT NULL,
-                        transaction_index INTEGER NOT NULL,
-                        log_index INTEGER NOT NULL,
-                        FOREIGN KEY (pk) REFERENCES Validators (pk),
-                        PRIMARY KEY (pk)
-                    )
-                    """
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS ExitRequest (
+                    pk TEXT UNIQUE NOT NULL,
+                    block_number INTEGER NOT NULL,
+                    transaction_index INTEGER NOT NULL,
+                    log_index INTEGER NOT NULL,
+                    FOREIGN KEY (pk) REFERENCES Validators (pk),
+                    PRIMARY KEY (pk)
                 )
-            get_logger().debug(f"Created a new table: ExitRequest")
-        except Exception as e:
-            raise DatabaseError("Error creating ExitRequest table") from e
+                """
+            )
+        get_logger().debug(f"Created a new table: ExitRequest")
+    except Exception as e:
+        raise DatabaseError("Error creating ExitRequest table") from e
 
 
 def drop_exit_request_table() -> None:
@@ -354,27 +338,26 @@ def create_stake_proposal_table() -> None:
     Raises:
         DatabaseError: Error creating StakeProposal table
     """
-    with stake_proposal_mutex:
-        try:
-            with Database() as db:
-                db.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS StakeProposal (
-                        pk TEXT UNIQUE NOT NULL,
-                        pool_id TEXT UNIQUE NOT NULL,
-                        block_number INTEGER NOT NULL,
-                        transaction_index INTEGER NOT NULL,
-                        log_index INTEGER NOT NULL,
-                        event_index INTEGER NOT NULL,
-                        PRIMARY KEY (pk)                       
-                        FOREIGN KEY (pk) REFERENCES Validators (pk),
-                        FOREIGN KEY (pool_id) REFERENCES Pools (id)
-                    )
-                    """
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS StakeProposal (
+                    pk TEXT UNIQUE NOT NULL,
+                    pool_id TEXT UNIQUE NOT NULL,
+                    block_number INTEGER NOT NULL,
+                    transaction_index INTEGER NOT NULL,
+                    log_index INTEGER NOT NULL,
+                    event_index INTEGER NOT NULL,
+                    PRIMARY KEY (pk)                       
+                    FOREIGN KEY (pk) REFERENCES Validators (pk),
+                    FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
-            get_logger().debug(f"Created a new table: StakeProposal")
-        except Exception as e:
-            raise DatabaseError("Error creating StakeProposal table") from e
+                """
+            )
+        get_logger().debug(f"Created a new table: StakeProposal")
+    except Exception as e:
+        raise DatabaseError("Error creating StakeProposal table") from e
 
 
 def drop_stake_proposal_table() -> None:
