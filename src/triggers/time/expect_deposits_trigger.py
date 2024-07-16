@@ -26,7 +26,6 @@ def ping_pubkey(pubkey: str) -> bool:
         return False
 
 
-# TODO: (now) like fill_pools_table, implement a function to fill the database on reboot with available data:  propose event daemon
 # TODO: (later) Stop and throw error after x attempts: This should be fault tolerant. Rely on config.json
 class ExpectDepositsTrigger(Trigger):
     """Trigger for the EXPECT_DEPOSITS. This time trigger waits until deposits for the
@@ -37,42 +36,64 @@ class ExpectDepositsTrigger(Trigger):
 
     Attributes:
         name (str): The name of the trigger to be used when logging etc. (value: EXPECT_DEPOSIT)
-        pubkeys (str): The list of validator pubkeys to be finalized when ALL exited.
+        __pubkeys (str): Internal list of validator pubkeys to be finalized when ALL exited.
+        __keep_alive (str): TimeDaemon will not be shot down when pubkeys list is empty, if provided.
+        Useful for event listeners.
     """
 
     name: str = "EXPECT_DEPOSITS"
 
-    def __init__(self, pubkeys: list[str]) -> None:  # list : so waits many pubkeys.
-        """_summary_
+    def __init__(self, pubkeys: list[str] = [], keep_alive: bool = False) -> None:
+        Trigger.__init__(self, name=self.name, action=self.process_deposits)
+        self.__pubkeys: str = pubkeys
+        self.__keep_alive: bool = keep_alive
+        get_logger().debug(f"{self.name} is initated.")
+
+    def append(self, pubkeys: str, daemon: TimeDaemon = None):
+        """Extends the internal pubkeys list provided list with 1 pubkey
+            then immadiately processes the current list.
 
         Args:
-            pubkey (str): _description_
+            pubkey (str): pubkey to append into pubkeys list
+            daemon (TimeDaemon): daemon to be stopped if the pubkey is empty
         """
-        Trigger.__init__(self, name=self.name, action=self.expect_deposits)
-        self.pubkeys: str = pubkeys
-        get_logger().debug(f"{self.name} is initated for pubkey: {pubkeys}")
+        self.__pubkeys.append(pubkeys)
+        self.process_deposits(daemon)
 
-    def expect_deposits(self, daemon: TimeDaemon) -> None:
-        """_summary_
+    def extend(self, pubkeys: str, daemon: TimeDaemon = None):
+        """Extends the internal pubkeys list with provided list of more pubkeys
+        then immadiately processes the current list.
 
         Args:
-            daemon (TimeDaemon): _description_
+            pubkeys (list[str]): list of pubkeys to append into pubkeys list
+            daemon (TimeDaemon): daemon to be stopped if the pubkey is empty
         """
-        response_filter: bool = multithread(ping_pubkey, self.pubkeys)
+        self.__pubkeys.extend(pubkeys)
+        self.process_deposits(daemon)
 
-        responded = list()
-        remaining = list()
-        for pk, res in zip(self.pubkeys, response_filter):
-            if res:
-                remaining.append(pk)
-            else:
-                remaining.append(pk)
+    def process_deposits(self, daemon: TimeDaemon = None, *args, **kwargs) -> None:
+        """Checks if any of the expected pubkeys are responding after the proposal deposit.
+        Processes the ones that respond and keeps the ones that don't for the next iteration.
 
-        if len(responded) > 0:
-            fill_validators_table(self.pubkeys)
+        Args:
+            daemon (TimeDaemon): daemon to be stopped if the pubkey is empty
+        """
+        if self.__pubkeys:
+            response_filter: bool = multithread(ping_pubkey, self.__pubkeys)
 
-        if len(remaining) > 0:
-            self.pubkeys = remaining
-        else:
+            responded = list()
+            remaining = list()
+            for pk, res in zip(self.__pubkeys, response_filter):
+                if res:
+                    remaining.append(pk)
+                else:
+                    remaining.append(pk)
+
+            if len(responded) > 0:
+                fill_validators_table(responded)
+
+            if len(remaining) > 0:
+                self.__pubkeys = remaining
+
+        if not self.__keep_alive and daemon:
             daemon.stop()
-        return

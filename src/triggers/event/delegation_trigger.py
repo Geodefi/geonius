@@ -4,15 +4,13 @@ from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
-from src.daemons import TimeDaemon
-from src.triggers.time import ExpectDepositsTrigger
 from src.exceptions import DatabaseError
 from src.database.events import create_delegation_table
 from src.database.pools import create_pools_table
 from src.database.operators import create_operators_table
 from src.helpers.event import event_handler
 from src.helpers.validator import check_and_propose
-from src.globals import get_logger, get_env, get_constants
+from src.globals import get_logger, get_env
 
 
 class DelegationTrigger(Trigger):
@@ -113,16 +111,6 @@ class DelegationTrigger(Trigger):
         # gather pool ids from filtered events
         pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        all_proposed_pks: list[str] = []
         for pool_id in pool_ids:
             # if able to propose any new validators do so
-            proposed_pks: list[str] = check_and_propose(pool_id)
-            all_proposed_pks.extend(proposed_pks)
-
-        if all_proposed_pks:
-            all_deposits_daemon: TimeDaemon = TimeDaemon(
-                interval=15 * get_constants().one_minute,
-                trigger=ExpectDepositsTrigger(all_proposed_pks),
-                initial_delay=12 * get_constants().one_hour,
-            )
-            all_deposits_daemon.run()
+            check_and_propose(pool_id)

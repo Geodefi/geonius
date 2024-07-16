@@ -13,6 +13,7 @@ deposit_mutex = Lock()
 fallback_mutex = Lock()
 id_initiated_mutex = Lock()
 exit_request_mutex = Lock()
+stake_proposal_mutex = Lock()
 
 
 def find_latest_event(event_name: str) -> AttributeDict:
@@ -345,3 +346,54 @@ def reinitialize_exit_request_table() -> None:
 
     drop_exit_request_table()
     create_exit_request_table()
+
+
+def create_stake_proposal_table() -> None:
+    """Creates the sql database table for StakeProposal.
+
+    Raises:
+        DatabaseError: Error creating StakeProposal table
+    """
+    with stake_proposal_mutex:
+        try:
+            with Database() as db:
+                db.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS StakeProposal (
+                        pk TEXT UNIQUE NOT NULL,
+                        pool_id TEXT UNIQUE NOT NULL,
+                        block_number INTEGER NOT NULL,
+                        transaction_index INTEGER NOT NULL,
+                        log_index INTEGER NOT NULL,
+                        event_index INTEGER NOT NULL,
+                        PRIMARY KEY (pk)                       
+                        FOREIGN KEY (pk) REFERENCES Validators (pk),
+                        FOREIGN KEY (pool_id) REFERENCES Pools (id)
+                    )
+                    """
+                )
+            get_logger().debug(f"Created a new table: StakeProposal")
+        except Exception as e:
+            raise DatabaseError("Error creating StakeProposal table") from e
+
+
+def drop_stake_proposal_table() -> None:
+    """Removes StakeProposal table from the database.
+
+    Raises:
+        DatabaseError: Error dropping StakeProposal table
+    """
+
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS StakeProposal""")
+        get_logger().debug(f"Dropped Table: StakeProposal")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping StakeProposal table") from e
+
+
+def reinitialize_stake_proposal_table() -> None:
+    """Removes StakeProposal table and creates an empty one."""
+
+    drop_stake_proposal_table()
+    create_stake_proposal_table()

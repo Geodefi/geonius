@@ -4,8 +4,6 @@ from typing import Iterable
 from web3.types import EventData
 
 from src.classes import Trigger, Database
-from src.daemons import TimeDaemon
-from src.triggers.time import ExpectDepositsTrigger
 from src.exceptions import DatabaseError
 from src.database.events import create_fallback_operator_table
 from src.database.pools import create_pools_table, save_fallback_operator
@@ -13,7 +11,7 @@ from src.database.operators import create_operators_table
 from src.helpers.event import event_handler
 from src.helpers.portal import get_fallback_operator
 from src.helpers.validator import check_and_propose
-from src.globals import get_env, get_logger, get_constants
+from src.globals import get_env, get_logger
 
 
 class FallbackOperatorTrigger(Trigger):
@@ -107,7 +105,6 @@ class FallbackOperatorTrigger(Trigger):
         # gather pool ids from filtered events
         pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        all_proposed_pks: list[str] = []
         for pool_id in pool_ids:
             fallback: int = get_fallback_operator(pool_id)
 
@@ -116,13 +113,4 @@ class FallbackOperatorTrigger(Trigger):
             save_fallback_operator(pool_id, fallback == get_env().OPERATOR_ID)
 
             # if able to propose any new validators do so
-            proposed_pks: list[str] = check_and_propose(pool_id)
-            all_proposed_pks.extend(proposed_pks)
-
-        if all_proposed_pks:
-            all_deposits_daemon: TimeDaemon = TimeDaemon(
-                interval=15 * get_constants().one_minute,
-                trigger=ExpectDepositsTrigger(all_proposed_pks),
-                initial_delay=12 * get_constants().one_hour,
-            )
-            all_deposits_daemon.run()
+            check_and_propose(pool_id)

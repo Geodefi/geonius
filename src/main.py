@@ -9,6 +9,7 @@ from src.triggers.event import (
     FallbackOperatorTrigger,
     IdInitiatedTrigger,
     DepositTrigger,
+    StakeProposalTrigger,
     ExitRequestTrigger,
 )
 from src.triggers.block import (
@@ -19,6 +20,7 @@ from src.database.events import (
     reinitialize_delegation_table,
     reinitialize_deposit_table,
     reinitialize_exit_request_table,
+    reinitialize_stake_proposal_table,
     reinitialize_fallback_operator_table,
     reinitialize_id_initiated_table,
 )
@@ -38,10 +40,12 @@ def init_dbs():
     reinitialize_operators_table()
     reinitialize_pools_table()
     reinitialize_validators_table()
+
     reinitialize_alienated_table()
     reinitialize_delegation_table()
     reinitialize_deposit_table()
     reinitialize_exit_request_table()
+    reinitialize_stake_proposal_table()
     reinitialize_fallback_operator_table()
     reinitialize_id_initiated_table()
 
@@ -58,6 +62,7 @@ def setup_daemons():
     id_initiated_trigger: IdInitiatedTrigger = IdInitiatedTrigger()
     deposit_trigger: DepositTrigger = DepositTrigger()
     delegation_trigger: DelegationTrigger = DelegationTrigger()
+    stake_proposal_trigger: StakeProposalTrigger = StakeProposalTrigger()
     fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
     alienated_trigger: AlienatedTrigger = AlienatedTrigger()
     exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
@@ -75,6 +80,10 @@ def setup_daemons():
     delegation_daemon: EventDaemon = EventDaemon(
         trigger=delegation_trigger,
         event=events.Delegation(),
+    )
+    stake_proposal_daemon: EventDaemon = EventDaemon(
+        trigger=stake_proposal_trigger,
+        event=events.StakeProposal(),
     )
     fallback_operator_daemon: EventDaemon = EventDaemon(
         trigger=fallback_operator_trigger,
@@ -96,6 +105,7 @@ def setup_daemons():
     id_initiated_daemon.run()
     deposit_daemon.run()
     delegation_daemon.run()
+    stake_proposal_daemon.run()
     fallback_operator_daemon.run()
     alienated_daemon.run()
     exit_request_daemon.run()
