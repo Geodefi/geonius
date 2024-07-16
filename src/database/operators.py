@@ -2,10 +2,10 @@
 
 from src.classes import Database
 from src.exceptions import DatabaseError
-from src.globals import get_logger, get_env
+from src.globals import get_logger, get_config
 
 
-# TODO: this seemed unnecessary
+# TODO: (later) this seemed unnecessary
 
 
 def create_operators_table() -> None:
@@ -53,7 +53,7 @@ def reinitialize_operators_table() -> None:
             "INSERT INTO Operators VALUES (?,?)",
             [
                 (
-                    str(get_env().OPERATOR_ID),
+                    str(get_config().operator_id),
                     0,
                 ),
             ],
@@ -75,7 +75,7 @@ def save_last_stake_timestamp(timestamp: int) -> None:
                 SET last_stake_ts = ?
                 WHERE id = ?
                 """,
-                (timestamp, get_env().OPERATOR_ID),
+                (timestamp, get_config().operator_id),
             )
     except Exception as e:
         raise DatabaseError("Error saving last stake timestamp") from e
@@ -95,12 +95,12 @@ def fetch_last_stake_timestamp() -> int:
                 SELECT last_stake_ts FROM Operators
                 WHERE id = ?
                 """,
-                (str(get_env().OPERATOR_ID),),
+                (str(get_config().operator_id),),
             )
             last_stake_ts: int = db.fetchone()[0]
     except Exception as e:
         raise DatabaseError(
-            f"Error fetching last stake timestamp for operator {get_env().OPERATOR_ID}"
+            f"Error fetching last stake timestamp for operator {get_config().operator_id}"
         ) from e
 
     return last_stake_ts

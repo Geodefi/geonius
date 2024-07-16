@@ -11,7 +11,7 @@ from src.database.operators import create_operators_table
 from src.helpers.event import event_handler
 from src.helpers.portal import get_fallback_operator
 from src.helpers.validator import check_and_propose
-from src.globals import get_env, get_logger
+from src.globals import get_logger, get_config
 
 
 class FallbackOperatorTrigger(Trigger):
@@ -45,7 +45,7 @@ class FallbackOperatorTrigger(Trigger):
             bool: True if the event is for the script's OPERATOR_ID, False otherwise
         """
 
-        if event.args.operatorId == get_env().OPERATOR_ID:
+        if event.args.operatorId == get_config().operator_id:
             return True
         else:
             return False
@@ -110,7 +110,7 @@ class FallbackOperatorTrigger(Trigger):
 
             # check if the fallback id is OPERATOR_ID
             # if so, column value is set to 1, sqlite3 don't do booleans
-            save_fallback_operator(pool_id, fallback == get_env().OPERATOR_ID)
+            save_fallback_operator(pool_id, fallback == get_config().operator_id)
 
             # if able to propose any new validators do so
             check_and_propose(pool_id)

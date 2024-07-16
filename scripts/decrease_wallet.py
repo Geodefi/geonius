@@ -8,7 +8,7 @@ from geodefi.globals import ETHER_DENOMINATOR
 
 from src.common import AttributeDict
 from src.exceptions import UnknownFlagError
-from src.globals import get_sdk, get_env, get_logger, get_flags
+from src.globals import get_sdk, get_config, get_logger, get_flags
 from src.helpers.portal import get_name
 from src.utils.gas import get_gas
 from src.setup import setup
@@ -54,7 +54,7 @@ def tx_params() -> dict:
 
 def decrease_wallet(value: int):
     try:
-        _id = int(get_env().OPERATOR_ID)
+        _id = int(get_config().operator_id)
         get_logger().info(
             f"Decreasing id wallet for {get_name(_id)} by {value/ETHER_DENOMINATOR} ether"
         )

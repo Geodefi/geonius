@@ -4,12 +4,13 @@ from web3.types import TxReceipt
 from web3.exceptions import TimeExhausted
 
 from src.exceptions import CannotStakeError, CallFailedError
-from src.globals import get_sdk, get_env, get_logger
+from src.globals import get_sdk, get_config, get_logger
 from src.utils.notify import send_email
 from src.utils.gas import get_gas
 
 
 def tx_params() -> dict:
+
     priority_fee, base_fee = get_gas()
     if priority_fee and base_fee:
         return {
@@ -26,7 +27,7 @@ def call_proposeStake(
     pubkeys: list,
     sig1s: list,
     sig31s: list,
-) -> bool:
+) -> None:
     """Transact on proposeStake function with given pubkeys, sigs, and pool_id.
 
     This function initiates a transaction to propose new validators for a given pool_id.
@@ -52,7 +53,9 @@ def call_proposeStake(
 
         tx_hash = (
             get_sdk()
-            .portal.functions.proposeStake(pool_id, get_env().OPERATOR_ID, pubkeys, sig1s, sig31s)
+            .portal.functions.proposeStake(
+                pool_id, get_config().operator_id, pubkeys, sig1s, sig31s
+            )
             .transact(tx_params())
         )
 
@@ -110,7 +113,7 @@ def call_stake(pubkeys: list[str]) -> bool:
             return True
 
     except CannotStakeError as e:
-        send_email(
+        send_email(  # TODO: (now) check send emails...
             e.__class__.__name__,
             str(e),
         )

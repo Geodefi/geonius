@@ -8,7 +8,7 @@ from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
 from src.triggers.time import ExpectDepositsTrigger
 from src.exceptions import DatabaseError
-from src.globals import get_env, get_logger, get_constants
+from src.globals import get_config, get_logger, get_constants
 from src.helpers.event import event_handler
 from src.database.events import create_stake_proposal_table
 from src.database.pools import create_pools_table
@@ -53,7 +53,7 @@ class StakeProposalTrigger(Trigger):
             bool: True if the event is for the script's OPERATOR_ID, False otherwise
         """
 
-        if event.args.operatorId == get_env().OPERATOR_ID:
+        if event.args.operatorId == get_config().operator_id:
             return True
         else:
             return False

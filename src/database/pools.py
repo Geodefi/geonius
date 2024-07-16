@@ -3,7 +3,7 @@
 from src.classes import Database
 from src.exceptions import DatabaseError
 from src.helpers.portal import get_fallback_operator
-from src.globals import get_env, get_logger
+from src.globals import get_config, get_logger
 from src.utils.thread import multithread
 
 
@@ -70,7 +70,7 @@ def fetch_pools_batch(ids: list[int]) -> list[dict]:
     pools_transposed: list[dict] = [
         {
             "id": str(id),
-            "fallback": 1 if fallback == get_env().OPERATOR_ID else 0,
+            "fallback": 1 if fallback == get_config().operator_id else 0,
             "last_proposal_ts": 0,
         }
         for (id, fallback) in zip(ids, fallback_operators)

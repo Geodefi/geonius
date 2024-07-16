@@ -10,7 +10,7 @@ from src.database.pools import create_pools_table
 from src.database.operators import create_operators_table
 from src.helpers.event import event_handler
 from src.helpers.validator import check_and_propose
-from src.globals import get_logger, get_env
+from src.globals import get_logger, get_config
 
 
 class DelegationTrigger(Trigger):
@@ -44,7 +44,7 @@ class DelegationTrigger(Trigger):
             bool: True if the event is for the script's OPERATOR_ID, False otherwise
         """
 
-        if event.args.operatorId == get_env().OPERATOR_ID:
+        if event.args.operatorId == get_config().operator_id:
             return True
         else:
             return False
