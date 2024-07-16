@@ -27,7 +27,7 @@ from src.database.events import (
 from src.database.operators import reinitialize_operators_table
 from src.database.pools import reinitialize_pools_table
 from src.database.validators import reinitialize_validators_table
-from src.globals import get_flags, get_sdk, get_constants
+from src.globals import get_flags, get_sdk, get_constants, get_logger
 from src.setup import setup
 
 
@@ -127,7 +127,13 @@ def main():
 
     # pylint: disable-next=broad-exception-caught
     except Exception as e:
-        print(str(e) + "\nCould not initiate geonius.\nExiting...")
+        try:
+            get_logger().error(str(e))
+            get_logger().error("Could not initiate geonius")
+            get_logger().info("Exiting...")
+        # pylint: disable-next=broad-exception-caught
+        except Exception:
+            print(str(e) + "\nCould not initiate geonius.\nExiting...")
         raise e
 
 

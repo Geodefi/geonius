@@ -8,7 +8,7 @@ from src.exceptions import UnknownFlagError
 
 
 def collect_flags() -> dict:
-    # TODO: update docs
+    # TODO: (later) update docs
     parser = ArgumentParser()
     parser.add_argument(
         "--main-directory",
