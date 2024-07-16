@@ -7,7 +7,7 @@ from geodefi.utils import to_bytes32
 from web3.exceptions import TimeExhausted
 
 # from src.classes import Database
-from src.globals import get_sdk, get_config, get_env, get_constants, get_logger
+from src.globals import get_sdk, get_config, get_constants, get_logger
 from src.utils.notify import send_email
 from src.actions.ethdo import generate_deposit_data
 from src.actions.portal import call_proposeStake, call_stake
@@ -65,11 +65,11 @@ def max_proposals_count(pool_id: int) -> int:
 
     # considering the wallet balance of the operator since it might not be enough (1 eth per val)
     wallet_balance: int = (
-        get_sdk().portal.functions.readUint(get_env().OPERATOR_ID, to_bytes32("wallet")).call()
+        get_sdk().portal.functions.readUint(get_config().operator_id, to_bytes32("wallet")).call()
     )
 
     get_logger().debug(
-        f"Wallet balance for operator {get_name(get_env().OPERATOR_ID)}: {wallet_balance}"
+        f"Wallet balance for operator {get_name(get_config().operator_id)}: {wallet_balance}"
     )
 
     eth_per_wallet_balance: int = wallet_balance // (DEPOSIT_SIZE.PROPOSAL * BEACON_DENOMINATOR)
@@ -90,7 +90,7 @@ def max_proposals_count(pool_id: int) -> int:
         return curr_max
 
 
-def check_and_propose(pool_id: int) -> list[str]:
+def check_and_propose(pool_id: int) -> None:
     """Propose for given pool if able to propose for all of them at once \
         or in batches of 50 pubkeys at a time if needed to.
 
@@ -112,7 +112,7 @@ def check_and_propose(pool_id: int) -> list[str]:
             # This returns the length of the validators array in the contract so it is same as the index of the next validator
             new_val_ind: int = (
                 get_sdk()
-                .portal.functions.readUint(get_env().OPERATOR_ID, to_bytes32('validators'))
+                .portal.functions.readUint(get_config().operator_id, to_bytes32('validators'))
                 .call()
             )
 
@@ -150,7 +150,6 @@ def check_and_propose(pool_id: int) -> list[str]:
 
         # get_logger().info(f"Last proposal timestamp for pool {pool_id}: {last_proposal_timestamp}")
 
-        pks: list[str] = []
         for i in range(0, len(pubkeys), 50):
             temp_pks: list[str] = pubkeys[i : i + 50]
             temp_sigs1: list[str] = signatures1[i : i + 50]
@@ -163,16 +162,10 @@ def check_and_propose(pool_id: int) -> list[str]:
             #     ):
             #         break
 
-            try:
-                success: bool = call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
-                save_last_proposal_timestamp(pool_id, int(round(datetime.now().timestamp())))
-            except (CallFailedError, TimeExhausted) as e:
-                # TODO: (now) somehow here, we should be checking if there are any succesful, from many 50 batch and handle
-                raise e
-
-            if success:
-                pks.extend(temp_pks)
-        return pks
+            call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
+            save_last_proposal_timestamp(
+                pool_id, int(round(datetime.now().timestamp()))
+            )  # why is this needed?
 
 
 def check_and_stake(pks: list[str]) -> list[str]:
@@ -202,7 +195,7 @@ def check_and_stake(pks: list[str]) -> list[str]:
                 success: bool = call_stake(temp_pks)
                 save_last_stake_timestamp(int(round(datetime.now().timestamp())))
             except (CallFailedError, TimeExhausted) as e:
-                # TODO: (now) somehow here, we should be checking if there are any succesful, from many 50 batch and handle
+                # TODO: (later) reconsider how stake part works...
                 raise e
 
             if success:

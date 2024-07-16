@@ -61,8 +61,6 @@ def call_proposeStake(
 
         get_logger().etherscan("proposeStake", tx_hash)
 
-        return True
-
     except TimeExhausted as e:
         get_logger().error(f"proposeStake tx could not conclude in time.")
         raise e
