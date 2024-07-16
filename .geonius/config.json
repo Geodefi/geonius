@@ -1,4 +1,5 @@
 {
+  "operator_id": 46876274494823354384428212092516289553647577426286656470167864486523402510788,
   "chains": {
     "holesky": {
       "start": 1550551,
@@ -6,7 +7,9 @@
       "period": "1",
       "interval": "12",
       "range": "3000",
-      "slots_per_epoch": 32
+      "slots_per_epoch": 32,
+      "execution_api": "https://rpc.ankr.com/eth_holesky/<EXECUTION_API_KEY>",
+      "consensus_api": "https://rpc.ankr.com/premium-http/eth_holesky_beacon/<CONSENSUS_API_KEY>"
     }
   },
   "network": {
@@ -44,8 +47,9 @@
     }
   },
   "email": {
+    "sender": "admin@geode.fi",
+    "receivers": "admin@geode.fi,admin@geode.fi,admin@geode.fi",
     "smtp_server": "smtp.gmail.com",
-    "smtp_port": 587,
-    "dont_notify_devs": false
+    "smtp_port": 587
   }
 }
