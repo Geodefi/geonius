@@ -46,6 +46,13 @@ def apply_flags(config: AttributeDict):
         config.logger.backup = flags.logger_backup
     if "database_directory" in flags:
         config.database.directory = flags.database_directory
+    if "ethdo_wallet" in flags:
+        config.ethdo.wallet = flags.ethdo_wallet
+    if "ethdo_account" in flags:
+        config.ethdo.account = flags.ethdo_account
+    if "dont_notify_devs" in flags:
+        config.email.dont_notify_devs = flags.dont_notify_devs
+
     if "chain_start" in flags:
         config.chains[flags.chain].start = flags.chain_start
     if "chain_identifier" in flags:
@@ -56,18 +63,32 @@ def apply_flags(config: AttributeDict):
         config.chains[flags.chain].interval = int(flags.chain_interval)
     if "chain_range" in flags:
         config.chains[flags.chain].range = int(flags.chain_range)
-    if "ethdo_wallet" in flags:
-        config.ethdo.wallet = flags.ethdo_wallet
-    if "ethdo_account" in flags:
-        config.ethdo.account = flags.ethdo_account
-    if "dont_notify_devs" in flags:
-        config.email.dont_notify_devs = flags.dont_notify_devs
 
-    # put the gas api key in the configuration from the environment variables
-    if "<GAS_API_KEY>" in config.gas.api and get_env().GAS_API_KEY:
-        config.gas.api = config.gas.api.replace("<GAS_API_KEY>", get_env().GAS_API_KEY)
-    elif "<GAS_API_KEY>" in config.gas.api:
-        raise MissingConfigurationError("GAS_API_KEY environment var should be provided.")
+    # put the execution api key in configuration from environment variables
+    if "<EXECUTION_API_KEY>" in config.chains[flags.chain].execution_api:
+        if get_env().GAS_API_KEY:
+            config.chains[flags.chain].execution_api = config.chains[
+                flags.chain
+            ].execution_api.replace("<EXECUTION_API_KEY>", get_env().EXECUTION_API_KEY)
+        else:
+            raise MissingConfigurationError("EXECUTION_API_KEY environment var should be provided.")
+
+    # put the consensus api key in configuration from environment variables
+    if "<CONSENSUS_API_KEY>" in config.chains[flags.chain].consensus_api:
+        if get_env().GAS_API_KEY:
+            config.chains[flags.chain].consensus_api = config.chains[
+                flags.chain
+            ].consensus_api.replace("<CONSENSUS_API_KEY>", get_env().CONSENSUS_API_KEY)
+        else:
+            raise MissingConfigurationError("CONSENSUS_API_KEY environment var should be provided.")
+
+    # put the gas api key in configuration from environment variables
+    if "<GAS_API_KEY>" in config.gas.api:
+        if get_env().GAS_API_KEY:
+            config.gas.api = config.gas.api.replace("<GAS_API_KEY>", get_env().GAS_API_KEY)
+        else:
+            raise MissingConfigurationError("GAS_API_KEY environment var should be provided.")
+
     return config
 
 

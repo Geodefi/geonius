@@ -31,6 +31,8 @@ def send_email(
         e: _description_
         e: _description_
     """
+    if get_config().email is None:
+        return
 
     if not attachments:
         main_dir: str = get_config().directory
@@ -44,8 +46,8 @@ def send_email(
     env = get_env()
 
     msg: MIMEMultipart = MIMEMultipart()
-    msg['From'] = env.SENDER_EMAIL
-    msg['To'] = env.RECEIVER_EMAIL if env.RECEIVER_EMAIL else env.SENDER_EMAIL
+    msg['From'] = get_config().sender
+    msg['To'] = get_config().receivers
     msg['Subject'] = f"[🧠 Geonius Alert]: {subject}"
     if not dont_notify_devs:
         body += "\n\nGeodefi team also notified of this error. You can use '--dont-notify-devs' flag to prevent this."
@@ -67,7 +69,7 @@ def send_email(
     try:
         server = smtplib.SMTP(get_config().email.smtp_server, get_config().email.smtp_port)
         server.starttls()
-        server.login(env.SENDER_EMAIL, env.SENDER_PASSWORD)
+        server.login(get_config().sender, env.EMAIL_PASSWORD)
         server.send_message(msg)
         server.quit()
     except Exception as e:
