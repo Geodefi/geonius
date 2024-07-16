@@ -126,43 +126,6 @@ def create_account(index: int = None) -> dict:
         raise e
 
 
-def create_wallet() -> dict:
-    """Creates a new wallet to be used on ethdo
-
-    Returns:
-        dict: Returns the wallet data in JSON format.
-
-    Raises:
-        EthdoError: Raised if the wallet creation fails.
-        JSONDecodeError: Raised if the response cannot be decoded to JSON.
-        TypeError: Raised if the response is not type of str, bytes or bytearray.
-    """
-    get_logger().info(f"Creating a new wallet: {get_config().ethdo.wallet}")
-
-    try:
-        res: str = check_output(
-            [
-                "ethdo",
-                "wallet",
-                "create",
-                f"--wallet={get_config().ethdo.wallet}",
-                f"--wallet-passphrase={get_env().WALLET_PASSPHRASE}",
-                f"-type=hd",
-            ]
-        )
-
-    except Exception as e:
-        raise EthdoError(f"Failed to create wallet {get_config().ethdo.wallet}") from e
-
-    try:
-        return json.loads(res)
-    except (json.JSONDecodeError, TypeError) as e:
-        get_logger().error(f"Failed to interpret the response from ethdo: {res}")
-        raise e
-    except Exception as e:
-        raise e
-
-
 def exit_validator(pubkey: str) -> dict:
     """Triggers a validator exit for given pubkey
 
