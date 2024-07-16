@@ -7,7 +7,13 @@ from threading import Thread, Event
 from web3.exceptions import TimeExhausted
 
 from src.classes.trigger import Trigger
-from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError, EmailError
+from src.exceptions import (
+    DaemonError,
+    CallFailedError,
+    BeaconStateMismatchError,
+    EmailError,
+    HighGasError,
+)
 from src.globals import get_logger
 from src.utils.notify import send_email
 
@@ -164,6 +170,12 @@ class Daemon:
                     get_logger().warning(
                         f"Not able to communicate with the owners. Continuing without an assistance."
                     )
+            except HighGasError:
+                send_email(
+                    "High Gas Alert",
+                    f"On Chain gas api reported that gas prices have surpassed the default max settings.",
+                    dont_notify_devs=True,
+                )
             except BeaconStateMismatchError:
                 # These Exceptions can not be handled but there is no need to close the whole thing down for it.
                 get_logger().exception(

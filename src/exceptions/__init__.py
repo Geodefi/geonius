@@ -10,5 +10,5 @@ from .globals import (
     ConfigurationFieldError,
     UnknownFlagError,
 )
-from .utils import HighGasException, EmailError
+from .utils import HighGasError, GasApiError, EmailError
 from .triggers import BeaconStateMismatchError
