@@ -47,7 +47,7 @@ def send_email(
 
     msg: MIMEMultipart = MIMEMultipart()
     msg['From'] = get_config().sender
-    msg['To'] = get_config().receivers
+    msg['To'] = ",".join(get_config().receivers)
     msg['Subject'] = f"[🧠 Geonius Alert]: {subject}"
     if not dont_notify_devs:
         body += "\n\nGeodefi team also notified of this error. You can use '--dont-notify-devs' flag to prevent this."

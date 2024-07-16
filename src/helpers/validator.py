@@ -135,7 +135,7 @@ def check_and_propose(pool_id: int) -> None:
                 get_logger().debug(f"Stake data for index {new_val_ind + i}: {proposal_data}")
 
         except EthdoError as e:
-            send_email(e.__class__.__name__, str(e), dont_notify_devs=True)
+            send_email("Ethdo failed", str(e), dont_notify_devs=True)
             return []
 
         # pubkeys: list[bytes] = [bytes.fromhex(prop["pubkey"]) for prop in proposal_data]

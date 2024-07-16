@@ -56,7 +56,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         raise EthdoError(
             f"Failed to generate deposit data from account {account} \
                 with withdrawal address {withdrawal_address}, deposit value {deposit_value} \
-                and fork version {fork_version}",
+                and fork version {fork_version}. Will try again later.",
         ) from e
 
     try:

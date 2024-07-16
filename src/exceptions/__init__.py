@@ -2,6 +2,7 @@
 
 from .actions import EthdoError, CannotStakeError, CallFailedError
 from .classes import DaemonError, DatabaseError, DatabaseMismatchError
+from .daemons import EventFetchingError
 from .globals import (
     SDKError,
     MissingPrivateKeyError,

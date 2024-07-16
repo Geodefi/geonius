@@ -13,6 +13,7 @@ from src.exceptions import (
     BeaconStateMismatchError,
     EmailError,
     HighGasError,
+    EventFetchingError,
 )
 from src.globals import get_logger
 from src.utils.notify import send_email
@@ -174,6 +175,12 @@ class Daemon:
                 send_email(
                     "High Gas Alert",
                     f"On Chain gas api reported that gas prices have surpassed the default max settings.",
+                    dont_notify_devs=True,
+                )
+            except EventFetchingError:
+                send_email(
+                    "Could not get some events from the chain",
+                    f"There was an issue while fetching an event from the chain. Will not shot down geonius and will be trying again later. However, it might be worth checking what is wrong.",
                     dont_notify_devs=True,
                 )
             except BeaconStateMismatchError:

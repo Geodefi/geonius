@@ -111,7 +111,7 @@ def call_stake(pubkeys: list[str]) -> bool:
             return True
 
     except CannotStakeError as e:
-        send_email(  # TODO: (now) check send emails...
+        send_email(
             e.__class__.__name__,
             str(e),
         )

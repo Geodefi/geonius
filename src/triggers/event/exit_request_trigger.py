@@ -115,7 +115,9 @@ class ExitRequestTrigger(Trigger):
             try:
                 exit_validator(pubkey)
             except EthdoError as e:
-                send_email(e.__class__.__name__, str(e), dont_notify_devs=True)
+                send_email(
+                    f"Could not exit from validator: {pubkey}", str(e), dont_notify_devs=True
+                )
                 continue
 
             val: Validator = get_sdk().portal.validator(pubkey)
@@ -128,7 +130,7 @@ class ExitRequestTrigger(Trigger):
             else:
                 raise BeaconStateMismatchError(f"Beacon state mismatch for pubkey {pubkey}")
 
-        # TODO: (later) if exit_validator function (ethdo) is waiting for finalization, we do not need to
+        # TODO: (later) exit_validator function (ethdo) is waiting for finalization, we do not need to
         #       seperate the for loops and we can continue under the same loop
         for pubkey in exitted_pks:
             save_local_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)

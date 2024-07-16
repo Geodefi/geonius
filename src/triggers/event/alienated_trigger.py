@@ -112,6 +112,6 @@ class AlienatedTrigger(Trigger):
                 save_local_state(pubkey, VALIDATOR_STATE.ALIENATED)
 
             send_email(
-                "AlienatedAndPrisoned",
+                "Proposal is Alienated and You are Prisoned!",
                 "Alienated event is triggered, you will be prisoned. Please contact the admin and exit the program.",
             )

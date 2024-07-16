@@ -6,10 +6,10 @@ from web3.contract.contract import ContractEvent
 
 from src.classes import Daemon, Trigger
 from src.common import AttributeDict
+from src.exceptions import EventFetchingError
 from src.globals import get_sdk, get_constants, get_logger
 from src.database.events import find_latest_event
 from src.helpers.event import get_all_events
-from src.utils.notify import send_email
 
 
 class EventDaemon(Daemon):
@@ -68,8 +68,8 @@ class EventDaemon(Daemon):
         return False
 
     def listen_events(self) -> Iterable[EventData]:
-        """The main task for the EventDaemon. Checks for new events.\ 
-        If any, runs the trigger and returns the events.\ 
+        """The main task for the EventDaemon. Checks for new events.
+        If any, activates the trigger and returns the events.
         If no events are emitted, returns None.
 
         Returns:
@@ -102,8 +102,9 @@ class EventDaemon(Daemon):
                 )
 
             except Exception as e:
-                get_logger().error(e)
-                send_email(e.__class__.__name__, str(e))
+                raise EventFetchingError(
+                    f"There was an issue while fetching the {self.event.event_name} event from the chain"
+                ) from e
 
             # take a snapshot after finishing processing the block.\
             # Does not matter if there are events or not.

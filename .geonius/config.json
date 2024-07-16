@@ -48,7 +48,7 @@
   },
   "email": {
     "sender": "admin@geode.fi",
-    "receivers": "admin@geode.fi,admin@geode.fi,admin@geode.fi",
+    "receivers": ["admin@geode.fi", "admin@geode.fi", "admin@geode.fi"],
     "smtp_server": "smtp.gmail.com",
     "smtp_port": 587
   }
