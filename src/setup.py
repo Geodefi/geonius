@@ -1,7 +1,17 @@
 from typing import Callable
 
+from geodefi import Geode
+from geodefi.globals.constants import ETHER_DENOMINATOR
+
 from src.common import AttributeDict, Loggable
-from src.exceptions import ConfigurationFieldError, MissingConfigurationError
+from src.exceptions import (
+    ConfigurationFieldError,
+    MissingConfigurationError,
+    EthdoError,
+    GasApiError,
+)
+from src.actions.ethdo import ping_account
+from src.utils.gas import parse_gas, fetch_gas
 from src.globals import (
     set_config,
     set_env,
@@ -9,9 +19,13 @@ from src.globals import (
     set_flags,
     set_constants,
     set_logger,
+    get_flags,
     get_env,
     get_config,
+    get_sdk,
+    get_logger,
 )
+from src.helpers.portal import get_maintainer, get_wallet_balance
 from src.globals.config import apply_flags, init_config
 from src.globals.constants import init_constants
 from src.globals.env import load_env
@@ -21,19 +35,18 @@ from src.globals.sdk import init_sdk
 
 def preflight_checks():
     """Checks if everything is ready for geonius to work.
-    - Checks if config missing any values. 'gas' and 'email' sections are Optional,
-        however they should be valid if provided.# TODO: (now) check if they are optional in the code as well
-    TODO:
-    - Checks if there is enough money in the operator wallet and prints
-    - Checks if given private key can control the provided Operator ID
-    - Checks if ethdo is available and
+    - Checks if config missing any values. 'gas' and 'email' sections are optional,
+        however they should be valid if provided.
+    - Checks if ethdo is available and account exists
     - Checks if gas api working, when provided
-    - What else?
+    - Checks if given private key can control the provided Operator ID
+    - Checks if there is enough money in the operator wallet and prints
 
     Raises:
         MissingConfigurationError: One of the required fields on configuration file is missing.
     """
     config = get_config()
+
     # Sections
     if not 'chains' in config:
         raise MissingConfigurationError("'chains' section on config.json is missing or empty.")
@@ -108,10 +121,12 @@ def preflight_checks():
         raise MissingConfigurationError("'database' section is missing the 'directory' field.")
 
     ethdo: AttributeDict = config.ethdo
-    if not 'wallet' in ethdo:  # TODO: (now) check if exists
+    if not 'wallet' in ethdo:
         raise MissingConfigurationError("'ethdo' section is missing the 'wallet' field.")
-    if not 'account' in ethdo:  # TODO: (now) check if exists
+    if not 'account' in ethdo:
         raise MissingConfigurationError("'ethdo' section is missing the 'account' field.")
+    if not ping_account(wallet=ethdo.wallet, account=ethdo.account):
+        raise EthdoError(f"Provided account: {ethdo.wallet}/{ethdo.account} does not exists.")
 
     if config.gas:
         gas: AttributeDict = config.gas
@@ -119,12 +134,16 @@ def preflight_checks():
             raise MissingConfigurationError("'gas' section is missing the 'max_priority' field.")
         if not 'max_fee' in gas:
             raise MissingConfigurationError("'gas' section is missing the 'max_fee' field.")
-        if gas.api:  # Optional
-            if not 'parser' in gas:
-                raise MissingConfigurationError(
-                    "No parser could be identified for the provided gas api"
-                )
-            # elif # TODO: (now) check if it is working.
+        if not 'api' in gas:
+            raise MissingConfigurationError("'gas' section is missing the 'api' field.")
+        if not 'parser' in gas:
+            raise MissingConfigurationError(
+                "No parser could be identified for the provided gas api"
+            )
+
+        priority_fee, base_fee = parse_gas(fetch_gas())
+        if priority_fee is None or base_fee is None or priority_fee <= 0 or base_fee <= 0:
+            raise GasApiError("Gas api did not respond or faulty")
 
     if config.email:
         email: AttributeDict = config.email
@@ -139,6 +158,19 @@ def preflight_checks():
             )
         if not 'dont_notify_devs' in email:
             email.dont_notify_devs = False
+
+    sdk: Geode = get_sdk()
+    signer = sdk.w3.eth.default_account
+    maintainer = get_maintainer(config.operator_id)
+
+    if maintainer != signer:
+        raise ConfigurationFieldError(
+            f"'maintainer' of {config.operator_id} is {maintainer}. Provided private key for {signer} does not match."
+        )
+
+    get_logger().warning(
+        f"There is only {get_wallet_balance(config.operator_id)/ETHER_DENOMINATOR} ETH in the internal wallet. Use 'geonius increase-wallet' to deposit more."
+    )
 
 
 def setup(flag_collector: Callable = collect_flags):
@@ -164,8 +196,8 @@ def setup(flag_collector: Callable = collect_flags):
     set_logger(Loggable().logger)
     set_sdk(
         init_sdk(
-            exec_api=get_env().EXECUTION_API,
-            cons_api=get_env().CONSENSUS_API,
+            exec_api=get_config().chains[get_flags().chain].execution_api,
+            cons_api=get_config().chains[get_flags().chain].consensus_api,
             priv_key=get_env().PRIVATE_KEY,
         )
     )
