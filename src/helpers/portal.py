@@ -5,7 +5,7 @@ from itertools import repeat
 from geodefi.globals import ID_TYPE
 from geodefi.utils import to_bytes32, get_key
 
-from src.globals import get_sdk, get_env, get_logger
+from src.globals import get_sdk, get_config, get_logger
 from src.utils.thread import multithread
 
 
@@ -21,7 +21,7 @@ def get_StakeParams() -> list[Any]:
 
 
 # pylint: disable-next=invalid-name
-def get_allIdsByType(type: ID_TYPE, index: int) -> int:
+def get_allIdsByType(_type: ID_TYPE, index: int) -> int:
     """A helper function to call allIdsByType on Portal. Returns the ID of the given type and index.
 
     Args:
@@ -33,7 +33,7 @@ def get_allIdsByType(type: ID_TYPE, index: int) -> int:
     """
 
     get_logger().debug("Calling allIdsByType() from portal")
-    return get_sdk().portal.functions.allIdsByType(type, index).call()
+    return get_sdk().portal.functions.allIdsByType(_type, index).call()
 
 
 # related to pools >
@@ -51,6 +51,28 @@ def get_name(pool_id: int) -> str:
 
     get_logger().debug("Fetching the name of a pool: {pool_id}")
     return get_sdk().portal.functions.readBytes(pool_id, to_bytes32("NAME")).call().decode("utf-8")
+
+
+def get_maintainer(_id: int) -> str:
+    """Returns the maintainer of the given ID.
+
+    Args:
+        id (int): ID of the pool or operator to fetch maintainer for.
+    """
+
+    get_logger().debug("Fetching the maintainer of id: {_id}")
+    return get_sdk().portal.functions.readAddress(_id, to_bytes32("maintainer")).call()
+
+
+def get_wallet_balance(_id: int) -> str:
+    """Returns the internal wallet a balance for the given ID.
+
+    Args:
+        id (int): ID of the pool or operator to fetch maintainer for.
+    """
+
+    get_logger().debug("Fetching the wallet balance for id: {_id}")
+    return get_sdk().portal.functions.readUint(_id, to_bytes32("wallet")).call()
 
 
 def get_withdrawal_address(pool_id: int) -> str:
@@ -135,7 +157,9 @@ def get_owned_pubkeys_count() -> int:
     """
     get_logger().debug("Fetching the number of pools owned pubkeys from a validator: {pool_id}")
     return (
-        get_sdk().portal.functions.readUint(get_env().OPERATOR_ID, to_bytes32("validators")).call()
+        get_sdk()
+        .portal.functions.readUint(get_config().operator_id, to_bytes32("validators"))
+        .call()
     )
 
 
@@ -150,7 +174,7 @@ def get_owned_pubkey(index: int) -> str:
     """
     pk: str = (
         get_sdk()
-        .portal.functions.readBytes(index, get_key(get_env().OPERATOR_ID, "validators"))
+        .portal.functions.readBytes(index, get_key(get_config().operator_id, "validators"))
         .call()
     )
     get_logger().debug("Fetching an owned pubkey. index:{index} : pubkey:{pk}")
@@ -181,4 +205,4 @@ def get_operatorAllowance(pool_id: int) -> int:
     Returns:
         int: Operator allowance for the given pool.
     """
-    return get_sdk().portal.functions.operatorAllowance(pool_id, get_env().OPERATOR_ID).call()
+    return get_sdk().portal.functions.operatorAllowance(pool_id, get_config().operator_id).call()
