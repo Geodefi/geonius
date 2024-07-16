@@ -5,9 +5,6 @@ from web3.types import EventData
 
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
-from src.database.events import create_delegation_table
-from src.database.pools import create_pools_table
-from src.database.operators import create_operators_table
 from src.helpers.event import event_handler
 from src.helpers.validator import check_and_propose
 from src.globals import get_logger, get_config
@@ -29,9 +26,6 @@ class DelegationTrigger(Trigger):
         """
 
         Trigger.__init__(self, name=self.name, action=self.consider_allowance)
-        create_operators_table()
-        create_pools_table()
-        create_delegation_table()
         get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:

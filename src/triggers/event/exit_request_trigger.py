@@ -16,8 +16,6 @@ from src.database.validators import (
     save_exit_epoch,
     check_pk_in_db,
 )
-from src.database.events import create_exit_request_table
-
 from src.helpers.event import event_handler
 from src.helpers.validator import run_finalize_exit_triggers
 from src.globals import get_constants, get_sdk, get_logger
@@ -40,8 +38,6 @@ class ExitRequestTrigger(Trigger):
 
         Trigger.__init__(self, name=self.name, action=self.update_validators_status)
         # Runs finalize exit triggers if there are any validators to be finalized
-        run_finalize_exit_triggers()
-        create_exit_request_table()
         get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:

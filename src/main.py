@@ -15,6 +15,9 @@ from src.triggers.event import (
 from src.triggers.block import (
     StakeTrigger,
 )
+from src.database.pools import reinitialize_pools_table, create_pools_table
+from src.database.operators import reinitialize_operators_table, create_operators_table
+from src.database.validators import reinitialize_validators_table, create_validators_table
 from src.database.events import (
     reinitialize_alienated_table,
     reinitialize_delegation_table,
@@ -23,31 +26,48 @@ from src.database.events import (
     reinitialize_stake_proposal_table,
     reinitialize_fallback_operator_table,
     reinitialize_id_initiated_table,
+    create_alienated_table,
+    create_delegation_table,
+    create_deposit_table,
+    create_exit_request_table,
+    create_stake_proposal_table,
+    create_fallback_operator_table,
+    create_id_initiated_table,
 )
-from src.database.operators import reinitialize_operators_table
-from src.database.pools import reinitialize_pools_table
-from src.database.validators import reinitialize_validators_table
 from src.globals import get_flags, get_sdk, get_constants, get_logger
 from src.setup import setup
 
 
 def init_dbs():
-    """Initializes the databases and fills them with the current data.
+    """Initializes the databases if suited. Wipes out all data When reset flag is provided.
 
     This function is called at the beginning of the program to make sure the
     databases are up to date.
     """
-    reinitialize_operators_table()
-    reinitialize_pools_table()
-    reinitialize_validators_table()
+    if get_flags().reset:
+        reinitialize_pools_table()
+        reinitialize_operators_table()
+        reinitialize_validators_table()
 
-    reinitialize_alienated_table()
-    reinitialize_delegation_table()
-    reinitialize_deposit_table()
-    reinitialize_exit_request_table()
-    reinitialize_stake_proposal_table()
-    reinitialize_fallback_operator_table()
-    reinitialize_id_initiated_table()
+        reinitialize_alienated_table()
+        reinitialize_delegation_table()
+        reinitialize_deposit_table()
+        reinitialize_exit_request_table()
+        reinitialize_stake_proposal_table()
+        reinitialize_fallback_operator_table()
+        reinitialize_id_initiated_table()
+    else:
+        create_pools_table()
+        create_operators_table()
+        create_validators_table()
+
+        create_alienated_table()
+        create_delegation_table()
+        create_deposit_table()
+        create_exit_request_table()
+        create_stake_proposal_table()
+        create_fallback_operator_table()
+        create_id_initiated_table()
 
 
 def setup_daemons():
@@ -121,8 +141,7 @@ def main():
     """
     try:
         setup()
-        if get_flags().reset:
-            init_dbs()
+        init_dbs()
         setup_daemons()
 
     # pylint: disable-next=broad-exception-caught

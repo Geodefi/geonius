@@ -10,8 +10,6 @@ from src.triggers.time import ExpectDepositsTrigger
 from src.exceptions import DatabaseError
 from src.globals import get_config, get_logger, get_constants
 from src.helpers.event import event_handler
-from src.database.events import create_stake_proposal_table
-from src.database.pools import create_pools_table
 
 
 class StakeProposalTrigger(Trigger):
@@ -29,8 +27,6 @@ class StakeProposalTrigger(Trigger):
         It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
         """
         Trigger.__init__(self, name=self.name, action=self.expect_validators)
-        create_pools_table()
-        create_stake_proposal_table()
 
         # initiate a TimeDaemon to keep track
         self.__except_deposit_trigger: ExpectDepositsTrigger = ExpectDepositsTrigger(

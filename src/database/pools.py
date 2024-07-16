@@ -50,7 +50,6 @@ def reinitialize_pools_table() -> None:
     """Removes pools table and creates an empty one."""
 
     drop_pools_table()
-    create_pools_table()
 
 
 def fetch_pools_batch(ids: list[int]) -> list[dict]:

@@ -6,12 +6,10 @@ from geodefi.globals import VALIDATOR_STATE
 
 from src.classes import Trigger
 from src.database.validators import (
-    create_validators_table,
     save_local_state,
     save_portal_state,
     fetch_verified_pks,
 )
-from src.database.operators import create_operators_table
 from src.helpers.validator import check_and_stake
 from src.globals import get_logger
 from src.utils.thread import multithread
@@ -33,8 +31,6 @@ class StakeTrigger(Trigger):
         """
 
         Trigger.__init__(self, name=self.name, action=self.activate_validators)
-        create_operators_table()
-        create_validators_table()
         get_logger().debug(f"{self.name} is initated.")
 
     def activate_validators(self, *args, **kwargs) -> None:

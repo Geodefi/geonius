@@ -6,9 +6,7 @@ from geodefi.globals import VALIDATOR_STATE
 
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
-from src.database.events import create_alienated_table
 from src.database.validators import (
-    create_validators_table,
     save_portal_state,
     save_local_state,
     check_pk_in_db,
@@ -35,8 +33,6 @@ class AlienatedTrigger(Trigger):
         """
 
         Trigger.__init__(self, name=self.name, action=self.alienate_validators)
-        create_validators_table()
-        create_alienated_table()
         get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:

@@ -5,9 +5,7 @@ from web3.types import EventData
 
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
-from src.database.events import create_fallback_operator_table
-from src.database.pools import create_pools_table, save_fallback_operator
-from src.database.operators import create_operators_table
+from src.database.pools import save_fallback_operator
 from src.helpers.event import event_handler
 from src.helpers.portal import get_fallback_operator
 from src.helpers.validator import check_and_propose
@@ -30,9 +28,6 @@ class FallbackOperatorTrigger(Trigger):
         """
 
         Trigger.__init__(self, name=self.name, action=self.update_fallback_operator)
-        create_operators_table()
-        create_pools_table()
-        create_fallback_operator_table()
         get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
