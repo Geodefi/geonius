@@ -133,3 +133,6 @@ class Loggable:
             )
         elif network == Network.ethereum:
             self.logger.info(f"{function_name} tx sent: https://etherscan.io/tx/{tx_hash.hex()}")
+
+    def __getattr__(self, attr):
+        return getattr(self.logger, attr)
