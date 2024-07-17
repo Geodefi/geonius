@@ -50,6 +50,5 @@ def init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
         sdk = __set_web3_account(sdk, priv_key)
         return sdk
 
-    # pylint: disable-next=broad-exception-caught
     except Exception as e:
         raise SDKError("Could not connect to sdk. Please check your configuration.") from e

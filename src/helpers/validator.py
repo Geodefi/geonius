@@ -228,7 +228,6 @@ def run_finalize_exit_triggers():
         slots_per_epoch: int = get_constants().chain.slots_per_epoch
         slot_interval: int = int(get_constants().chain.interval)
 
-        # pylint: disable=E1126:invalid-sequence-index
         current_slot: int = int(res["header"]["message"]["slot"])
         current_epoch: int = current_slot // slots_per_epoch
 

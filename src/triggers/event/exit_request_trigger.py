@@ -137,7 +137,6 @@ class ExitRequestTrigger(Trigger):
 
             # calculate the delay for the daemon to run
             res: dict[str, Any] = get_sdk().beacon.beacon_headers_id("head")
-            # pylint: disable=E1126:invalid-sequence-index
             slots_per_epoch: int = get_constants().chain.slots_per_epoch
             slot_interval: int = int(get_constants().chain.interval)
 

@@ -21,8 +21,7 @@ def ping_pubkey(pubkey: str) -> bool:
     try:
         get_sdk().beacon.beacon_states_validators_id(state_id="head", validator_id=pubkey)
         return True
-    # pylint: disable=bare-except
-    except:
+    except Exception:
         return False
 
 

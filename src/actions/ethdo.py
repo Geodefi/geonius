@@ -78,7 +78,6 @@ def ping_account(wallet: str, account: str) -> bool:
     try:
         check_output(["ethdo", "account", "info", f"--validatoraccount={wallet}/{account}"])
         return True
-    # pylint: disable-next=broad-exception-caught
     except Exception:
         return False
 

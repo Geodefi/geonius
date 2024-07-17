@@ -144,13 +144,11 @@ def main():
         init_dbs()
         setup_daemons()
 
-    # pylint: disable-next=broad-exception-caught
     except Exception as e:
         try:
             get_logger().error(str(e))
             get_logger().error("Could not initiate geonius")
             get_logger().info("Exiting...")
-        # pylint: disable-next=broad-exception-caught
         except Exception:
             print(str(e) + "\nCould not initiate geonius.\nExiting...")
         raise e
