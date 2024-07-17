@@ -171,18 +171,34 @@ class Daemon:
                     get_logger().warning(
                         f"Not able to communicate with the owners. Continuing without an assistance."
                     )
-            except HighGasError:
-                send_email(
-                    "High Gas Alert",
-                    f"On Chain gas api reported that gas prices have surpassed the default max settings.",
-                    dont_notify_devs=True,
+            except HighGasError as e:
+                get_logger().error(str(e))
+                get_logger().warning(
+                    f"One of the calls failed for {self.trigger.name:^17}. Continuing but may need to be checked in case of a problem."
                 )
-            except EventFetchingError:
-                send_email(
-                    "Could not get some events from the chain",
-                    f"There was an issue while fetching an event from the chain. Will not shot down geonius and will be trying again later. However, it might be worth checking what is wrong.",
-                    dont_notify_devs=True,
-                )
+                try:
+                    send_email(
+                        "High Gas Alert",
+                        f"On Chain gas api reported that gas prices have surpassed the default max settings.",
+                        dont_notify_devs=True,
+                    )
+                except EmailError:
+                    get_logger().warning(
+                        f"Not able to communicate with the owners. Continuing without an assistance."
+                    )
+            except EventFetchingError as e:
+                get_logger().error(str(e))
+                try:
+                    send_email(
+                        "Could not get some events from the chain",
+                        f"There was an issue while fetching an event from the chain. Will not shot down geonius and will be trying again later. However, it might be worth checking what is wrong.",
+                        dont_notify_devs=True,
+                    )
+                except EmailError:
+                    get_logger().warning(
+                        f"Not able to communicate with the owners. Continuing without an assistance."
+                    )
+
             except BeaconStateMismatchError:
                 # These Exceptions can not be handled but there is no need to close the whole thing down for it.
                 get_logger().exception(
@@ -201,7 +217,6 @@ class Daemon:
                 self.start_flag.clear()
                 self.stop_flag.set()
 
-            # pylint: disable-next=broad-exception-caught
             except Exception:
                 # All of the remaining Exceptions will force the MainThread to exit.>
                 get_logger().exception(
