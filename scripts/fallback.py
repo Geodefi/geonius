@@ -15,6 +15,14 @@ from src.setup import setup
 def collect_local_flags() -> dict:
     parser = ArgumentParser()
     parser.add_argument(
+        "--chain",
+        action="store",
+        dest="chain",
+        type=str,
+        help="Network name, such as 'holesky' or 'ethereum' etc. Required when providing any other chain setting.",
+        required=True,
+    )
+    parser.add_argument(
         "--main-directory",
         action="store",
         dest="main_directory",
@@ -70,7 +78,7 @@ def set_fallback_operator(pool: int, operator: int, threshold: int):
         get_logger().error(err)
 
 
-if __name__ == "__main__":
+def main():
     setup(flag_collector=collect_local_flags)
     f: dict = get_flags()
 
@@ -80,3 +88,7 @@ if __name__ == "__main__":
             sleep(f.interval)
     else:
         set_fallback_operator(f.pool, f.operator, f.threshold)
+
+
+if __name__ == "__main__":
+    main()
