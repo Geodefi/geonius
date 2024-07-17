@@ -43,7 +43,10 @@ def get_gas() -> tuple[str]:
             except Exception as e:
                 raise GasApiError("Gas api did not respond") from e
 
-            if priority_fee < gas.max_priority and base_fee < gas.max_fee:
+            sdk: Geode = get_sdk()
+            if priority_fee < sdk.w3.to_wei(gas.max_priority, 'gwei') and base_fee < sdk.w3.to_wei(
+                gas.max_fee, 'gwei'
+            ):
                 return __float_to_hexstring(priority_fee), __float_to_hexstring(base_fee)
             else:
                 get_logger().critical(
