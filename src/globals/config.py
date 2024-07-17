@@ -50,9 +50,15 @@ def apply_flags(config: AttributeDict):
         config.ethdo.wallet = flags.ethdo_wallet
     if "ethdo_account" in flags:
         config.ethdo.account = flags.ethdo_account
-    if "dont_notify_devs" in flags:
-        config.email.dont_notify_devs = flags.dont_notify_devs
 
+    if "dont_notify_devs" in flags:
+        if flags.dont_notify_devs is True:
+            try:
+                config.email.dont_notify_devs = flags.dont_notify_devs
+            except Exception as e:
+                raise MissingConfigurationError(
+                    "'--dont-notify-devs' flag requires email configuration"
+                ) from e
     if "chain_start" in flags:
         config.chains[flags.chain].start = flags.chain_start
     if "chain_identifier" in flags:
@@ -82,12 +88,15 @@ def apply_flags(config: AttributeDict):
         else:
             raise MissingConfigurationError("CONSENSUS_API_KEY environment var should be provided.")
 
-    # put the gas api key in configuration from environment variables
-    if "<GAS_API_KEY>" in config.gas.api:
-        if get_env().GAS_API_KEY:
-            config.gas.api = config.gas.api.replace("<GAS_API_KEY>", get_env().GAS_API_KEY)
-        else:
-            raise MissingConfigurationError("GAS_API_KEY environment var should be provided.")
+        # put the gas api key in configuration from environment variables
+        if 'gas' in config:
+            if "<GAS_API_KEY>" in config.gas.api:
+                if get_env().GAS_API_KEY:
+                    config.gas.api = config.gas.api.replace("<GAS_API_KEY>", get_env().GAS_API_KEY)
+                else:
+                    raise MissingConfigurationError(
+                        "GAS_API_KEY environment var should be provided."
+                    )
 
     return config
 

@@ -12,6 +12,7 @@ from src.exceptions import (
 )
 from src.actions.ethdo import ping_account
 from src.utils.gas import parse_gas, fetch_gas
+from src.helpers.portal import get_name
 from src.globals import (
     set_config,
     set_env,
@@ -128,7 +129,7 @@ def preflight_checks():
     if not ping_account(wallet=ethdo.wallet, account=ethdo.account):
         raise EthdoError(f"Provided account: {ethdo.wallet}/{ethdo.account} does not exists.")
 
-    if config.gas:
+    if "gas" in config:
         gas: AttributeDict = config.gas
         if not 'max_priority' in gas:
             raise MissingConfigurationError("'gas' section is missing the 'max_priority' field.")
@@ -145,7 +146,7 @@ def preflight_checks():
         if priority_fee is None or base_fee is None or priority_fee <= 0 or base_fee <= 0:
             raise GasApiError("Gas api did not respond or faulty")
 
-    if config.email:
+    if "email" in config:
         email: AttributeDict = config.email
 
         if not 'smtp_server' in email:
@@ -168,8 +169,10 @@ def preflight_checks():
             f"'maintainer' of {config.operator_id} is {maintainer}. Provided private key for {signer} does not match."
         )
 
+    balance: int = get_wallet_balance(config.operator_id)
+
     get_logger().warning(
-        f"There is only {get_wallet_balance(config.operator_id)/ETHER_DENOMINATOR} ETH in the internal wallet. Use 'geonius increase-wallet' to deposit more."
+        f"{get_name(config.operator_id)} has {balance/ETHER_DENOMINATOR} ETH ({balance} wei) in the internal wallet. Use 'geonius increase-wallet --value X --chain X' to deposit more."
     )
 
 
@@ -193,7 +196,7 @@ def setup(flag_collector: Callable = collect_flags):
     config = apply_flags(init_config())
     set_config(config)
 
-    set_logger(Loggable().logger)
+    set_logger(Loggable())
     set_sdk(
         init_sdk(
             exec_api=get_config().chains[get_flags().chain].execution_api,

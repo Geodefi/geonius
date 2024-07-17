@@ -44,7 +44,7 @@ def check_wallet():
         oid = get_config().operator_id
         balance: int = get_wallet_balance(oid)
 
-        get_logger().warning(
+        get_logger().info(
             f"{get_name(oid)} has {balance/ETHER_DENOMINATOR} ETH ({balance} wei) in the internal wallet. Use 'geonius increase-wallet --value X --chain X' to deposit more."
         )
 
