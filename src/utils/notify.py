@@ -14,7 +14,7 @@ from src.globals import get_env, get_config, get_logger
 def send_email(
     subject: str,
     body: str,
-    attachments: list[tuple[str, str]] = None,
+    attachments: list[tuple[str, str]] = [],
     dont_notify_devs=None,
 ):
     """Sends an email to the provided developer address, as well as admin when allowed and applicable.
@@ -34,26 +34,26 @@ def send_email(
     if get_config().email is None:
         return
 
-    if not attachments:
-        main_dir: str = get_config().directory
-        log_dir: str = get_config().logger.directory
-        path: str = os.path.join(main_dir, log_dir, "log")
-        attachments: list[tuple[str, str]] = [(path, "log.txt")]
-
     if dont_notify_devs is None:
         dont_notify_devs = get_config().email.dont_notify_devs
 
     env = get_env()
 
     msg: MIMEMultipart = MIMEMultipart()
-    msg['From'] = get_config().sender
-    msg['To'] = ",".join(get_config().receivers)
+    msg['From'] = get_config().email.sender
+    msg['To'] = ",".join(get_config().email.receivers)
     msg['Subject'] = f"[🧠 Geonius Alert]: {subject}"
     if not dont_notify_devs:
         body += "\n\nGeodefi team also notified of this error. You can use '--dont-notify-devs' flag to prevent this."
         msg['Cc'] = "notifications@geode.fi"
 
     msg.attach(MIMEText(body, 'plain'))
+
+    if not attachments and not get_config().logger.no_file:
+        main_dir: str = get_config().directory
+        log_dir: str = get_config().logger.directory
+        path: str = os.path.join(main_dir, log_dir, "log")
+        attachments: list[tuple[str, str]] = [(path, "log.txt")]
 
     try:
         for file_path, file_name in attachments:
@@ -69,9 +69,10 @@ def send_email(
     try:
         server = smtplib.SMTP(get_config().email.smtp_server, get_config().email.smtp_port)
         server.starttls()
-        server.login(get_config().sender, env.EMAIL_PASSWORD)
+        server.login(get_config().email.sender, env.EMAIL_PASSWORD)
         server.send_message(msg)
         server.quit()
     except Exception as e:
         get_logger().error(f"Failed to send email!")
-        raise EmailError(f"Failed to send an email!") from e
+        get_logger().error(str(e))
+        raise EmailError(f"Failed to send an email") from e
