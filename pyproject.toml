@@ -13,6 +13,7 @@ packages = [
 python = ">=3.8,<=3.12"
 geodefi = "3.0.5"
 python-dotenv = "^1.0.1"
+click = "^8.1.7"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "==3.0.3"
@@ -26,6 +27,7 @@ run = "src.main:main"
 check-wallet = "scripts.check_wallet:main"
 increase-wallet = "scripts.increase_wallet:main"
 decrease-wallet = "scripts.decrease_wallet:main"
+change-maintainer = "scripts.change_maintainer:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

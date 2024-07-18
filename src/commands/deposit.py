@@ -26,19 +26,19 @@ def collect_local_flags() -> dict:
         "--main-directory",
         action="store",
         dest="main_directory",
+        type=str,
         help="main directory name that will be created, and used to store data",
         default=os.path.join(os.getcwd(), '.geonius'),
     )
+    parser.add_argument("--value", action="store", dest="value", type=int, required=True)
     parser.add_argument("--pool", action="store", dest="pool", type=int, required=True)
-    parser.add_argument("--operator", action="store", dest="operator", type=int, required=True)
-    parser.add_argument("--threshold", action="store", dest="threshold", type=int, required=True)
     parser.add_argument(
         "--interval",
         action="store",
-        type=int,
         dest="interval",
+        type=int,
         required=False,
-        help="Will run as a daemon when provided, interpreted in seconds.",
+        help="Will run as a daemon when provided, interpreted as seconds.",
     )
     flags, unknown = parser.parse_known_args()
     if unknown:
@@ -60,18 +60,30 @@ def tx_params() -> dict:
         return {}
 
 
-def set_fallback_operator(pool: int, operator: int, threshold: int):
+def deposit(
+    pool: int,
+    value: int,
+):
     try:
-        get_logger().info(
-            f"Setting threshold as {threshold} from pool {get_name(pool)} for {get_name(operator)}"
-        )
+        get_logger().info(f"Depositing {value} wei to pool {get_name(pool)}")
+
+        params: dict = tx_params()
+        params.update({'value': value})
 
         tx: dict = (
             get_sdk()
-            .portal.contract.functions.setFallbackOperator(pool, operator, threshold)
-            .transact(tx_params())
+            .portal.contract.functions.deposit(
+                pool,
+                0,
+                [],
+                0,
+                1821194534,  # will fail in 2100
+                get_sdk().w3.eth.default_account,
+            )
+            .transact(params)
         )
-        get_logger().etherscan("setFallbackOperator", tx)
+
+        get_logger().etherscan("deposit", tx)
 
     except Exception as err:
         get_logger().error("Tx failed, try again.")
@@ -81,13 +93,12 @@ def set_fallback_operator(pool: int, operator: int, threshold: int):
 def main():
     setup(flag_collector=collect_local_flags)
     f: dict = get_flags()
-
     if "interval" in f and f.interval:
         while True:
-            set_fallback_operator(f.pool, f.operator, f.threshold)
+            deposit(f.pool, f.value)
             sleep(f.interval)
     else:
-        set_fallback_operator(f.pool, f.operator, f.threshold)
+        deposit(f.pool, f.value)
 
 
 if __name__ == "__main__":

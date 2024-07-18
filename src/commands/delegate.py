@@ -26,6 +26,7 @@ def collect_local_flags() -> dict:
         "--main-directory",
         action="store",
         dest="main_directory",
+        type=str,
         help="main directory name that will be created, and used to store data",
         default=os.path.join(os.getcwd(), '.geonius'),
     )

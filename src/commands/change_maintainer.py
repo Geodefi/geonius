@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from time import sleep
 from argparse import ArgumentParser
-
-from geodefi.globals import ETHER_DENOMINATOR
 
 from src.common import AttributeDict
 from src.exceptions import UnknownFlagError
@@ -28,18 +25,19 @@ def collect_local_flags() -> dict:
         "--main-directory",
         action="store",
         dest="main_directory",
+        type=str,
         help="main directory name that will be created, and used to store data",
         default=os.path.join(os.getcwd(), '.geonius'),
     )
-    parser.add_argument("--value", action="store", dest="value", type=int, required=True)
     parser.add_argument(
-        "--interval",
+        "--address",
         action="store",
-        dest="interval",
+        dest="value",
         type=int,
-        required=False,
-        help="Will run as a daemon when provided, interpreted in seconds.",
+        help="maintainer address to set and use in geonius",
+        required=True,
     )
+
     flags, unknown = parser.parse_known_args()
     if unknown:
         print(f"Unknown flags:{unknown}")
@@ -60,19 +58,15 @@ def tx_params() -> dict:
         return {}
 
 
-def increase_wallet(value: int):
+def change_maintainer(address: str):
     try:
-        get_logger().info(
-            f"Increasing id wallet for {get_name(get_config().operator_id)} by {value/ETHER_DENOMINATOR} ether"
-        )
+        operator_id: int = get_config().operator_id
+        get_logger().info(f"Setting a new maintainer for {get_name(operator_id)}: {address}")
 
         params: dict = tx_params()
-        params.update({'value': value})
 
         tx: dict = (
-            get_sdk()
-            .portal.functions.increaseWalletBalance(get_config().operator_id)
-            .transact(params)
+            get_sdk().portal.functions.changeMaintainer(operator_id, address).transact(params)
         )
 
         get_logger().etherscan("increaseWalletBalance", tx)
@@ -85,12 +79,7 @@ def increase_wallet(value: int):
 def main():
     setup(flag_collector=collect_local_flags)
     f: dict = get_flags()
-    if "interval" in f and f.interval:
-        while True:
-            increase_wallet(f.value)
-            sleep(int(f.interval))
-    else:
-        increase_wallet(f.value)
+    change_maintainer(f.address)
 
 
 if __name__ == "__main__":

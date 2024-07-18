@@ -4,11 +4,9 @@ import os
 from time import sleep
 from argparse import ArgumentParser
 
-from geodefi.globals import ETHER_DENOMINATOR
-
 from src.common import AttributeDict
 from src.exceptions import UnknownFlagError
-from src.globals import get_sdk, get_config, get_logger, get_flags
+from src.globals import get_sdk, get_logger, get_flags
 from src.helpers.portal import get_name
 from src.utils.gas import get_gas
 from src.setup import setup
@@ -28,17 +26,20 @@ def collect_local_flags() -> dict:
         "--main-directory",
         action="store",
         dest="main_directory",
+        type=str,
         help="main directory name that will be created, and used to store data",
         default=os.path.join(os.getcwd(), '.geonius'),
     )
-    parser.add_argument("--value", action="store", dest="value", type=int, required=True)
+    parser.add_argument("--pool", action="store", dest="pool", type=int, required=True)
+    parser.add_argument("--operator", action="store", dest="operator", type=int, required=True)
+    parser.add_argument("--threshold", action="store", dest="threshold", type=int, required=True)
     parser.add_argument(
         "--interval",
         action="store",
-        dest="interval",
         type=int,
+        dest="interval",
         required=False,
-        help="Will run as a daemon when provided, interpreted as seconds.",
+        help="Will run as a daemon when provided, interpreted in seconds.",
     )
     flags, unknown = parser.parse_known_args()
     if unknown:
@@ -60,18 +61,18 @@ def tx_params() -> dict:
         return {}
 
 
-def decrease_wallet(value: int):
+def set_fallback_operator(pool: int, operator: int, threshold: int):
     try:
-        _id = int(get_config().operator_id)
         get_logger().info(
-            f"Decreasing id wallet for {get_name(_id)} by {value/ETHER_DENOMINATOR} ether"
+            f"Setting threshold as {threshold} from pool {get_name(pool)} for {get_name(operator)}"
         )
 
-        params: dict = tx_params()
-
-        tx: dict = get_sdk().portal.functions.decreaseWalletBalance(_id, value).transact(params)
-
-        get_logger().etherscan("decreaseWalletBalance", tx)
+        tx: dict = (
+            get_sdk()
+            .portal.contract.functions.setFallbackOperator(pool, operator, threshold)
+            .transact(tx_params())
+        )
+        get_logger().etherscan("setFallbackOperator", tx)
 
     except Exception as err:
         get_logger().error("Tx failed, try again.")
@@ -84,10 +85,10 @@ def main():
 
     if "interval" in f and f.interval:
         while True:
-            decrease_wallet(f.value)
+            set_fallback_operator(f.pool, f.operator, f.threshold)
             sleep(f.interval)
     else:
-        decrease_wallet(f.value)
+        set_fallback_operator(f.pool, f.operator, f.threshold)
 
 
 if __name__ == "__main__":
