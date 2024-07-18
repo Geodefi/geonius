@@ -74,8 +74,8 @@ def delegate(allowance: int, pool: int, operator: int):
         get_logger().etherscan("delegate", tx)
 
     except Exception as e:
-        get_logger().error("Tx failed, trying again.")
         get_logger().error(str(e))
+        get_logger().error("Tx failed, try again.")
 
 
 def main():

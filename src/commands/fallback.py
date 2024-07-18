@@ -75,8 +75,8 @@ def set_fallback_operator(pool: int, operator: int, threshold: int):
         get_logger().etherscan("setFallbackOperator", tx)
 
     except Exception as e:
-        get_logger().error("Tx failed, try again.")
         get_logger().error(str(e))
+        get_logger().error("Tx failed, try again.")
 
 
 def main():

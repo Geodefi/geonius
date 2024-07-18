@@ -72,8 +72,8 @@ def change_maintainer(address: str):
         get_logger().etherscan("increaseWalletBalance", tx)
 
     except Exception as e:
-        get_logger().error("Tx failed, try again.")
         get_logger().error(str(e))
+        get_logger().error("Tx failed, try again.")
 
 
 def main():

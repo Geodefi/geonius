@@ -50,8 +50,8 @@ def check_wallet():
         )
 
     except Exception as e:
-        get_logger().error("Check failed, try again.")
         get_logger().error(str(e))
+        get_logger().error("Check failed, try again.")
 
 
 def main():

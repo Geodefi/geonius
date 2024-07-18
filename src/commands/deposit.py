@@ -77,7 +77,7 @@ def deposit(
                 0,
                 [],
                 0,
-                1821194534,  # will fail in 2100
+                32503680061,  # will fail in year 3000
                 get_sdk().w3.eth.default_account,
             )
             .transact(params)
@@ -86,8 +86,8 @@ def deposit(
         get_logger().etherscan("deposit", tx)
 
     except Exception as e:
-        get_logger().error("Tx failed, try again.")
         get_logger().error(str(e))
+        get_logger().error("Tx failed, try again.")
 
 
 def main():

@@ -9,7 +9,7 @@ def main():
 
     This function is called with `geonius run --chain _xxx_`.
 
-    initializes the databases and sets up the daemons.
+    initializes the databases and starts the daemons.
     """
     try:
         setup()

@@ -75,8 +75,8 @@ def decrease_wallet(value: int):
         get_logger().etherscan("decreaseWalletBalance", tx)
 
     except Exception as e:
-        get_logger().error("Tx failed, try again.")
         get_logger().error(str(e))
+        get_logger().error("Tx failed, try again.")
 
 
 def main():
