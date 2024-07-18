@@ -2,52 +2,12 @@
 
 import os
 from time import sleep
-from argparse import ArgumentParser
+import click
 
-from src.common import AttributeDict
-from src.exceptions import UnknownFlagError
-from src.globals import get_sdk, get_config, get_logger, get_flags
+from src.globals import get_sdk, get_config, get_logger
 from src.helpers.portal import get_name
 from src.utils.gas import get_gas
 from src.setup import setup
-
-
-def collect_local_flags() -> dict:
-    parser = ArgumentParser()
-    parser.add_argument(
-        "--chain",
-        action="store",
-        dest="chain",
-        type=str,
-        help="Network name, such as 'holesky' or 'ethereum' etc. Required when providing any other chain setting.",
-        required=True,
-    )
-    parser.add_argument(
-        "--main-directory",
-        action="store",
-        dest="main_directory",
-        type=str,
-        help="main directory name that will be created, and used to store data",
-        default=os.path.join(os.getcwd(), '.geonius'),
-    )
-    parser.add_argument("--allowance", action="store", dest="allowance", type=int, required=True)
-    parser.add_argument("--pool", action="store", dest="pool", type=int, required=True)
-    parser.add_argument("--operator", action="store", dest="operator", type=int, required=True)
-    parser.add_argument(
-        "--interval",
-        action="store",
-        dest="interval",
-        type=int,
-        required=False,
-        help="Will run as a daemon when provided, interpreted as seconds.",
-    )
-    flags, unknown = parser.parse_known_args()
-    if unknown:
-        print(f"Unknown flags:{unknown}")
-        raise UnknownFlagError
-    flags_dict = vars(flags)
-    flags_dict["no_log_file"] = True
-    return AttributeDict.convert_recursive(flags_dict)
 
 
 def tx_params() -> dict:
@@ -61,9 +21,9 @@ def tx_params() -> dict:
         return {}
 
 
-def delegate(allowance: int, pool: int, operator: int):
+def delegate(pool: int, operator: int, allowance: int):
     try:
-        get_logger().info(
+        get_logger().critical(
             f"Delegating {allowance} to operator {get_name(get_config().operator_id)} in pool {get_name(pool)}"
         )
 
@@ -78,14 +38,58 @@ def delegate(allowance: int, pool: int, operator: int):
         get_logger().error("Tx failed, try again.")
 
 
-def main():
-    setup()
-    f: dict = get_flags()
+@click.option(
+    "--interval",
+    required=False,
+    type=click.INT,
+    help="Will run as a daemon when provided (seconds)",
+)
+@click.option(
+    "--allowance",
+    required=True,
+    type=click.INT,
+    prompt="Please specify the allowance (validators)",
+    help="Number of validators provided Operator can create on behalf of the provided Pool",
+)
+@click.option(
+    "--operator",
+    required=True,
+    type=click.INT,
+    prompt="Please specify the Operator ID",
+    help="Operator ID that will be allowed to create validators",
+)
+@click.option(
+    "--pool",
+    required=True,
+    type=click.INT,
+    prompt="Please specify the Pool ID",
+    help="Pool ID to give allowance from.",
+)
+@click.option(
+    "--chain",
+    envvar="GEONIUS_CHAIN",
+    required=True,
+    type=click.Choice(["holesky", "ethereum"]),
+    prompt="You forgot to specify the chain",
+    default="holesky",
+    help="Network name, such as 'holesky' or 'ethereum' etc.",
+)
+@click.option(
+    "--main-dir",
+    envvar="GEONIUS_DIR",
+    required=False,
+    type=click.STRING,
+    default=os.path.join(os.getcwd(), ".geonius"),
+    help="Main directory PATH that will be used to store data. Default is ./.geonius",
+)
+@click.command(help="Allow an Operator to propose validators on behalf of the staking pool.")
+def main(chain: str, main_dir: str, pool: int, operator: int, allowance: int, interval: int):
+    setup(chain=chain, main_dir=main_dir, no_log_file=True)
 
-    if "interval" in f and f.interval:
+    if interval:
         while True:
-            delegate(f.allowance, f.pool, f.operator)
-
-            sleep(f.interval)
+            delegate(pool, operator, allowance)
+            get_logger().info(f"Will run again in {interval} seconds")
+            sleep(interval)
     else:
-        delegate(f.allowance, f.pool, f.operator)
+        delegate(pool, operator, allowance)

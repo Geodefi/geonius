@@ -4,9 +4,8 @@ import os
 from time import sleep
 import click
 
-from geodefi.globals import ETHER_DENOMINATOR
-
-from src.globals import get_sdk, get_config, get_logger
+from geodefi.globals.constants import PERCENTAGE_DENOMINATOR
+from src.globals import get_sdk, get_logger
 from src.helpers.portal import get_name
 from src.utils.gas import get_gas
 from src.setup import setup
@@ -23,23 +22,19 @@ def tx_params() -> dict:
         return {}
 
 
-def increase_wallet(value: int):
+def set_fallback_operator(pool: int, operator: int, threshold: int):
     try:
+        perc_threshold: int = threshold * PERCENTAGE_DENOMINATOR / 100
         get_logger().critical(
-            f"Increasing internal wallet for {get_name(get_config().operator_id)} "
-            f"by {value/ETHER_DENOMINATOR} ether."
+            f"Setting threshold as {perc_threshold} from pool {get_name(pool)} for {get_name(operator)}"
         )
-
-        params: dict = tx_params()
-        params.update({"value": value})
 
         tx: dict = (
             get_sdk()
-            .portal.functions.increaseWalletBalance(get_config().operator_id)
-            .transact(params)
+            .portal.contract.functions.setFallbackOperator(pool, operator, perc_threshold)
+            .transact(tx_params())
         )
-
-        get_logger().etherscan("increaseWalletBalance", tx)
+        get_logger().etherscan("setFallbackOperator", tx)
 
     except Exception as e:
         get_logger().error(str(e))
@@ -53,11 +48,25 @@ def increase_wallet(value: int):
     help="Will run as a daemon when provided (seconds)",
 )
 @click.option(
-    "--value",
+    "--threshold",
+    required=True,
+    type=click.IntRange(0, 100),
+    prompt="Please specify the threshold (percentage)",
+    help="Provided Operator can create infinitely many validators after this threshold is filled.",
+)
+@click.option(
+    "--operator",
     required=True,
     type=click.INT,
-    prompt="Please specify the amount to deposit (wei)",
-    help="Amount to deposit into the internal wallet (wei)",
+    prompt="Please specify the Operator ID",
+    help="Operator ID that will be allowed to create validators",
+)
+@click.option(
+    "--pool",
+    required=True,
+    type=click.INT,
+    prompt="Please specify the Pool ID",
+    help="Pool ID that will allow provided operator to create validators when suitable.",
 )
 @click.option(
     "--chain",
@@ -77,17 +86,16 @@ def increase_wallet(value: int):
     help="Main directory PATH that will be used to store data. Default is ./.geonius",
 )
 @click.command(
-    help="Deposits the specified amount of wei into the Node Operator's internal wallet. "
-    "Every new validator requires 1 ETH to be available in the internal wallet. "
-    "Ether will be returned back to the internal wallet after the activation of the validator."
+    help="Sets a new fallback operator for the provided pool id. "
+    "Provided Operator can create infinitely many validators after the provided threshold is filled."
 )
-def main(chain: str, main_dir: str, value: int, interval: int):
+def main(chain: str, main_dir: str, pool: int, operator: int, threshold: int, interval: int):
     setup(chain=chain, main_dir=main_dir, no_log_file=True)
 
     if interval:
         while True:
-            increase_wallet(value)
+            set_fallback_operator(pool, operator, threshold)
             get_logger().info(f"Will run again in {interval} seconds")
             sleep(interval)
     else:
-        increase_wallet(value)
+        set_fallback_operator(pool, operator, threshold)

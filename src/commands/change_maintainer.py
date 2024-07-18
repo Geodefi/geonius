@@ -1,50 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import os
-from argparse import ArgumentParser
+import click
 
-from src.common import AttributeDict
-from src.exceptions import UnknownFlagError
-from src.globals import get_sdk, get_config, get_logger, get_flags
+from src.globals import get_sdk, get_config, get_logger
 from src.helpers.portal import get_name
 from src.utils.gas import get_gas
 from src.setup import setup
-
-
-def collect_local_flags() -> dict:
-    parser = ArgumentParser()
-    parser.add_argument(
-        "--chain",
-        action="store",
-        dest="chain",
-        type=str,
-        help="Network name, such as 'holesky' or 'ethereum' etc. Required when providing any other chain setting.",
-        required=True,
-    )
-    parser.add_argument(
-        "--main-directory",
-        action="store",
-        dest="main_directory",
-        type=str,
-        help="main directory name that will be created, and used to store data",
-        default=os.path.join(os.getcwd(), '.geonius'),
-    )
-    parser.add_argument(
-        "--address",
-        action="store",
-        dest="value",
-        type=int,
-        help="maintainer address to set and use in geonius",
-        required=True,
-    )
-
-    flags, unknown = parser.parse_known_args()
-    if unknown:
-        print(f"Unknown flags:{unknown}")
-        raise UnknownFlagError
-    flags_dict = vars(flags)
-    flags_dict["no_log_file"] = True
-    return AttributeDict.convert_recursive(flags_dict)
 
 
 def tx_params() -> dict:
@@ -61,7 +23,7 @@ def tx_params() -> dict:
 def change_maintainer(address: str):
     try:
         operator_id: int = get_config().operator_id
-        get_logger().info(f"Setting a new maintainer for {get_name(operator_id)}: {address}")
+        get_logger().critical(f"Setting a new maintainer for {get_name(operator_id)}: {address}")
 
         params: dict = tx_params()
 
@@ -69,14 +31,40 @@ def change_maintainer(address: str):
             get_sdk().portal.functions.changeMaintainer(operator_id, address).transact(params)
         )
 
-        get_logger().etherscan("increaseWalletBalance", tx)
+        get_logger().etherscan("changeMaintainer", tx)
 
     except Exception as e:
         get_logger().error(str(e))
         get_logger().error("Tx failed, try again.")
 
 
-def main():
-    setup()
-    f: dict = get_flags()
-    change_maintainer(f.address)
+@click.option(
+    "--address",
+    required=True,
+    type=click.STRING,
+    prompt="Please specify the maintainer address",
+    help="Maintainer address to set and use in geonius",
+)
+@click.option(
+    "--chain",
+    envvar="GEONIUS_CHAIN",
+    required=True,
+    type=click.Choice(["holesky", "ethereum"]),
+    prompt="You forgot to specify the chain",
+    default="holesky",
+    help="Network name, such as 'holesky' or 'ethereum' etc.",
+)
+@click.option(
+    "--main-dir",
+    envvar="GEONIUS_DIR",
+    required=False,
+    type=click.STRING,
+    default=os.path.join(os.getcwd(), ".geonius"),
+    help="Main directory PATH that will be used to store data. Default is ./.geonius",
+)
+@click.command(
+    help="Set a new maintainer for the Node Operator. Maintainers are allowed to create validators, and should be the ones operating geonius."
+)
+def main(chain: str, main_dir: str, address: str):
+    setup(chain=chain, main_dir=main_dir, no_log_file=True)
+    change_maintainer(address)

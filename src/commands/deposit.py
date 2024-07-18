@@ -2,51 +2,12 @@
 
 import os
 from time import sleep
-from argparse import ArgumentParser
+import click
 
-from src.common import AttributeDict
-from src.exceptions import UnknownFlagError
-from src.globals import get_sdk, get_logger, get_flags
+from src.globals import get_sdk, get_logger
 from src.helpers.portal import get_name
 from src.utils.gas import get_gas
 from src.setup import setup
-
-
-def collect_local_flags() -> dict:
-    parser = ArgumentParser()
-    parser.add_argument(
-        "--chain",
-        action="store",
-        dest="chain",
-        type=str,
-        help="Network name, such as 'holesky' or 'ethereum' etc. Required when providing any other chain setting.",
-        required=True,
-    )
-    parser.add_argument(
-        "--main-directory",
-        action="store",
-        dest="main_directory",
-        type=str,
-        help="main directory name that will be created, and used to store data",
-        default=os.path.join(os.getcwd(), '.geonius'),
-    )
-    parser.add_argument("--value", action="store", dest="value", type=int, required=True)
-    parser.add_argument("--pool", action="store", dest="pool", type=int, required=True)
-    parser.add_argument(
-        "--interval",
-        action="store",
-        dest="interval",
-        type=int,
-        required=False,
-        help="Will run as a daemon when provided, interpreted as seconds.",
-    )
-    flags, unknown = parser.parse_known_args()
-    if unknown:
-        print(f"Unknown flags:{unknown}")
-        raise UnknownFlagError
-    flags_dict = vars(flags)
-    flags_dict["no_log_file"] = True
-    return AttributeDict.convert_recursive(flags_dict)
 
 
 def tx_params() -> dict:
@@ -65,10 +26,10 @@ def deposit(
     value: int,
 ):
     try:
-        get_logger().info(f"Depositing {value} wei to pool {get_name(pool)}")
+        get_logger().critical(f"Depositing {value} wei to pool {get_name(pool)}")
 
         params: dict = tx_params()
-        params.update({'value': value})
+        params.update({"value": value})
 
         tx: dict = (
             get_sdk()
@@ -90,12 +51,54 @@ def deposit(
         get_logger().error("Tx failed, try again.")
 
 
-def main():
-    setup()
-    f: dict = get_flags()
-    if "interval" in f and f.interval:
+@click.option(
+    "--interval",
+    required=False,
+    type=click.INT,
+    help="Will run as a daemon when provided (seconds)",
+)
+@click.option(
+    "--value",
+    required=True,
+    type=click.INT,
+    prompt="Please specify the deposit amount (wei)",
+    help="Amount to deposit into provided staking pool (wei)",
+)
+@click.option(
+    "--pool",
+    required=True,
+    type=click.INT,
+    prompt="Please specify the Pool ID",
+    help="Pool ID to deposit ether.",
+)
+@click.option(
+    "--chain",
+    envvar="GEONIUS_CHAIN",
+    required=True,
+    type=click.Choice(["holesky", "ethereum"]),
+    prompt="You forgot to specify the chain",
+    default="holesky",
+    help="Network name, such as 'holesky' or 'ethereum' etc.",
+)
+@click.option(
+    "--main-dir",
+    envvar="GEONIUS_DIR",
+    required=False,
+    type=click.STRING,
+    default=os.path.join(os.getcwd(), ".geonius"),
+    help="Main directory PATH that will be used to store data. Default is ./.geonius",
+)
+@click.command(
+    help="Deposit ether into a Staking pool."
+    "Circuit breakers like 'deadline' or 'min gETH amount' can not be specified at the moment."
+)
+def main(chain: str, main_dir: str, pool: int, value: int, interval: int):
+    setup(chain=chain, main_dir=main_dir, no_log_file=True)
+
+    if interval:
         while True:
-            deposit(f.pool, f.value)
-            sleep(f.interval)
+            deposit(pool, value)
+            get_logger().info(f"Will run again in {interval} seconds")
+            sleep(interval)
     else:
-        deposit(f.pool, f.value)
+        deposit(pool, value)

@@ -18,7 +18,7 @@ def check_wallet():
 
         get_logger().info(
             f"{get_name(oid)} has {balance/ETHER_DENOMINATOR}ETH ({balance} wei) balance in portal."
-            f" Use 'geonius increase-wallet --value X --chain X' to deposit more."
+            f" Use 'geonius increase-wallet' to deposit more."
         )
 
     except Exception as e:
@@ -43,8 +43,11 @@ def check_wallet():
     default=os.path.join(os.getcwd(), ".geonius"),
     help="Main directory PATH that will be used to store data. Default is ./.geonius",
 )
-@click.command(help="Start geonius")
+@click.command(
+    help="Prints the amount of ether that can be utilized by Node Operators to propose new validators. "
+    "Every new validator requires 1 ETH to be available in the internal wallet. "
+    "Ether will be returned back to the internal wallet after the activation of the validator."
+)
 def main(chain: str, main_dir: str):
-    print(chain, main_dir)
     setup(chain=chain, main_dir=main_dir, no_log_file=True)
     check_wallet()
