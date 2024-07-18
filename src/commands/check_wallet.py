@@ -49,15 +49,11 @@ def check_wallet():
             f"{get_name(oid)} has {balance/ETHER_DENOMINATOR} ETH ({balance} wei) in the internal wallet. Use 'geonius increase-wallet --value X --chain X' to deposit more."
         )
 
-    except Exception as err:
+    except Exception as e:
         get_logger().error("Check failed, try again.")
-        get_logger().error(err)
+        get_logger().error(str(e))
 
 
 def main():
-    setup(flag_collector=collect_local_flags)
+    setup()
     check_wallet()
-
-
-if __name__ == "__main__":
-    main()

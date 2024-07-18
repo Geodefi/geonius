@@ -73,13 +73,13 @@ def delegate(allowance: int, pool: int, operator: int):
 
         get_logger().etherscan("delegate", tx)
 
-    except Exception as err:
+    except Exception as e:
         get_logger().error("Tx failed, trying again.")
-        get_logger().error(err)
+        get_logger().error(str(e))
 
 
 def main():
-    setup(flag_collector=collect_local_flags)
+    setup()
     f: dict = get_flags()
 
     if "interval" in f and f.interval:
@@ -89,7 +89,3 @@ def main():
             sleep(f.interval)
     else:
         delegate(f.allowance, f.pool, f.operator)
-
-
-if __name__ == "__main__":
-    main()

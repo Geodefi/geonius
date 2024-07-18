@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
+
 from typing import Callable
+from web3.contract.contract import ContractEvent
 
 from geodefi import Geode
 from geodefi.globals.constants import ETHER_DENOMINATOR
@@ -25,6 +28,7 @@ from src.globals import (
     get_config,
     get_sdk,
     get_logger,
+    get_constants,
 )
 from src.helpers.portal import get_maintainer, get_wallet_balance
 from src.globals.config import apply_flags, init_config
@@ -32,6 +36,40 @@ from src.globals.constants import init_constants
 from src.globals.env import load_env
 from src.globals.flags import collect_flags
 from src.globals.sdk import init_sdk
+
+
+from src.daemons import BlockDaemon, EventDaemon
+from src.triggers.event import (
+    AlienatedTrigger,
+    DelegationTrigger,
+    FallbackOperatorTrigger,
+    IdInitiatedTrigger,
+    DepositTrigger,
+    StakeProposalTrigger,
+    ExitRequestTrigger,
+)
+from src.triggers.block import (
+    StakeTrigger,
+)
+from src.database.pools import reinitialize_pools_table, create_pools_table
+from src.database.operators import reinitialize_operators_table, create_operators_table
+from src.database.validators import reinitialize_validators_table, create_validators_table
+from src.database.events import (
+    reinitialize_alienated_table,
+    reinitialize_delegation_table,
+    reinitialize_deposit_table,
+    reinitialize_exit_request_table,
+    reinitialize_stake_proposal_table,
+    reinitialize_fallback_operator_table,
+    reinitialize_id_initiated_table,
+    create_alienated_table,
+    create_delegation_table,
+    create_deposit_table,
+    create_exit_request_table,
+    create_stake_proposal_table,
+    create_fallback_operator_table,
+    create_id_initiated_table,
+)
 
 
 def preflight_checks():
@@ -176,7 +214,7 @@ def preflight_checks():
     )
 
 
-def setup(flag_collector: Callable = collect_flags):
+def setup():
     """Initializes the required components from the geonius script:
     - Loads environment variables from specified .env file
     - Applies the provided flags to be utilized in the config step
@@ -190,7 +228,7 @@ def setup(flag_collector: Callable = collect_flags):
         Secondary scripts can have their own flags, then this should be speciifed.
         Otherwise, defaults to collect_flags.
     """
-    set_flags(flag_collector())
+    # set_flags(flag_collector())
     set_env(load_env())
 
     config = apply_flags(init_config())
@@ -206,3 +244,97 @@ def setup(flag_collector: Callable = collect_flags):
     )
     set_constants(init_constants())
     preflight_checks()
+
+
+def init_dbs():
+    """Initializes the databases if suited. Wipes out all data When reset flag is provided.
+
+    This function is called at the beginning of the program to make sure the
+    databases are up to date.
+    """
+    if get_flags().reset:
+        reinitialize_pools_table()
+        reinitialize_operators_table()
+        reinitialize_validators_table()
+
+        reinitialize_alienated_table()
+        reinitialize_delegation_table()
+        reinitialize_deposit_table()
+        reinitialize_exit_request_table()
+        reinitialize_stake_proposal_table()
+        reinitialize_fallback_operator_table()
+        reinitialize_id_initiated_table()
+    else:
+        create_pools_table()
+        create_operators_table()
+        create_validators_table()
+
+        create_alienated_table()
+        create_delegation_table()
+        create_deposit_table()
+        create_exit_request_table()
+        create_stake_proposal_table()
+        create_fallback_operator_table()
+        create_id_initiated_table()
+
+
+def run_daemons():
+    """Initializes and runs the daemons for the triggers.
+
+    This function is called at the beginning of the program to make sure the
+    daemons are running.
+    """
+    events: ContractEvent = get_sdk().portal.contract.events
+    # Triggers
+
+    id_initiated_trigger: IdInitiatedTrigger = IdInitiatedTrigger()
+    deposit_trigger: DepositTrigger = DepositTrigger()
+    delegation_trigger: DelegationTrigger = DelegationTrigger()
+    stake_proposal_trigger: StakeProposalTrigger = StakeProposalTrigger()
+    fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
+    alienated_trigger: AlienatedTrigger = AlienatedTrigger()
+    exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
+    stake_trigger: StakeTrigger = StakeTrigger()
+
+    # Create appropriate type of Daemons for the triggers
+    id_initiated_daemon: EventDaemon = EventDaemon(
+        trigger=id_initiated_trigger,
+        event=events.IdInitiated(),
+    )
+    deposit_daemon: EventDaemon = EventDaemon(
+        trigger=deposit_trigger,
+        event=events.Deposit(),
+    )
+    delegation_daemon: EventDaemon = EventDaemon(
+        trigger=delegation_trigger,
+        event=events.Delegation(),
+    )
+    stake_proposal_daemon: EventDaemon = EventDaemon(
+        trigger=stake_proposal_trigger,
+        event=events.StakeProposal(),
+    )
+    fallback_operator_daemon: EventDaemon = EventDaemon(
+        trigger=fallback_operator_trigger,
+        event=events.FallbackOperator(),
+    )
+    alienated_daemon: EventDaemon = EventDaemon(
+        trigger=alienated_trigger,
+        event=events.Alienated(),
+    )
+    exit_request_daemon: EventDaemon = EventDaemon(
+        trigger=exit_request_trigger,
+        event=events.ExitRequest(),
+    )
+    stake_daemon: BlockDaemon = BlockDaemon(
+        trigger=stake_trigger, block_period=0.5 * get_constants().hour_blocks
+    )
+
+    # Run the daemons
+    id_initiated_daemon.run()
+    deposit_daemon.run()
+    delegation_daemon.run()
+    stake_proposal_daemon.run()
+    fallback_operator_daemon.run()
+    alienated_daemon.run()
+    exit_request_daemon.run()
+    stake_daemon.run()

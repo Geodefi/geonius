@@ -74,13 +74,13 @@ def set_fallback_operator(pool: int, operator: int, threshold: int):
         )
         get_logger().etherscan("setFallbackOperator", tx)
 
-    except Exception as err:
+    except Exception as e:
         get_logger().error("Tx failed, try again.")
-        get_logger().error(err)
+        get_logger().error(str(e))
 
 
 def main():
-    setup(flag_collector=collect_local_flags)
+    setup()
     f: dict = get_flags()
 
     if "interval" in f and f.interval:
@@ -89,7 +89,3 @@ def main():
             sleep(f.interval)
     else:
         set_fallback_operator(f.pool, f.operator, f.threshold)
-
-
-if __name__ == "__main__":
-    main()

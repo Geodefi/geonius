@@ -85,13 +85,13 @@ def deposit(
 
         get_logger().etherscan("deposit", tx)
 
-    except Exception as err:
+    except Exception as e:
         get_logger().error("Tx failed, try again.")
-        get_logger().error(err)
+        get_logger().error(str(e))
 
 
 def main():
-    setup(flag_collector=collect_local_flags)
+    setup()
     f: dict = get_flags()
     if "interval" in f and f.interval:
         while True:
@@ -99,7 +99,3 @@ def main():
             sleep(f.interval)
     else:
         deposit(f.pool, f.value)
-
-
-if __name__ == "__main__":
-    main()

@@ -2,15 +2,18 @@
 
 from os import path
 import json
-import geodefi
 
 from src.common import AttributeDict
 from src.exceptions import ConfigurationFileError, MissingConfigurationError
-from src.globals import get_flags, get_env
 
 
-def apply_flags(config: AttributeDict):
-    """Applies the flags to the configuration. If a flag is not set, the configuration is not changed.
+def apply_flags(
+    flags: AttributeDict,
+    config: AttributeDict,
+    env: AttributeDict,
+):
+    """Applies the flags to the configuration.
+    If a particular flag is not set, the configuration is not changed.
 
     Args:
         config (AttributeDict): the configuration as an AttributeDict.
@@ -18,7 +21,7 @@ def apply_flags(config: AttributeDict):
     Returns:
         AttributeDict: the configuration with the flags applied.
     """
-    flags = AttributeDict({k: v for k, v in get_flags().items() if v is not None})
+    flags = AttributeDict({k: v for k, v in flags.items() if v is not None})
 
     if "no_log_stream" in flags:
         config.logger.no_stream = flags.no_log_stream
@@ -29,11 +32,11 @@ def apply_flags(config: AttributeDict):
     if "max_proposal_delay" in flags:
         config.strategy.max_proposal_delay = flags.max_proposal_delay
     if "network_refresh_rate" in flags:
-        geodefi.globals.constants.REFRESH_RATE = flags.network_max_attempt
-    if "network_attempt_rate" in flags:
-        geodefi.globals.constants.ATTEMPT_RATE = flags.network_attempt_rate
+        config.network.refresh_rate = flags.network_refresh_rate
     if "network_max_attempt" in flags:
-        geodefi.globals.constants.MAX_ATTEMPT = flags.network_refresh_rate
+        config.network.max_attempt = flags.network_max_attempt
+    if "network_attempt_rate" in flags:
+        config.network.attempt_rate = flags.network_attempt_rate
     if "logger_directory" in flags:
         config.logger.directory = flags.logger_directory
     if "logger_level" in flags:
@@ -72,27 +75,27 @@ def apply_flags(config: AttributeDict):
 
     # put the execution api key in configuration from environment variables
     if "<EXECUTION_API_KEY>" in config.chains[flags.chain].execution_api:
-        if get_env().EXECUTION_API_KEY:
+        if env.EXECUTION_API_KEY:
             config.chains[flags.chain].execution_api = config.chains[
                 flags.chain
-            ].execution_api.replace("<EXECUTION_API_KEY>", get_env().EXECUTION_API_KEY)
+            ].execution_api.replace("<EXECUTION_API_KEY>", env.EXECUTION_API_KEY)
         else:
             raise MissingConfigurationError("EXECUTION_API_KEY environment var should be provided.")
 
     # put the consensus api key in configuration from environment variables
     if "<CONSENSUS_API_KEY>" in config.chains[flags.chain].consensus_api:
-        if get_env().CONSENSUS_API_KEY:
+        if env.CONSENSUS_API_KEY:
             config.chains[flags.chain].consensus_api = config.chains[
                 flags.chain
-            ].consensus_api.replace("<CONSENSUS_API_KEY>", get_env().CONSENSUS_API_KEY)
+            ].consensus_api.replace("<CONSENSUS_API_KEY>", env.CONSENSUS_API_KEY)
         else:
             raise MissingConfigurationError("CONSENSUS_API_KEY environment var should be provided.")
 
         # put the gas api key in configuration from environment variables
         if 'gas' in config:
             if "<GAS_API_KEY>" in config.gas.api:
-                if get_env().GAS_API_KEY:
-                    config.gas.api = config.gas.api.replace("<GAS_API_KEY>", get_env().GAS_API_KEY)
+                if env.GAS_API_KEY:
+                    config.gas.api = config.gas.api.replace("<GAS_API_KEY>", env.GAS_API_KEY)
                 else:
                     raise MissingConfigurationError(
                         "GAS_API_KEY environment var should be provided."
@@ -101,7 +104,7 @@ def apply_flags(config: AttributeDict):
     return config
 
 
-def init_config() -> AttributeDict:
+def init_config(main_dir: str) -> AttributeDict:
     """Initializes the configuration from the config.json file from main directory.
 
     Returns:
@@ -112,7 +115,6 @@ def init_config() -> AttributeDict:
     """
 
     try:
-        main_dir: str = get_flags().main_directory
         config_path = path.join(main_dir, 'config.json')
 
         # Catch configuration variables
