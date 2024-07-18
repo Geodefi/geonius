@@ -5,8 +5,7 @@ description = "Geonius is a daemonic script that allows Node Operators to automa
 authors = ["0xIceBear", "Crash Bandicoot"]
 readme = "README.md"
 packages = [
-    { include = "src" },
-    { include = "scripts" }
+    { include = "src" }
 ]
 
 [tool.poetry.dependencies]
@@ -22,13 +21,13 @@ pytest = "^8.2.1"
 black = "^24.4.2"
 pyinstaller = "^6.9.0"
 
-# we might need these for pipx git+https:// stuff
-# [tool.poetry.scripts]
-# run = "src.main:main"
-# check-wallet = "scripts.check_wallet:main"
-# increase-wallet = "scripts.increase_wallet:main"
-# decrease-wallet = "scripts.decrease_wallet:main"
-# change-maintainer = "scripts.change_maintainer:main"
+# we might need these for pipx git+https:// stuff = check pipx later
+[tool.poetry.scripts]
+run = "src.main:main"
+check-wallet = "src.commands.check_wallet:main"
+increase-wallet = "src.commands.increase_wallet:main"
+decrease-wallet = "src.commands.decrease_wallet:main"
+change-maintainer = "src.commands.change_maintainer:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -36,7 +35,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 100
-skip-string-normalization = true
 include = '\.pyi?$'
 exclude = '''
 /(
