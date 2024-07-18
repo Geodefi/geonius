@@ -34,7 +34,7 @@ class Loggable:
     def __init__(self) -> None:
         """Initializes a Loggable object."""
         logger: Logger = self.__get_logger()
-        logger.info("Initalized a global logger.")
+        logger.debug("Initalized a global logger.")
         self.logger = logger
 
     def __get_logger(self) -> Logger:
@@ -107,8 +107,8 @@ class Loggable:
             TimedRotatingFileHandler: Initialized and Configured File Handler
         """
 
-        main_dir: str = get_config().directory
-        log_dir: str = get_config().logger.directory
+        main_dir: str = get_config().dir
+        log_dir: str = get_config().logger.dir
         path: str = os.path.join(main_dir, log_dir)
         if not os.path.exists(path):
             os.makedirs(path)
@@ -129,10 +129,12 @@ class Loggable:
         network: str = get_sdk().network
         if network == Network.holesky:
             self.logger.info(
-                f"{function_name} tx sent: https://holesky.etherscan.io/tx/{tx_hash.hex()}"
+                f"{function_name} tx is submitted: https://holesky.etherscan.io/tx/{tx_hash.hex()}"
             )
         elif network == Network.ethereum:
-            self.logger.info(f"{function_name} tx sent: https://etherscan.io/tx/{tx_hash.hex()}")
+            self.logger.info(
+                f"{function_name} tx is submitted: https://etherscan.io/tx/{tx_hash.hex()}"
+            )
 
     def __getattr__(self, attr):
         return getattr(self.logger, attr)

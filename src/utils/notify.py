@@ -7,6 +7,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from src.common import AttributeDict
 from src.exceptions import EmailError
 from src.globals import get_env, get_config, get_logger
 
@@ -17,7 +18,8 @@ def send_email(
     attachments: list[tuple[str, str]] = [],
     dont_notify_devs=None,
 ):
-    """Sends an email to the provided developer address, as well as admin when allowed and applicable.
+    """Sends an email to the provided developer address,
+    as well as admin when allowed and applicable.
 
     Args:
         subject (_type_): The header for the mail
@@ -31,45 +33,47 @@ def send_email(
         e: _description_
         e: _description_
     """
-    if get_config().email is None:
+    config: AttributeDict = get_config()
+
+    if config.email is None:
         return
 
     if dont_notify_devs is None:
-        dont_notify_devs = get_config().email.dont_notify_devs
+        dont_notify_devs = config.email.dont_notify_devs
 
     env = get_env()
 
     msg: MIMEMultipart = MIMEMultipart()
-    msg['From'] = get_config().email.sender
-    msg['To'] = ",".join(get_config().email.receivers)
-    msg['Subject'] = f"[🧠 Geonius Alert]: {subject}"
+    msg["From"] = config.email.sender
+    msg["To"] = ",".join(config.email.receivers)
+    msg["Subject"] = f"[🧠 Geonius Alert]: {subject}"
     if not dont_notify_devs:
         body += "\n\nGeodefi team also notified of this error. You can use '--dont-notify-devs' flag to prevent this."
-        msg['Cc'] = "notifications@geode.fi"
+        msg["Cc"] = "notifications@geode.fi"
 
-    msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(body, "plain"))
 
-    if not attachments and not get_config().logger.no_file:
-        main_dir: str = get_config().directory
-        log_dir: str = get_config().logger.directory
+    if not attachments and not config.logger.no_file:
+        main_dir: str = config.dir
+        log_dir: str = config.logger.dir
         path: str = os.path.join(main_dir, log_dir, "log")
         attachments: list[tuple[str, str]] = [(path, "log.txt")]
 
     try:
         for file_path, file_name in attachments:
-            with open(file_path, 'rb') as attachment:
-                part = MIMEBase('application', 'octet-stream')
+            with open(file_path, "rb") as attachment:
+                part = MIMEBase("application", "octet-stream")
                 part.set_payload(attachment.read())
             encoders.encode_base64(part)
-            part.add_header('Content-Disposition', f'attachment; filename= {file_name}')
+            part.add_header("Content-Disposition", f"attachment; filename= {file_name}")
             msg.attach(part)
     except Exception as e:
         get_logger().error(f"Failed to attach file {file_path}: {e}. Will try to send without it.")
 
     try:
-        server = smtplib.SMTP(get_config().email.smtp_server, get_config().email.smtp_port)
+        server = smtplib.SMTP(config.email.smtp_server, config.email.smtp_port)
         server.starttls()
-        server.login(get_config().email.sender, env.EMAIL_PASSWORD)
+        server.login(config.email.sender, env.EMAIL_PASSWORD)
         server.send_message(msg)
         server.quit()
     except Exception as e:

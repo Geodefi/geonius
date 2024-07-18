@@ -24,14 +24,14 @@
   "logger": {
     "no_stream": false,
     "no_file": false,
-    "directory": "logs",
+    "dir": "logs",
     "level": "INFO",
     "when": "midnight",
     "interval": 1,
     "backup": 30
   },
   "database": {
-    "directory": "db"
+    "dir": "db"
   },
   "ethdo": {
     "wallet": "geonius",

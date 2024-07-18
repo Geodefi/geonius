@@ -8,8 +8,8 @@ from src.exceptions import ConfigurationFileError, MissingConfigurationError
 
 
 def apply_flags(
-    flags: AttributeDict,
     config: AttributeDict,
+    flags: AttributeDict,
     env: AttributeDict,
 ):
     """Applies the flags to the configuration.
@@ -21,7 +21,9 @@ def apply_flags(
     Returns:
         AttributeDict: the configuration with the flags applied.
     """
-    flags = AttributeDict({k: v for k, v in flags.items() if v is not None})
+
+    config.dir = flags.main_dir
+    config.chain_name = flags.chain
 
     if "no_log_stream" in flags:
         config.logger.no_stream = flags.no_log_stream
@@ -37,8 +39,8 @@ def apply_flags(
         config.network.max_attempt = flags.network_max_attempt
     if "network_attempt_rate" in flags:
         config.network.attempt_rate = flags.network_attempt_rate
-    if "logger_directory" in flags:
-        config.logger.directory = flags.logger_directory
+    if "logger_dir" in flags:
+        config.logger.dir = flags.logger_dir
     if "logger_level" in flags:
         config.logger.level = flags.logger_level
     if "logger_when" in flags:
@@ -47,8 +49,8 @@ def apply_flags(
         config.logger.interval = flags.logger_interval
     if "logger_backup" in flags:
         config.logger.backup = flags.logger_backup
-    if "database_directory" in flags:
-        config.database.directory = flags.database_directory
+    if "database_dir" in flags:
+        config.database.dir = flags.database_dir
     if "ethdo_wallet" in flags:
         config.ethdo.wallet = flags.ethdo_wallet
     if "ethdo_account" in flags:
@@ -63,36 +65,36 @@ def apply_flags(
                     "'--dont-notify-devs' flag requires email configuration"
                 ) from e
     if "chain_start" in flags:
-        config.chains[flags.chain].start = flags.chain_start
+        config.chains[config.chain_name].start = flags.chain_start
     if "chain_identifier" in flags:
-        config.chains[flags.chain].identifier = flags.chain_identifier
+        config.chains[config.chain_name].identifier = flags.chain_identifier
     if "chain_period" in flags:
-        config.chains[flags.chain].period = int(flags.chain_period)
+        config.chains[config.chain_name].period = int(flags.chain_period)
     if "chain_interval" in flags:
-        config.chains[flags.chain].interval = int(flags.chain_interval)
+        config.chains[config.chain_name].interval = int(flags.chain_interval)
     if "chain_range" in flags:
-        config.chains[flags.chain].range = int(flags.chain_range)
+        config.chains[config.chain_name].range = int(flags.chain_range)
 
     # put the execution api key in configuration from environment variables
     if "<EXECUTION_API_KEY>" in config.chains[flags.chain].execution_api:
         if env.EXECUTION_API_KEY:
-            config.chains[flags.chain].execution_api = config.chains[
-                flags.chain
+            config.chains[config.chain_name].execution_api = config.chains[
+                config.chain_name
             ].execution_api.replace("<EXECUTION_API_KEY>", env.EXECUTION_API_KEY)
         else:
             raise MissingConfigurationError("EXECUTION_API_KEY environment var should be provided.")
 
     # put the consensus api key in configuration from environment variables
-    if "<CONSENSUS_API_KEY>" in config.chains[flags.chain].consensus_api:
+    if "<CONSENSUS_API_KEY>" in config.chains[config.chain_name].consensus_api:
         if env.CONSENSUS_API_KEY:
-            config.chains[flags.chain].consensus_api = config.chains[
-                flags.chain
+            config.chains[config.chain_name].consensus_api = config.chains[
+                config.chain_name
             ].consensus_api.replace("<CONSENSUS_API_KEY>", env.CONSENSUS_API_KEY)
         else:
             raise MissingConfigurationError("CONSENSUS_API_KEY environment var should be provided.")
 
         # put the gas api key in configuration from environment variables
-        if 'gas' in config:
+        if "gas" in config:
             if "<GAS_API_KEY>" in config.gas.api:
                 if env.GAS_API_KEY:
                     config.gas.api = config.gas.api.replace("<GAS_API_KEY>", env.GAS_API_KEY)
@@ -115,13 +117,10 @@ def init_config(main_dir: str) -> AttributeDict:
     """
 
     try:
-        config_path = path.join(main_dir, 'config.json')
+        config_path = path.join(main_dir, "config.json")
 
         # Catch configuration variables
         config_dict: dict = json.load(open(config_path, encoding="utf-8"))
-
-        # Set main_directory as a config param
-        config_dict["directory"] = main_dir
 
         config: AttributeDict = AttributeDict.convert_recursive(config_dict)
 

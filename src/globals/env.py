@@ -4,12 +4,10 @@ import os
 from dotenv import load_dotenv
 
 from src.common import AttributeDict
-from src.globals import get_flags
 
 
-def load_env():
-    flags: dict = get_flags()
-    dotenv_path = os.path.join(flags.main_directory, '.env')
+def load_env(main_dir: str):
+    dotenv_path = os.path.join(main_dir, '.env')
 
     load_dotenv(dotenv_path)
     return AttributeDict.convert_recursive(

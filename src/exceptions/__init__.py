@@ -9,7 +9,6 @@ from .globals import (
     ConfigurationFileError,
     MissingConfigurationError,
     ConfigurationFieldError,
-    UnknownFlagError,
 )
 from .utils import HighGasError, GasApiError, EmailError
 from .triggers import BeaconStateMismatchError

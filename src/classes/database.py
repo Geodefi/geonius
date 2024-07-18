@@ -44,7 +44,7 @@ class Database:
         """
 
         self.db_name: str = db_name
-        self.path: str = os.path.join(get_config().directory, get_config().database.directory)
+        self.path: str = os.path.join(get_config().dir, get_config().database.dir)
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 

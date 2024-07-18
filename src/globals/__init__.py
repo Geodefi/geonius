@@ -47,15 +47,6 @@ def get_sdk():
     return __SDK
 
 
-def set_flags(value):
-    global __FLAGS
-    __FLAGS = value
-
-
-def get_flags():
-    return __FLAGS
-
-
 def set_constants(value):
     global __CONSTANTS
     __CONSTANTS = value
