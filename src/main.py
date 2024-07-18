@@ -2,6 +2,8 @@
 
 import click
 
+from src import __version__
+
 from src.commands.start import main as start
 from src.commands.check_wallet import main as check_wallet
 from src.commands.increase_wallet import main as increase_wallet
@@ -13,7 +15,7 @@ from src.commands.set_fallback import main as set_fallback
 
 
 @click.group()
-@click.version_option(version="0.0.1")
+@click.version_option(version=__version__)
 def cli() -> None:
     pass
 

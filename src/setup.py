@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import Callable
 from web3.contract.contract import ContractEvent
 
 from geodefi import Geode
@@ -13,31 +12,6 @@ from src.exceptions import (
     EthdoError,
     GasApiError,
 )
-from src.actions.ethdo import ping_account
-from src.utils.gas import parse_gas, fetch_gas
-from src.helpers.portal import get_name
-from src.globals import (
-    set_config,
-    set_env,
-    set_sdk,
-    set_flags,
-    set_constants,
-    set_logger,
-    get_flags,
-    get_env,
-    get_config,
-    get_sdk,
-    get_logger,
-    get_constants,
-)
-from src.helpers.portal import get_maintainer, get_wallet_balance
-from src.globals.config import apply_flags, init_config
-from src.globals.constants import init_constants
-from src.globals.env import load_env
-from src.globals.flags import collect_flags
-from src.globals.sdk import init_sdk
-
-
 from src.daemons import BlockDaemon, EventDaemon
 from src.triggers.event import (
     AlienatedTrigger,
@@ -51,6 +25,30 @@ from src.triggers.event import (
 from src.triggers.block import (
     StakeTrigger,
 )
+from src.actions.ethdo import ping_account
+
+from src.utils.gas import parse_gas, fetch_gas
+from src.utils.notify import send_email
+
+from src.helpers.portal import get_name
+from src.globals import (
+    set_config,
+    set_env,
+    set_sdk,
+    set_constants,
+    set_logger,
+    get_config,
+    get_sdk,
+    get_logger,
+    get_constants,
+)
+from src.helpers.portal import get_maintainer, get_wallet_balance
+
+from src.globals.config import apply_flags, init_config
+from src.globals.constants import init_constants
+from src.globals.env import load_env
+from src.globals.sdk import init_sdk
+
 from src.database.pools import reinitialize_pools_table, create_pools_table
 from src.database.operators import reinitialize_operators_table, create_operators_table
 from src.database.validators import reinitialize_validators_table, create_validators_table
@@ -87,48 +85,48 @@ def preflight_checks():
     config = get_config()
 
     # Sections
-    if not 'chains' in config:
+    if not "chains" in config:
         raise MissingConfigurationError("'chains' section on config.json is missing or empty.")
-    if not 'network' in config:
+    if not "network" in config:
         raise MissingConfigurationError("'network' section on config.json is missing or empty.")
-    if not 'strategy' in config:
+    if not "strategy" in config:
         raise MissingConfigurationError("'strategy' section on config.json is missing or empty.")
-    if not 'logger' in config:
+    if not "logger" in config:
         raise MissingConfigurationError("'logger' section on config.json is missing or empty.")
-    if not 'database' in config:
+    if not "database" in config:
         raise MissingConfigurationError("'database' section on config.json is missing or empty.")
-    if not 'ethdo' in config:
+    if not "ethdo" in config:
         raise MissingConfigurationError("'ethdo' section on config.json is missing or empty.")
 
     # Fields
     # TODO: (later) chain related checks should be implemented...
-    # chain: AttributeDict = config.chains[get_flags().chain] #
+    # chain: AttributeDict = config.chains[config.chain_name] #
 
     network: AttributeDict = config.network
-    if not 'refresh_rate' in network:
+    if not "refresh_rate" in network:
         raise MissingConfigurationError("'network' section is missing the 'refresh_rate' field.")
     elif network.refresh_rate <= 0 or network.refresh_rate > 360:
         raise ConfigurationFieldError("Provided value is unexpected: (0-360] seconds")
 
-    if not 'max_attempt' in network:
+    if not "max_attempt" in network:
         raise MissingConfigurationError("'network' section is missing the 'max_attempt' field.")
     elif network.max_attempt <= 0 or network.max_attempt > 100:
         raise ConfigurationFieldError("Provided value is unexpected: (0-100] attempts")
 
-    if not 'attempt_rate' in network:
+    if not "attempt_rate" in network:
         raise MissingConfigurationError("'network' section is missing the 'attempt_rate' field.")
     elif network.max_attempt <= 0 or network.attempt_rate > 10:
         raise ConfigurationFieldError("Provided value is unexpected: (0-10] seconds")
 
     strategy: AttributeDict = config.strategy
-    if not 'min_proposal_queue' in strategy:
+    if not "min_proposal_queue" in strategy:
         raise MissingConfigurationError(
             "'strategy' section is missing the 'min_proposal_queue' field."
         )
     elif strategy.min_proposal_queue < 0 or strategy.min_proposal_queue > 50:
         raise ConfigurationFieldError("Provided value is unexpected: [0-50] pubkeys")
 
-    if not 'max_proposal_delay' in strategy:
+    if not "max_proposal_delay" in strategy:
         raise MissingConfigurationError(
             "'strategy' section is missing the 'max_proposal_delay' field."
         )
@@ -136,46 +134,46 @@ def preflight_checks():
         raise ConfigurationFieldError("Provided value is unexpected: [0-604800] seconds")
 
     logger: AttributeDict = config.logger
-    if not 'no_stream' in logger:
+    if not "no_stream" in logger:
         raise MissingConfigurationError("'logger' section is missing the 'no_stream' field.")
 
-    if not 'no_file' in logger:
+    if not "no_file" in logger:
         raise MissingConfigurationError("'logger' section is missing the 'no_file' field.")
 
-    if not 'no_file' in logger:
-        if not 'level' in logger:  # can add more checks
+    if not "no_file" in logger:
+        if not "level" in logger:  # can add more checks
             raise MissingConfigurationError("'logger' section is missing the 'level' field.")
 
-        if not 'when' in logger:  # can add more checks
+        if not "when" in logger:  # can add more checks
             raise MissingConfigurationError("'logger' section is missing the 'when' field.")
 
-        if not 'interval' in logger:  # can add more checks
+        if not "interval" in logger:  # can add more checks
             raise MissingConfigurationError("'logger' section is missing the 'interval' field.")
 
-        if not 'backup' in logger:  # can add more checks
+        if not "backup" in logger:  # can add more checks
             raise MissingConfigurationError("'logger' section is missing the 'backup' field.")
 
     database: AttributeDict = config.database
-    if not 'directory' in database:
-        raise MissingConfigurationError("'database' section is missing the 'directory' field.")
+    if not "dir" in database:
+        raise MissingConfigurationError("'database' section is missing the 'dir' field.")
 
     ethdo: AttributeDict = config.ethdo
-    if not 'wallet' in ethdo:
+    if not "wallet" in ethdo:
         raise MissingConfigurationError("'ethdo' section is missing the 'wallet' field.")
-    if not 'account' in ethdo:
+    if not "account" in ethdo:
         raise MissingConfigurationError("'ethdo' section is missing the 'account' field.")
-    if not ping_account(wallet=ethdo.wallet, account=ethdo.account):
-        raise EthdoError(f"Provided account: {ethdo.wallet}/{ethdo.account} does not exists.")
+    # if not ping_account(wallet=ethdo.wallet, account=ethdo.account):
+    # raise EthdoError(f"Provided account: {ethdo.wallet}/{ethdo.account} does not exists.")
 
     if "gas" in config:
         gas: AttributeDict = config.gas
-        if not 'max_priority' in gas:
+        if not "max_priority" in gas:
             raise MissingConfigurationError("'gas' section is missing the 'max_priority' field.")
-        if not 'max_fee' in gas:
+        if not "max_fee" in gas:
             raise MissingConfigurationError("'gas' section is missing the 'max_fee' field.")
-        if not 'api' in gas:
+        if not "api" in gas:
             raise MissingConfigurationError("'gas' section is missing the 'api' field.")
-        if not 'parser' in gas:
+        if not "parser" in gas:
             raise MissingConfigurationError(
                 "No parser could be identified for the provided gas api"
             )
@@ -183,20 +181,6 @@ def preflight_checks():
         priority_fee, base_fee = parse_gas(fetch_gas())
         if priority_fee is None or base_fee is None or priority_fee <= 0 or base_fee <= 0:
             raise GasApiError("Gas api did not respond or faulty")
-
-    if "email" in config:
-        email: AttributeDict = config.email
-
-        if not 'smtp_server' in email:
-            raise MissingConfigurationError(
-                "'email' section is missing the required 'smtp_server' field."
-            )
-        if not 'smtp_port' in email:
-            raise MissingConfigurationError(
-                "'email' section is missing the required 'smtp_port' field."
-            )
-        if not 'dont_notify_devs' in email:
-            email.dont_notify_devs = False
 
     sdk: Geode = get_sdk()
     signer = sdk.w3.eth.default_account
@@ -210,11 +194,34 @@ def preflight_checks():
     balance: int = get_wallet_balance(config.operator_id)
 
     get_logger().warning(
-        f"{get_name(config.operator_id)} has {balance/ETHER_DENOMINATOR} ETH ({balance} wei) in the internal wallet. Use 'geonius increase-wallet --value X --chain X' to deposit more."
+        f"{get_name(config.operator_id)} has {balance/ETHER_DENOMINATOR}ETH ({balance} wei) balance in portal."
+        f" Use 'geonius increase-wallet' to deposit more."
     )
 
+    if "email" in config:
+        email: AttributeDict = config.email
 
-def setup():
+        if not "smtp_server" in email:
+            raise MissingConfigurationError(
+                "'email' section is missing the required 'smtp_server' field."
+            )
+        if not "smtp_port" in email:
+            raise MissingConfigurationError(
+                "'email' section is missing the required 'smtp_port' field."
+            )
+        if not "dont_notify_devs" in email:
+            email.dont_notify_devs = False
+        get_logger().info(f"Notification service is configured! Sending a test email...")
+        send_email(
+            "Email notification service is active",
+            "Looks like geonius is functional and it is sailing smoothly at the moment."
+            "We will send you regular emails when something important happened or when there is an error."
+            "Don't forget to check your script regularly tho. This service can fail too!",
+            dont_notify_devs=True,
+        )
+
+
+def setup(**kwargs):
     """Initializes the required components from the geonius script:
     - Loads environment variables from specified .env file
     - Applies the provided flags to be utilized in the config step
@@ -228,31 +235,41 @@ def setup():
         Secondary scripts can have their own flags, then this should be speciifed.
         Otherwise, defaults to collect_flags.
     """
-    # set_flags(flag_collector())
-    set_env(load_env())
+    flags: AttributeDict = AttributeDict({k: v for k, v in kwargs.items() if v is not None})
 
-    config = apply_flags(init_config())
+    env = load_env(flags.main_dir)
+    set_env(env)
+
+    config = apply_flags(init_config(flags.main_dir), flags, env)
     set_config(config)
 
-    set_logger(Loggable())
+    set_constants(init_constants())
+
+    logger: Loggable = Loggable()
+    set_logger(logger)
+
     set_sdk(
         init_sdk(
-            exec_api=get_config().chains[get_flags().chain].execution_api,
-            cons_api=get_config().chains[get_flags().chain].consensus_api,
-            priv_key=get_env().PRIVATE_KEY,
+            exec_api=config.chains[config.chain_name].execution_api,
+            cons_api=config.chains[config.chain_name].consensus_api,
+            priv_key=env.PRIVATE_KEY,
         )
     )
-    set_constants(init_constants())
+
     preflight_checks()
 
 
-def init_dbs():
-    """Initializes the databases if suited. Wipes out all data When reset flag is provided.
-
+def init_dbs(reset: bool = False):
+    """Initializes the databases as suited.\
     This function is called at the beginning of the program to make sure the
     databases are up to date.
+
+    Args:
+        reset (bool, optional): Wipes out all data if provided. Defaults to False.
     """
-    if get_flags().reset:
+    if reset:
+        get_logger().warning("Dropping the database...")
+
         reinitialize_pools_table()
         reinitialize_operators_table()
         reinitialize_validators_table()
@@ -264,6 +281,7 @@ def init_dbs():
         reinitialize_stake_proposal_table()
         reinitialize_fallback_operator_table()
         reinitialize_id_initiated_table()
+
     else:
         create_pools_table()
         create_operators_table()
@@ -285,16 +303,16 @@ def run_daemons():
     daemons are running.
     """
     events: ContractEvent = get_sdk().portal.contract.events
-    # Triggers
 
+    # Triggers
     id_initiated_trigger: IdInitiatedTrigger = IdInitiatedTrigger()
     deposit_trigger: DepositTrigger = DepositTrigger()
     delegation_trigger: DelegationTrigger = DelegationTrigger()
     stake_proposal_trigger: StakeProposalTrigger = StakeProposalTrigger()
     fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
     alienated_trigger: AlienatedTrigger = AlienatedTrigger()
-    exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
-    stake_trigger: StakeTrigger = StakeTrigger()
+    # exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
+    # stake_trigger: StakeTrigger = StakeTrigger()
 
     # Create appropriate type of Daemons for the triggers
     id_initiated_daemon: EventDaemon = EventDaemon(
@@ -321,13 +339,13 @@ def run_daemons():
         trigger=alienated_trigger,
         event=events.Alienated(),
     )
-    exit_request_daemon: EventDaemon = EventDaemon(
-        trigger=exit_request_trigger,
-        event=events.ExitRequest(),
-    )
-    stake_daemon: BlockDaemon = BlockDaemon(
-        trigger=stake_trigger, block_period=0.5 * get_constants().hour_blocks
-    )
+    # exit_request_daemon: EventDaemon = EventDaemon(
+    #     trigger=exit_request_trigger,
+    #     event=events.ExitRequest(),
+    # )
+    # stake_daemon: BlockDaemon = BlockDaemon(
+    #     trigger=stake_trigger, block_period=0.5 * get_constants().hour_blocks
+    # )
 
     # Run the daemons
     id_initiated_daemon.run()
@@ -336,5 +354,5 @@ def run_daemons():
     stake_proposal_daemon.run()
     fallback_operator_daemon.run()
     alienated_daemon.run()
-    exit_request_daemon.run()
-    stake_daemon.run()
+    # exit_request_daemon.run()
+    # stake_daemon.run()

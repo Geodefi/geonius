@@ -1,20 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
-import tomli
+from src.utils.version import get_version
 
 
-def _get_project_meta() -> dict:
-    """Returns the project metadata from pyproject.toml file. Used to get the version of the project.
-
-    Returns:
-        dict: Project metadata
-    """
-
-    toml_path: Path = Path(__file__).parents[1].joinpath("pyproject.toml")
-
-    with toml_path.open(mode="rb") as pyproject:
-        return tomli.load(pyproject)["tool"]["poetry"]
-
-
-__version__ = _get_project_meta()["version"]
+__version__ = get_version()
