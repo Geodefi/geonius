@@ -69,7 +69,7 @@ from src.database.events import (
 )
 
 
-def preflight_checks(send_test_email: bool = False):
+def preflight_checks(test_email: bool = False, test_ethdo=False, test_operator=False):
     """Checks if everything is ready for geonius to work.
     - Checks if config missing any values. 'gas' and 'email' sections are optional,
         however they should be valid if provided.
@@ -156,14 +156,6 @@ def preflight_checks(send_test_email: bool = False):
     if not "dir" in database:
         raise MissingConfigurationError("'database' section is missing the 'dir' field.")
 
-    ethdo: AttributeDict = config.ethdo
-    if not "wallet" in ethdo:
-        raise MissingConfigurationError("'ethdo' section is missing the 'wallet' field.")
-    if not "account" in ethdo:
-        raise MissingConfigurationError("'ethdo' section is missing the 'account' field.")
-    # if not ping_account(wallet=ethdo.wallet, account=ethdo.account):
-    # raise EthdoError(f"Provided account: {ethdo.wallet}/{ethdo.account} does not exists.")
-
     if "gas" in config:
         gas: AttributeDict = config.gas
         if not "max_priority" in gas:
@@ -181,45 +173,55 @@ def preflight_checks(send_test_email: bool = False):
         if priority_fee is None or base_fee is None or priority_fee <= 0 or base_fee <= 0:
             raise GasApiError("Gas api did not respond or faulty")
 
-    sdk: Geode = get_sdk()
-    signer = sdk.w3.eth.default_account
-    maintainer = get_maintainer(config.operator_id)
+    if test_ethdo:
+        ethdo: AttributeDict = config.ethdo
+        if not "wallet" in ethdo:
+            raise MissingConfigurationError("'ethdo' section is missing the 'wallet' field.")
+        if not "account" in ethdo:
+            raise MissingConfigurationError("'ethdo' section is missing the 'account' field.")
+        if not ping_account(wallet=ethdo.wallet, account=ethdo.account):
+            raise EthdoError(f"Provided account: {ethdo.wallet}/{ethdo.account} does not exists.")
 
-    if maintainer != signer:
-        raise ConfigurationFieldError(
-            f"'maintainer' of {config.operator_id} is {maintainer}. Provided private key for {signer} does not match."
+    if test_operator:
+        sdk: Geode = get_sdk()
+        signer = sdk.w3.eth.default_account
+        maintainer = get_maintainer(config.operator_id)
+
+        if maintainer != signer:
+            raise ConfigurationFieldError(
+                f"'maintainer' of {config.operator_id} is {maintainer}. Provided private key for {signer} does not match."
+            )
+
+        balance: int = get_wallet_balance(config.operator_id)
+
+        get_logger().warning(
+            f"{get_name(config.operator_id)} has {balance/ETHER_DENOMINATOR}ETH ({balance} wei) balance in portal."
+            f" Use 'geonius increase-wallet' to deposit more."
         )
 
-    balance: int = get_wallet_balance(config.operator_id)
+    if test_email:
+        if "email" in config:
+            email: AttributeDict = config.email
 
-    get_logger().warning(
-        f"{get_name(config.operator_id)} has {balance/ETHER_DENOMINATOR}ETH ({balance} wei) balance in portal."
-        f" Use 'geonius increase-wallet' to deposit more."
-    )
+            if not "smtp_server" in email:
+                raise MissingConfigurationError(
+                    "'email' section is missing the required 'smtp_server' field."
+                )
+            if not "smtp_port" in email:
+                raise MissingConfigurationError(
+                    "'email' section is missing the required 'smtp_port' field."
+                )
+            if not "dont_notify_devs" in email:
+                email.dont_notify_devs = False
 
-    if "email" in config:
-        email: AttributeDict = config.email
-
-        if not "smtp_server" in email:
-            raise MissingConfigurationError(
-                "'email' section is missing the required 'smtp_server' field."
-            )
-        if not "smtp_port" in email:
-            raise MissingConfigurationError(
-                "'email' section is missing the required 'smtp_port' field."
-            )
-        if not "dont_notify_devs" in email:
-            email.dont_notify_devs = False
-
-        if send_test_email:
-            get_logger().info(f"Notification service is configured! Sending a test email...")
-            send_email(
-                "Email notification service is active",
-                "Looks like geonius is functional and it is sailing smoothly at the moment."
-                "We will send you regular emails when something important happened or when there is an error."
-                "Don't forget to check your script regularly tho. This service can fail too!",
-                dont_notify_devs=True,
-            )
+                get_logger().info(f"Notification service is configured! Sending a test email...")
+                send_email(
+                    "Email notification service is active",
+                    "Looks like geonius is functional and it is sailing smoothly at the moment."
+                    "We will send you regular emails when something important happens or when there is an error."
+                    "Don't forget to check your script regularly tho. This service can fail too!",
+                    dont_notify_devs=True,
+                )
 
 
 def setup(**kwargs):
@@ -254,7 +256,11 @@ def setup(**kwargs):
         )
     )
 
-    preflight_checks(send_test_email=kwargs["send_test_email"])
+    preflight_checks(
+        test_email=kwargs["test_email"],
+        test_ethdo=kwargs["test_ethdo"],
+        test_operator=kwargs["test_operator"],
+    )
 
 
 def init_dbs(reset: bool = False):
