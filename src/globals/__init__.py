@@ -29,10 +29,6 @@ def get_config():
     return __CONFIG
 
 
-def get_env():
-    return __ENV
-
-
 def set_sdk(value):
     global __SDK
     __SDK = value

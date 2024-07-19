@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from os import path
+import os
+from os import getenv
 import json
 
 from src.common import AttributeDict
 from src.exceptions import ConfigurationFileError, MissingConfigurationError
-
-from src.globals import get_env
 
 
 def apply_flags(
@@ -22,7 +21,6 @@ def apply_flags(
     Returns:
         AttributeDict: the configuration with the flags applied.
     """
-    env = get_env()
     config.dir = flags.main_dir
     config.chain_name = flags.chain
 
@@ -78,27 +76,27 @@ def apply_flags(
 
     # put the execution api key in configuration from environment variables
     if "<EXECUTION_API_KEY>" in config.chains[flags.chain].execution_api:
-        if env.EXECUTION_API_KEY:
+        if getenv("EXECUTION_API_KEY"):
             config.chains[config.chain_name].execution_api = config.chains[
                 config.chain_name
-            ].execution_api.replace("<EXECUTION_API_KEY>", env.EXECUTION_API_KEY)
+            ].execution_api.replace("<EXECUTION_API_KEY>", getenv("EXECUTION_API_KEY"))
         else:
             raise MissingConfigurationError("EXECUTION_API_KEY environment var should be provided.")
 
     # put the consensus api key in configuration from environment variables
     if "<CONSENSUS_API_KEY>" in config.chains[config.chain_name].consensus_api:
-        if env.CONSENSUS_API_KEY:
+        if getenv("CONSENSUS_API_KEY"):
             config.chains[config.chain_name].consensus_api = config.chains[
                 config.chain_name
-            ].consensus_api.replace("<CONSENSUS_API_KEY>", env.CONSENSUS_API_KEY)
+            ].consensus_api.replace("<CONSENSUS_API_KEY>", getenv("CONSENSUS_API_KEY"))
         else:
             raise MissingConfigurationError("CONSENSUS_API_KEY environment var should be provided.")
 
         # put the gas api key in configuration from environment variables
         if "gas" in config:
             if "<GAS_API_KEY>" in config.gas.api:
-                if env.GAS_API_KEY:
-                    config.gas.api = config.gas.api.replace("<GAS_API_KEY>", env.GAS_API_KEY)
+                if getenv("GAS_API_KEY"):
+                    config.gas.api = config.gas.api.replace("<GAS_API_KEY>", getenv("GAS_API_KEY"))
                 else:
                     raise MissingConfigurationError(
                         "GAS_API_KEY environment var should be provided."
@@ -116,18 +114,29 @@ def init_config(main_dir: str) -> AttributeDict:
     Raises:
         TypeError: if the config file is not a dict after loading from json.
     """
+    main_dir_path = os.path.join(os.getcwd(), main_dir)  # TODO: this can be home or cwd
 
-    try:
-        config_path = path.join(main_dir, "config.json")
-
-        # Catch configuration variables
-        config_dict: dict = json.load(open(config_path, encoding="utf-8"))
-
-        config: AttributeDict = AttributeDict.convert_recursive(config_dict)
-
-    except Exception as e:
+    if not os.path.exists(main_dir_path):
+        # TODO: log.error and ask if want to create
         raise ConfigurationFileError(
-            "Error while loading the configuration file 'config.json'"
-        ) from e
+            f"Could not locate the provided path for the main directory: {main_dir_path}"
+        )
+
+    config_path = os.path.join(main_dir_path, "config.json")
+
+    if os.path.exists(config_path):
+        # Catch configuration variables
+        try:
+            config_dict: dict = json.load(open(config_path, encoding="utf-8"))
+        except Exception as e:
+            raise ConfigurationFileError(
+                "Error while loading the configuration file 'config.json'"
+            ) from e
+
+    else:
+        # TODO: log.error and ask if want to create
+        raise ConfigurationFileError(f"Could not find a config.json file in {main_dir_path}")
+
+    config: AttributeDict = AttributeDict.convert_recursive(config_dict)
 
     return config

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from os import getenv
 import json
 from subprocess import check_output
 
 import geodefi
 
 from src.exceptions import EthdoError
-from src.globals import get_sdk, get_env, get_config, get_logger
+from src.globals import get_sdk, get_config, get_logger
 
 
 def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int) -> dict:
@@ -44,7 +45,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
                 "validator",
                 "depositdata",
                 f"--validatoraccount='{wallet}/{account}'",
-                f"--passphrase={get_env().ACCOUNT_PASSPHRASE}",
+                f"--passphrase={getenv('ACCOUNT_PASSPHRASE')}",
                 f"--withdrawaladdress={withdrawal_address}",
                 f"--depositvalue={deposit_value}",
                 f"--forkversion={fork_version}",
@@ -108,8 +109,8 @@ def create_account(index: int = None) -> dict:
                 "account",
                 "create",
                 f"--account={get_config().ethdo.wallet}/{account}",
-                f"--passphrase={get_env().ACCOUNT_PASSPHRASE}",
-                f"--wallet-passphrase={get_env().WALLET_PASSPHRASE}",
+                f"--passphrase={getenv('ACCOUNT_PASSPHRASE')}",
+                f"--wallet-passphrase={getenv('WALLET_PASSPHRASE')}",
             ]
         )
 
@@ -148,8 +149,8 @@ def exit_validator(pubkey: str) -> dict:
                 "validator",
                 "exit",
                 f"----validator={pubkey}",
-                f"--passphrase={get_env().ACCOUNT_PASSPHRASE}",
-                f"--wallet-passphrase={get_env().WALLET_PASSPHRASE}",
+                f"--passphrase={getenv('ACCOUNT_PASSPHRASE')}",
+                f"--wallet-passphrase={getenv('WALLET_PASSPHRASE')}",
             ]
         )
 

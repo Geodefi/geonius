@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import os
 from time import sleep
 import click
 
 from src.globals import get_sdk, get_logger
 from src.helpers.portal import get_name
+from src.utils.env import load_env
 from src.utils.gas import get_gas
 from src.setup import setup
 
@@ -58,7 +58,7 @@ def deposit(
     help="Will run as a daemon when provided (seconds)",
 )
 @click.option(
-    "--value",
+    "--wei",
     required=True,
     type=click.INT,
     prompt="Please specify the deposit amount (wei)",
@@ -84,21 +84,23 @@ def deposit(
     "--main-dir",
     envvar="GEONIUS_DIR",
     required=False,
+    is_eager=True,
+    callback=load_env,
     type=click.STRING,
-    default=os.path.join(os.getcwd(), ".geonius"),
-    help="Main directory PATH that will be used to store data. Default is ./.geonius",
+    default=".geonius",
+    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
 )
 @click.command(
     help="Deposit ether into a Staking pool."
     "Circuit breakers like 'deadline' or 'min gETH amount' can not be specified at the moment."
 )
-def main(chain: str, main_dir: str, pool: int, value: int, interval: int):
-    setup(chain=chain, main_dir=main_dir, no_log_file=True)
+def main(chain: str, main_dir: str, pool: int, wei: int, interval: int):
+    setup(chain=chain, main_dir=main_dir, no_log_file=True, send_test_email=False)
 
     if interval:
         while True:
-            deposit(pool, value)
+            deposit(pool, wei)
             get_logger().info(f"Will run again in {interval} seconds")
             sleep(interval)
     else:
-        deposit(pool, value)
+        deposit(pool, wei)

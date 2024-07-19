@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 from time import sleep
 import click
 
@@ -8,6 +7,7 @@ from geodefi.globals import ETHER_DENOMINATOR
 
 from src.globals import get_sdk, get_config, get_logger
 from src.helpers.portal import get_name
+from src.utils.env import load_env
 from src.utils.gas import get_gas
 from src.setup import setup
 
@@ -48,7 +48,7 @@ def decrease_wallet(value: int):
     help="Will run as a daemon when provided (seconds)",
 )
 @click.option(
-    "--value",
+    "--wei",
     required=True,
     type=click.INT,
     prompt="Please specify the amount to withdraw (wei)",
@@ -67,9 +67,11 @@ def decrease_wallet(value: int):
     "--main-dir",
     envvar="GEONIUS_DIR",
     required=False,
+    is_eager=True,
+    callback=load_env,
     type=click.STRING,
-    default=os.path.join(os.getcwd(), ".geonius"),
-    help="Main directory PATH that will be used to store data. Default is ./.geonius",
+    default=".geonius",
+    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
 )
 @click.command(
     help="Withdraws the specified amount of wei from the Node Operator's internal wallet. "
@@ -77,13 +79,13 @@ def decrease_wallet(value: int):
     "Every new validator requires 1 ETH to be available in the internal wallet. "
     "Ether will be returned back to the internal wallet after the activation of the validator."
 )
-def main(chain: str, main_dir: str, value: int, interval: int):
-    setup(chain=chain, main_dir=main_dir, no_log_file=True)
+def main(chain: str, main_dir: str, wei: int, interval: int):
+    setup(chain=chain, main_dir=main_dir, no_log_file=True, send_test_email=False)
 
     if interval:
         while True:
-            decrease_wallet(value)
+            decrease_wallet(wei)
             get_logger().info(f"Will run again in {interval} seconds")
             sleep(interval)
     else:
-        decrease_wallet(value)
+        decrease_wallet(wei)

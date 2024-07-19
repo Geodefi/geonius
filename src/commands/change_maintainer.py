@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import os
 import click
 
 from src.globals import get_sdk, get_config, get_logger
 from src.helpers.portal import get_name
 from src.utils.gas import get_gas
+from src.utils.env import load_env
 from src.setup import setup
 
 
@@ -59,12 +59,14 @@ def change_maintainer(address: str):
     envvar="GEONIUS_DIR",
     required=False,
     type=click.STRING,
-    default=os.path.join(os.getcwd(), ".geonius"),
-    help="Main directory PATH that will be used to store data. Default is ./.geonius",
+    is_eager=True,
+    callback=load_env,
+    default=".geonius",
+    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
 )
 @click.command(
     help="Set a new maintainer for the Node Operator. Maintainers are allowed to create validators, and should be the ones operating geonius."
 )
 def main(chain: str, main_dir: str, address: str):
-    setup(chain=chain, main_dir=main_dir, no_log_file=True)
+    setup(chain=chain, main_dir=main_dir, no_log_file=True, send_test_email=False)
     change_maintainer(address)

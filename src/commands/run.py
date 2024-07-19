@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os
 import click
 
+from src.utils.env import load_env
 from src.globals import get_logger
 from src.setup import setup, init_dbs, run_daemons
 
@@ -163,8 +163,10 @@ def config_reset(ctx, option, value):
     envvar="GEONIUS_DIR",
     required=False,
     type=click.STRING,
-    default=os.path.join(os.getcwd(), ".geonius"),
-    help="Main directory PATH that will be used to store data. Default is ./.geonius",
+    is_eager=True,
+    callback=load_env,
+    default=".geonius",
+    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
 )
 @click.command(help="Start geonius.")
 def main(**kwargs):
@@ -173,7 +175,7 @@ def main(**kwargs):
     Initializes the databases and starts the daemons.
     """
     try:
-        setup(**kwargs)
+        setup(**kwargs, send_test_email=True)
         init_dbs(reset=kwargs["reset"])
         run_daemons()
 

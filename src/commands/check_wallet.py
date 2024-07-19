@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import click
 
 from geodefi.globals import ETHER_DENOMINATOR
@@ -8,6 +7,7 @@ from geodefi.globals import ETHER_DENOMINATOR
 from src.globals import get_config, get_logger
 from src.helpers.portal import get_wallet_balance
 from src.helpers.portal import get_name
+from src.utils.env import load_env
 from src.setup import setup
 
 
@@ -39,9 +39,11 @@ def check_wallet():
     "--main-dir",
     envvar="GEONIUS_DIR",
     required=False,
+    is_eager=True,
+    callback=load_env,
     type=click.STRING,
-    default=os.path.join(os.getcwd(), ".geonius"),
-    help="Main directory PATH that will be used to store data. Default is ./.geonius",
+    default=".geonius",
+    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
 )
 @click.command(
     help="Prints the amount of ether that can be utilized by Node Operators to propose new validators. "
@@ -49,5 +51,5 @@ def check_wallet():
     "Ether will be returned back to the internal wallet after the activation of the validator."
 )
 def main(chain: str, main_dir: str):
-    setup(chain=chain, main_dir=main_dir, no_log_file=True)
+    setup(chain=chain, main_dir=main_dir, no_log_file=True, send_test_email=False)
     check_wallet()

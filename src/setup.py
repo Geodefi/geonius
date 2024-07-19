@@ -2,6 +2,7 @@
 
 from web3.contract.contract import ContractEvent
 
+import os
 from geodefi import Geode
 from geodefi.globals.constants import ETHER_DENOMINATOR
 
@@ -45,7 +46,6 @@ from src.helpers.portal import get_maintainer, get_wallet_balance
 
 from src.globals.config import apply_flags, init_config
 from src.globals.constants import init_constants
-from src.globals.env import load_env
 from src.globals.sdk import init_sdk
 
 from src.database.pools import reinitialize_pools_table, create_pools_table
@@ -69,7 +69,7 @@ from src.database.events import (
 )
 
 
-def preflight_checks():
+def preflight_checks(send_test_email: bool = False):
     """Checks if everything is ready for geonius to work.
     - Checks if config missing any values. 'gas' and 'email' sections are optional,
         however they should be valid if provided.
@@ -210,14 +210,16 @@ def preflight_checks():
             )
         if not "dont_notify_devs" in email:
             email.dont_notify_devs = False
-        get_logger().info(f"Notification service is configured! Sending a test email...")
-        send_email(
-            "Email notification service is active",
-            "Looks like geonius is functional and it is sailing smoothly at the moment."
-            "We will send you regular emails when something important happened or when there is an error."
-            "Don't forget to check your script regularly tho. This service can fail too!",
-            dont_notify_devs=True,
-        )
+
+        if send_test_email:
+            get_logger().info(f"Notification service is configured! Sending a test email...")
+            send_email(
+                "Email notification service is active",
+                "Looks like geonius is functional and it is sailing smoothly at the moment."
+                "We will send you regular emails when something important happened or when there is an error."
+                "Don't forget to check your script regularly tho. This service can fail too!",
+                dont_notify_devs=True,
+            )
 
 
 def setup(**kwargs):
@@ -236,8 +238,6 @@ def setup(**kwargs):
     """
     flags: AttributeDict = AttributeDict({k: v for k, v in kwargs.items() if v is not None})
 
-    env = load_env(flags.main_dir)
-
     config = apply_flags(init_config(flags.main_dir), flags)
     set_config(config)
 
@@ -250,11 +250,11 @@ def setup(**kwargs):
         init_sdk(
             exec_api=config.chains[config.chain_name].execution_api,
             cons_api=config.chains[config.chain_name].consensus_api,
-            priv_key=env.PRIVATE_KEY,
+            priv_key=os.getenv("PRIVATE_KEY"),
         )
     )
 
-    preflight_checks()
+    preflight_checks(send_test_email=kwargs["send_test_email"])
 
 
 def init_dbs(reset: bool = False):

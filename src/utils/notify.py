@@ -9,14 +9,11 @@ from email.mime.text import MIMEText
 
 from src.common import AttributeDict
 from src.exceptions import EmailError
-from src.globals import get_env, get_config, get_logger
+from src.globals import get_config, get_logger
 
 
 def send_email(
-    subject: str,
-    body: str,
-    attachments: list[tuple[str, str]] = [],
-    dont_notify_devs=None,
+    subject: str, body: str, attachments: list[tuple[str, str]] = list(), dont_notify_devs=None
 ):
     """Sends an email to the provided developer address,
     as well as admin when allowed and applicable.
@@ -41,14 +38,15 @@ def send_email(
     if dont_notify_devs is None:
         dont_notify_devs = config.email.dont_notify_devs
 
-    env = get_env()
-
     msg: MIMEMultipart = MIMEMultipart()
     msg["From"] = config.email.sender
     msg["To"] = ",".join(config.email.receivers)
-    msg["Subject"] = f"[🧠 Geonius Alert]: {subject}"
+    msg["Subject"] = f"[🧠 Geonius]: {subject}"
     if not dont_notify_devs:
-        body += "\n\nGeodefi team also notified of this error. You can use '--dont-notify-devs' flag to prevent this."
+        body += (
+            "\n\nGeodefi team is also notified of this error. "
+            "You can use '--dont-notify-devs' flag to prevent this."
+        )
         msg["Cc"] = "notifications@geode.fi"
 
     msg.attach(MIMEText(body, "plain"))
@@ -73,7 +71,7 @@ def send_email(
     try:
         server = smtplib.SMTP(config.email.smtp_server, config.email.smtp_port)
         server.starttls()
-        server.login(config.email.sender, env.EMAIL_PASSWORD)
+        server.login(config.email.sender, os.getenv("EMAIL_PASSWORD"))
         server.send_message(msg)
         server.quit()
     except Exception as e:
