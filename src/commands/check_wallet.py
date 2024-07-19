@@ -46,7 +46,7 @@ def check_wallet():
     help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
 )
 @click.command(
-    help="Prints the amount of ether that can be utilized by Node Operators to propose new validators. "
+    help="Prints the balance that can be utilized by Node Operators to propose new validators. "
     "Every new validator requires 1 ETH to be available in the internal wallet. "
     "Ether will be returned back to the internal wallet after the activation of the validator."
 )

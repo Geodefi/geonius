@@ -250,7 +250,7 @@ def setup(**kwargs):
         init_sdk(
             exec_api=config.chains[config.chain_name].execution_api,
             cons_api=config.chains[config.chain_name].consensus_api,
-            priv_key=os.getenv("PRIVATE_KEY"),
+            priv_key=os.getenv("GEONIUS_PRIVATE_KEY"),
         )
     )
 

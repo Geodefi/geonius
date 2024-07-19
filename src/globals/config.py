@@ -75,31 +75,31 @@ def apply_flags(
         config.chains[config.chain_name].range = int(flags.chain_range)
 
     # put the execution api key in configuration from environment variables
-    if "<EXECUTION_API_KEY>" in config.chains[flags.chain].execution_api:
-        if getenv("EXECUTION_API_KEY"):
+    if "<API_KEY_EXECUTION>" in config.chains[flags.chain].execution_api:
+        if getenv("API_KEY_EXECUTION"):
             config.chains[config.chain_name].execution_api = config.chains[
                 config.chain_name
-            ].execution_api.replace("<EXECUTION_API_KEY>", getenv("EXECUTION_API_KEY"))
+            ].execution_api.replace("<API_KEY_EXECUTION>", getenv("API_KEY_EXECUTION"))
         else:
-            raise MissingConfigurationError("EXECUTION_API_KEY environment var should be provided.")
+            raise MissingConfigurationError("API_KEY_EXECUTION environment var should be provided.")
 
     # put the consensus api key in configuration from environment variables
-    if "<CONSENSUS_API_KEY>" in config.chains[config.chain_name].consensus_api:
-        if getenv("CONSENSUS_API_KEY"):
+    if "<API_KEY_CONSENSUS>" in config.chains[config.chain_name].consensus_api:
+        if getenv("API_KEY_CONSENSUS"):
             config.chains[config.chain_name].consensus_api = config.chains[
                 config.chain_name
-            ].consensus_api.replace("<CONSENSUS_API_KEY>", getenv("CONSENSUS_API_KEY"))
+            ].consensus_api.replace("<API_KEY_CONSENSUS>", getenv("API_KEY_CONSENSUS"))
         else:
-            raise MissingConfigurationError("CONSENSUS_API_KEY environment var should be provided.")
+            raise MissingConfigurationError("API_KEY_CONSENSUS environment var should be provided.")
 
         # put the gas api key in configuration from environment variables
         if "gas" in config:
-            if "<GAS_API_KEY>" in config.gas.api:
-                if getenv("GAS_API_KEY"):
-                    config.gas.api = config.gas.api.replace("<GAS_API_KEY>", getenv("GAS_API_KEY"))
+            if "<API_KEY_GAS>" in config.gas.api:
+                if getenv("API_KEY_GAS"):
+                    config.gas.api = config.gas.api.replace("<API_KEY_GAS>", getenv("API_KEY_GAS"))
                 else:
                     raise MissingConfigurationError(
-                        "GAS_API_KEY environment var should be provided."
+                        "API_KEY_GAS environment var should be provided."
                     )
 
     return config

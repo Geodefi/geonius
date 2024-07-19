@@ -4,12 +4,12 @@
     "holesky": {
       "start": 1550551,
       "identifier": "latest",
-      "period": "1",
+      "period": "5",
       "interval": "12",
       "range": "3000",
       "slots_per_epoch": 32,
-      "execution_api": "https://rpc.ankr.com/eth_holesky/<EXECUTION_API_KEY>",
-      "consensus_api": "https://rpc.ankr.com/premium-http/eth_holesky_beacon/<CONSENSUS_API_KEY>"
+      "execution_api": "https://rpc.ankr.com/eth_holesky/<API_KEY_EXECUTION>",
+      "consensus_api": "https://rpc.ankr.com/premium-http/eth_holesky_beacon/<API_KEY_CONSENSUS>"
     }
   },
   "network": {
@@ -40,7 +40,7 @@
   "gas": {
     "max_priority": 3,
     "max_fee": 100,
-    "api": "https://gas.api.infura.io/v3/<GAS_API_KEY>/networks/1/suggestedGasFees",
+    "api": "https://gas.api.infura.io/v3/<API_KEY_GAS>/networks/1/suggestedGasFees",
     "parser": {
       "base": "low.suggestedMaxFeePerGas",
       "priority": "low.suggestedMaxPriorityFeePerGas"

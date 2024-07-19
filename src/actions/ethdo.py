@@ -45,7 +45,7 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
                 "validator",
                 "depositdata",
                 f"--validatoraccount='{wallet}/{account}'",
-                f"--passphrase={getenv('ACCOUNT_PASSPHRASE')}",
+                f"--passphrase={getenv('ETHDO_ACCOUNT_PASSPHRASE')}",
                 f"--withdrawaladdress={withdrawal_address}",
                 f"--depositvalue={deposit_value}",
                 f"--forkversion={fork_version}",
@@ -109,8 +109,8 @@ def create_account(index: int = None) -> dict:
                 "account",
                 "create",
                 f"--account={get_config().ethdo.wallet}/{account}",
-                f"--passphrase={getenv('ACCOUNT_PASSPHRASE')}",
-                f"--wallet-passphrase={getenv('WALLET_PASSPHRASE')}",
+                f"--passphrase={getenv('ETHDO_ACCOUNT_PASSPHRASE')}",
+                f"--wallet-passphrase={getenv('ETHDO_WALLET_PASSPHRASE')}",
             ]
         )
 
@@ -149,8 +149,8 @@ def exit_validator(pubkey: str) -> dict:
                 "validator",
                 "exit",
                 f"----validator={pubkey}",
-                f"--passphrase={getenv('ACCOUNT_PASSPHRASE')}",
-                f"--wallet-passphrase={getenv('WALLET_PASSPHRASE')}",
+                f"--passphrase={getenv('ETHDO_ACCOUNT_PASSPHRASE')}",
+                f"--wallet-passphrase={getenv('ETHDO_WALLET_PASSPHRASE')}",
             ]
         )
 
