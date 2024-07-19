@@ -24,10 +24,10 @@ def cli() -> None:
 cli.add_command(run, "run")
 
 # Operator helpers
+cli.add_command(change_maintainer, "change-maintainer")
 cli.add_command(check_wallet, "check-wallet")
 cli.add_command(increase_wallet, "increase-wallet")
 cli.add_command(decrease_wallet, "decrease-wallet")
-cli.add_command(change_maintainer, "change-maintainer")
 
 # Pool helpers
 cli.add_command(delegate, "delegate")

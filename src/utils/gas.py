@@ -9,7 +9,7 @@ from src.globals import get_sdk, get_config, get_logger
 
 
 def __float_to_hexstring(f):
-    return hex(struct.unpack('<I', struct.pack('<f', f))[0])
+    return hex(struct.unpack("<I", struct.pack("<f", f))[0])
 
 
 @wrappers.http_request
@@ -19,18 +19,18 @@ def fetch_gas() -> tuple:
 
 
 def parse_gas(gas) -> tuple[float]:
-    __priority_fee: list = get_config().gas.parser.priority.split('.')
+    __priority_fee: list = get_config().gas.parser.priority.split(".")
     gas_priority = gas
     for i in __priority_fee:
         gas_priority = gas_priority[i]
 
-    __base_fee: list = get_config().gas.parser.base.split('.')
+    __base_fee: list = get_config().gas.parser.base.split(".")
     gas_base_fee = gas
     for j in __base_fee:
         gas_base_fee = gas_base_fee[j]
     sdk: Geode = get_sdk()
 
-    return sdk.w3.to_wei(gas_priority, 'gwei'), sdk.w3.to_wei(gas_base_fee, 'gwei')
+    return sdk.w3.to_wei(gas_priority, "gwei"), sdk.w3.to_wei(gas_base_fee, "gwei")
 
 
 def get_gas() -> tuple[str]:
@@ -44,8 +44,8 @@ def get_gas() -> tuple[str]:
                 raise GasApiError("Gas api did not respond") from e
 
             sdk: Geode = get_sdk()
-            if priority_fee < sdk.w3.to_wei(gas.max_priority, 'gwei') and base_fee < sdk.w3.to_wei(
-                gas.max_fee, 'gwei'
+            if priority_fee < sdk.w3.to_wei(gas.max_priority, "gwei") and base_fee < sdk.w3.to_wei(
+                gas.max_fee, "gwei"
             ):
                 return __float_to_hexstring(priority_fee), __float_to_hexstring(base_fee)
             else:

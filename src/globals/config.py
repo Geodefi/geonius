@@ -24,45 +24,9 @@ def apply_flags(
     config.dir = flags.main_dir
     config.chain_name = flags.chain
 
-    if "no_log_stream" in flags:
-        config.logger.no_stream = flags.no_log_stream
-    if "no_log_file" in flags:
-        config.logger.no_file = flags.no_log_file
-    if "min_proposal_queue" in flags:
-        config.strategy.min_proposal_queue = flags.min_proposal_queue
-    if "max_proposal_delay" in flags:
-        config.strategy.max_proposal_delay = flags.max_proposal_delay
-    if "network_refresh_rate" in flags:
-        config.network.refresh_rate = flags.network_refresh_rate
-    if "network_max_attempt" in flags:
-        config.network.max_attempt = flags.network_max_attempt
-    if "network_attempt_rate" in flags:
-        config.network.attempt_rate = flags.network_attempt_rate
-    if "logger_dir" in flags:
-        config.logger.dir = flags.logger_dir
-    if "logger_level" in flags:
-        config.logger.level = flags.logger_level
-    if "logger_when" in flags:
-        config.logger.when = flags.logger_when
-    if "logger_interval" in flags:
-        config.logger.interval = flags.logger_interval
-    if "logger_backup" in flags:
-        config.logger.backup = flags.logger_backup
-    if "database_dir" in flags:
-        config.database.dir = flags.database_dir
-    if "ethdo_wallet" in flags:
-        config.ethdo.wallet = flags.ethdo_wallet
-    if "ethdo_account" in flags:
-        config.ethdo.account = flags.ethdo_account
+    if "operator_id" in flags:
+        config.operator_id = flags.operator_id
 
-    if "dont_notify_devs" in flags:
-        if flags.dont_notify_devs is True:
-            try:
-                config.email.dont_notify_devs = flags.dont_notify_devs
-            except Exception as e:
-                raise MissingConfigurationError(
-                    "'--dont-notify-devs' flag requires email configuration"
-                ) from e
     if "chain_start" in flags:
         config.chains[config.chain_name].start = flags.chain_start
     if "chain_identifier" in flags:
@@ -73,9 +37,63 @@ def apply_flags(
         config.chains[config.chain_name].interval = int(flags.chain_interval)
     if "chain_range" in flags:
         config.chains[config.chain_name].range = int(flags.chain_range)
+    if "execution_api" in flags:
+        config.chains[config.chain_name].execution_api = int(flags.execution_api)
+    if "consensus_api" in flags:
+        config.chains[config.chain_name].consensus_api = int(flags.consensus_api)
 
-    # put the execution api key in configuration from environment variables
+    if "network_refresh_rate" in flags:
+        config.network.refresh_rate = flags.network_refresh_rate
+    if "network_max_attempt" in flags:
+        config.network.max_attempt = flags.network_max_attempt
+    if "network_attempt_rate" in flags:
+        config.network.attempt_rate = flags.network_attempt_rate
+
+    if "min_proposal_queue" in flags:
+        config.strategy.min_proposal_queue = flags.min_proposal_queue
+    if "max_proposal_delay" in flags:
+        config.strategy.max_proposal_delay = flags.max_proposal_delay
+
+    if "no_log_stream" in flags:
+        config.logger.no_stream = flags.no_log_stream
+    if "no_log_file" in flags:
+        config.logger.no_file = flags.no_log_file
+    if "logger_dir" in flags:
+        config.logger.dir = flags.logger_dir
+    if "logger_level" in flags:
+        config.logger.level = flags.logger_level
+    if "logger_when" in flags:
+        config.logger.when = flags.logger_when
+    if "logger_interval" in flags:
+        config.logger.interval = flags.logger_interval
+    if "logger_backup" in flags:
+        config.logger.backup = flags.logger_backup
+
+    if "database_dir" in flags:
+        config.database.dir = flags.database_dir
+
+    if "ethdo_wallet" in flags:
+        config.ethdo.wallet = flags.ethdo_wallet
+    if "ethdo_account_prefix" in flags:
+        config.ethdo.account_prefix = flags.ethdo_account_prefix
+
+    if "dont_notify_devs" in flags:
+        # Gas and Email sections can not be provided as flags, as they are optional.
+        if flags.dont_notify_devs is True:
+            try:
+                # If dont_notify_devs is provided, email service should have been configured.
+                # So, there might be an issue with the configuration that the user is not aware.
+                # We raise.
+                config.email.dont_notify_devs = flags.dont_notify_devs
+            except Exception as e:
+                raise MissingConfigurationError(
+                    "'--dont-notify-devs' flag requires email configuration"
+                ) from e
+
+    # Apply environment variables if desired
+
     if "<API_KEY_EXECUTION>" in config.chains[flags.chain].execution_api:
+        # put the execution api key in configuration from environment variables
         if getenv("API_KEY_EXECUTION"):
             config.chains[config.chain_name].execution_api = config.chains[
                 config.chain_name
@@ -83,8 +101,8 @@ def apply_flags(
         else:
             raise MissingConfigurationError("API_KEY_EXECUTION environment var should be provided.")
 
-    # put the consensus api key in configuration from environment variables
     if "<API_KEY_CONSENSUS>" in config.chains[config.chain_name].consensus_api:
+        # put the consensus api key in configuration from environment variables
         if getenv("API_KEY_CONSENSUS"):
             config.chains[config.chain_name].consensus_api = config.chains[
                 config.chain_name
@@ -92,15 +110,13 @@ def apply_flags(
         else:
             raise MissingConfigurationError("API_KEY_CONSENSUS environment var should be provided.")
 
-        # put the gas api key in configuration from environment variables
-        if "gas" in config:
-            if "<API_KEY_GAS>" in config.gas.api:
-                if getenv("API_KEY_GAS"):
-                    config.gas.api = config.gas.api.replace("<API_KEY_GAS>", getenv("API_KEY_GAS"))
-                else:
-                    raise MissingConfigurationError(
-                        "API_KEY_GAS environment var should be provided."
-                    )
+    # put the gas api key in configuration from environment variables
+    if "gas" in config:
+        if "<API_KEY_GAS>" in config.gas.api:
+            if getenv("API_KEY_GAS"):
+                config.gas.api = config.gas.api.replace("<API_KEY_GAS>", getenv("API_KEY_GAS"))
+            else:
+                raise MissingConfigurationError("API_KEY_GAS environment var should be provided.")
 
     return config
 

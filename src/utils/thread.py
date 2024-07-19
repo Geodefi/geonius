@@ -13,7 +13,7 @@ def rename_worker(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         w = fn(*args, **kwargs)
-        w.name = w.name.replace('Thread', (current_thread()).name)
+        w.name = w.name.replace("Thread", (current_thread()).name)
         return w
 
     return wrapper

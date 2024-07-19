@@ -137,7 +137,7 @@ class ExitRequestTrigger(Trigger):
 
             # calculate the delay for the daemon to run
             res: dict[str, Any] = get_sdk().beacon.beacon_headers_id("head")
-            slots_per_epoch: int = get_constants().chain.slots_per_epoch
+            slots_per_epoch: int = 32
             slot_interval: int = int(get_constants().chain.interval)
 
             current_slot: int = int(res["header"]["message"]["slot"])

@@ -48,6 +48,12 @@ def decrease_wallet(value: int):
 
 
 @click.option(
+    "--operator-id",
+    required=False,
+    type=click.INT,
+    help="geodefi ID for the Node Operator",
+)
+@click.option(
     "--interval",
     required=False,
     type=click.INT,
@@ -59,6 +65,12 @@ def decrease_wallet(value: int):
     type=click.INT,
     prompt="Please specify the amount to withdraw (wei)",
     help="Amount to withdraw from the internal wallet (wei)",
+)
+@click.option(
+    "--operator-id",
+    required=False,
+    type=click.INT,
+    help="geodefi ID for the Node Operator",
 )
 @click.option(
     "--private-key",
@@ -127,11 +139,12 @@ def decrease_wallet(value: int):
 def main(
     chain: str,
     main_dir: str,
-    wei: int,
     private_key: str,
     api_key_execution: str,
     api_key_consensus: str,
     api_key_gas: str,
+    operator_id: int,
+    wei: int,
     interval: int,
 ):
     setup(
@@ -141,6 +154,7 @@ def main(
         api_key_execution=api_key_execution,
         api_key_consensus=api_key_consensus,
         api_key_gas=api_key_gas,
+        operator_id=operator_id,
         no_log_file=True,
         test_email=False,
         test_ethdo=False,

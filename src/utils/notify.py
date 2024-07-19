@@ -75,6 +75,6 @@ def send_email(
         server.send_message(msg)
         server.quit()
     except Exception as e:
-        get_logger().error(f"Failed to send email!")
+        get_logger().error(f"Failed to send email.")
         get_logger().error(str(e))
         raise EmailError(f"Failed to send an email") from e

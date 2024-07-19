@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from typing import Any
 from threading import Lock
 from datetime import datetime
@@ -77,11 +78,13 @@ def max_proposals_count(pool_id: int) -> int:
     if curr_max > eth_per_wallet_balance:
         pool_name: str = get_name(pool_id)
         get_logger().critical(
-            f"Could propose {curr_max} validators for {pool_name}. But wallet only has enough funds for {eth_per_wallet_balance}"
+            f"Could propose {curr_max} validators for {pool_name}."
+            f"But wallet only has enough funds for {eth_per_wallet_balance}"
         )
         send_email(
             "Insufficient funds for proposals",
-            f"Could propose {curr_max} validators for {pool_name}. But wallet only has enough funds for {eth_per_wallet_balance}",
+            f"Could propose {curr_max} validators for {pool_name}."
+            f"But wallet only has enough funds for {eth_per_wallet_balance}",
             dont_notify_devs=True,
         )
         return eth_per_wallet_balance
@@ -112,7 +115,7 @@ def check_and_propose(pool_id: int) -> None:
             # This returns the length of the validators array in the contract so it is same as the index of the next validator
             new_val_ind: int = (
                 get_sdk()
-                .portal.functions.readUint(get_config().operator_id, to_bytes32('validators'))
+                .portal.functions.readUint(get_config().operator_id, to_bytes32("validators"))
                 .call()
             )
 
@@ -225,7 +228,7 @@ def run_finalize_exit_triggers():
         # calculate the delay for the daemon to run
         res: dict[str, Any] = get_sdk().beacon.beacon_headers_id("head")
 
-        slots_per_epoch: int = get_constants().chain.slots_per_epoch
+        slots_per_epoch: int = 32
         slot_interval: int = int(get_constants().chain.interval)
 
         current_slot: int = int(res["header"]["message"]["slot"])

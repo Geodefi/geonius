@@ -179,8 +179,12 @@ def preflight_checks(test_email: bool = False, test_ethdo=False, test_operator=F
             raise MissingConfigurationError("'ethdo' section is missing the 'wallet' field.")
         if not "account" in ethdo:
             raise MissingConfigurationError("'ethdo' section is missing the 'account' field.")
-        if not ping_account(wallet=ethdo.wallet, account=ethdo.account):
-            raise EthdoError(f"Provided account: {ethdo.wallet}/{ethdo.account} does not exists.")
+        # if not ping_account(
+        #     wallet=ethdo.wallet, account=ethdo.account_prefix
+        # ):  # TODO: instead, ping the wallet
+        #     raise EthdoError(
+        #         f"Provided account: {ethdo.wallet}/{ethdo.ethdo.account_prefix} does not exists."
+        #     )
 
     if test_operator:
         sdk: Geode = get_sdk()

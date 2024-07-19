@@ -52,6 +52,12 @@ def change_maintainer(address: str):
     help="Maintainer address to set and use in geonius",
 )
 @click.option(
+    "--operator-id",
+    required=False,
+    type=click.INT,
+    help="geodefi ID for the Node Operator",
+)
+@click.option(
     "--private-key",
     envvar="GEONIUS_PRIVATE_KEY",
     required=False,
@@ -119,6 +125,7 @@ def main(
     api_key_execution: str,
     api_key_consensus: str,
     api_key_gas: str,
+    operator_id: int,
     address: str,
 ):
     setup(
@@ -128,6 +135,7 @@ def main(
         api_key_execution=api_key_execution,
         api_key_consensus=api_key_consensus,
         api_key_gas=api_key_gas,
+        operator_id=operator_id,
         no_log_file=True,
         test_email=False,
         test_ethdo=False,

@@ -27,17 +27,19 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
     """
     get_logger().info(f"Generating deposit data{f'index: {index}'if index else '' }")
 
-    account: str = get_config().ethdo.account
+    account: str = get_config().ethdo.account_prefix
     wallet: str = get_config().ethdo.wallet
 
-    if index is not None:
+    if index is not None or index < 0:
         account += str(index)
+    else:
+        raise EthdoError("Provided invalid index for the validator")
 
     fork_version = geodefi.globals.GENESIS_FORK_VERSION[get_sdk().network].hex()
 
     try:
         if not ping_account(wallet=wallet, account=account):
-            create_account(index=index)
+            create_account(account_name=account)
 
         res: str = check_output(
             [
@@ -83,7 +85,7 @@ def ping_account(wallet: str, account: str) -> bool:
         return False
 
 
-def create_account(index: int = None) -> dict:
+def create_account(account_name: int = None) -> dict:
     """Creates a new account on given ethdo wallet
 
     Returns:
@@ -94,13 +96,8 @@ def create_account(index: int = None) -> dict:
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
-
-    account = get_config().ethdo.account
-
-    if index is not None:
-        account += f"{index}"
-
-    get_logger().info(f"Creating a new account: {account} on wallet: {get_config().ethdo.wallet}")
+    wallet: str = get_config().ethdo.wallet
+    get_logger().info(f"Creating a new account: {account_name} on wallet: {wallet}")
 
     try:
         res: str = check_output(
@@ -108,14 +105,14 @@ def create_account(index: int = None) -> dict:
                 "ethdo",
                 "account",
                 "create",
-                f"--account={get_config().ethdo.wallet}/{account}",
+                f"--account={wallet}/{account_name}",
                 f"--passphrase={getenv('ETHDO_ACCOUNT_PASSPHRASE')}",
                 f"--wallet-passphrase={getenv('ETHDO_WALLET_PASSPHRASE')}",
             ]
         )
 
     except Exception as e:
-        raise EthdoError(f"Failed to create account {account}") from e
+        raise EthdoError(f"Failed to create account {account_name}") from e
 
     try:
         return json.loads(res)
