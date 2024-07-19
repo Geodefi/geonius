@@ -6,11 +6,12 @@ import json
 from src.common import AttributeDict
 from src.exceptions import ConfigurationFileError, MissingConfigurationError
 
+from src.globals import get_env
+
 
 def apply_flags(
     config: AttributeDict,
     flags: AttributeDict,
-    env: AttributeDict,
 ):
     """Applies the flags to the configuration.
     If a particular flag is not set, the configuration is not changed.
@@ -21,7 +22,7 @@ def apply_flags(
     Returns:
         AttributeDict: the configuration with the flags applied.
     """
-
+    env = get_env()
     config.dir = flags.main_dir
     config.chain_name = flags.chain
 

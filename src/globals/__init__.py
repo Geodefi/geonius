@@ -29,11 +29,6 @@ def get_config():
     return __CONFIG
 
 
-def set_env(value):
-    global __ENV
-    __ENV = value
-
-
 def get_env():
     return __ENV
 

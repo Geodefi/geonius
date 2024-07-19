@@ -4,7 +4,7 @@ import click
 
 from src.utils.version import get_version
 
-from src.commands.start import main as start
+from src.commands.run import main as run
 from src.commands.check_wallet import main as check_wallet
 from src.commands.increase_wallet import main as increase_wallet
 from src.commands.decrease_wallet import main as decrease_wallet
@@ -21,7 +21,7 @@ def cli() -> None:
 
 
 # geonius
-cli.add_command(start, "start")
+cli.add_command(run, "run")
 
 # Operator helpers
 cli.add_command(check_wallet, "check-wallet")

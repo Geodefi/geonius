@@ -33,7 +33,6 @@ from src.utils.notify import send_email
 from src.helpers.portal import get_name
 from src.globals import (
     set_config,
-    set_env,
     set_sdk,
     set_constants,
     set_logger,
@@ -238,9 +237,8 @@ def setup(**kwargs):
     flags: AttributeDict = AttributeDict({k: v for k, v in kwargs.items() if v is not None})
 
     env = load_env(flags.main_dir)
-    set_env(env)
 
-    config = apply_flags(init_config(flags.main_dir), flags, env)
+    config = apply_flags(init_config(flags.main_dir), flags)
     set_config(config)
 
     set_constants(init_constants())
