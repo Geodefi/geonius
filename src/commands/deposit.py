@@ -26,7 +26,7 @@ def deposit(
     value: int,
 ):
     try:
-        get_logger().critical(f"Depositing {value} wei to pool {get_name(pool)}")
+        get_logger().info(f"Depositing {value} wei to pool {get_name(pool)}")
 
         params: dict = tx_params()
         params.update({"value": value})

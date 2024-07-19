@@ -25,7 +25,7 @@ def tx_params() -> dict:
 
 def increase_wallet(value: int):
     try:
-        get_logger().critical(
+        get_logger().info(
             f"Increasing internal wallet for {get_name(get_config().operator_id)} "
             f"by {value/ETHER_DENOMINATOR} ether."
         )

@@ -23,7 +23,7 @@ def tx_params() -> dict:
 
 def delegate(pool: int, operator: int, allowance: int):
     try:
-        get_logger().critical(
+        get_logger().info(
             f"Delegating {allowance} to operator {get_name(get_config().operator_id)} in pool {get_name(pool)}"
         )
 

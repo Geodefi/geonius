@@ -247,7 +247,7 @@ class Daemon:
 
         self.start_flag.set()
         get_logger().info(
-            f"Daemon for {self.trigger.name:^17} is running. Use stop() to stop, and CTRL+C to exit."
+            f"Daemon for {self.trigger.name:^17} will run every {self.interval} seconds."
         )
 
     def stop(self) -> None:

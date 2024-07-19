@@ -23,7 +23,7 @@ def tx_params() -> dict:
 def change_maintainer(address: str):
     try:
         operator_id: int = get_config().operator_id
-        get_logger().critical(f"Setting a new maintainer for {get_name(operator_id)}: {address}")
+        get_logger().info(f"Setting a new maintainer for {get_name(operator_id)}: {address}")
 
         params: dict = tx_params()
 

@@ -26,7 +26,7 @@ def tx_params() -> dict:
 def decrease_wallet(value: int):
     try:
         _id = int(get_config().operator_id)
-        get_logger().critical(
+        get_logger().info(
             f"Decreasing internal wallet for {get_name(_id)} by {value/ETHER_DENOMINATOR} ether"
         )
 

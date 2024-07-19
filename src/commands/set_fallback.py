@@ -25,7 +25,7 @@ def tx_params() -> dict:
 def set_fallback_operator(pool: int, operator: int, threshold: int):
     try:
         perc_threshold: int = threshold * PERCENTAGE_DENOMINATOR / 100
-        get_logger().critical(
+        get_logger().info(
             f"Setting threshold as {perc_threshold} from pool {get_name(pool)} for {get_name(operator)}"
         )
 
