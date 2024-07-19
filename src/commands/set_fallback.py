@@ -6,7 +6,14 @@ import click
 from geodefi.globals.constants import PERCENTAGE_DENOMINATOR
 from src.globals import get_sdk, get_logger
 from src.helpers.portal import get_name
-from src.utils.env import load_env
+from src.utils.env import (
+    load_env,
+    set_geonius_private_key,
+    set_api_key_execution,
+    set_api_key_consensus,
+    set_api_key_gas,
+)
+
 from src.utils.gas import get_gas
 from src.setup import setup
 
@@ -69,6 +76,45 @@ def set_fallback_operator(pool: int, operator: int, threshold: int):
     help="Pool ID that will allow provided operator to create validators when suitable.",
 )
 @click.option(
+    "--private-key",
+    envvar="GEONIUS_PRIVATE_KEY",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_geonius_private_key,
+    help="Password for the ethdo wallet that will be used to create validators. Overrides .env file.",
+)
+@click.option(
+    "--api-key-execution",
+    envvar="API_KEY_EXECUTION",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_api_key_execution,
+    help="Api key for the execution layer end point."
+    " Could be the rest api of the execution client. Overrides .env file.",
+)
+@click.option(
+    "--api-key-consensus",
+    envvar="API_KEY_CONSENSUS",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_api_key_consensus,
+    help="Api key for the consensus layer end point."
+    " Could be the rest api of the consensus client."
+    " Overrides .env file.",
+)
+@click.option(
+    "--api-key-gas",
+    envvar="API_KEY_GAS",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_api_key_gas,
+    help="Api key for the end point used fetching gas prices in gwei. Overrides .env file.",
+)
+@click.option(
     "--chain",
     envvar="GEONIUS_CHAIN",
     required=True,
@@ -81,7 +127,7 @@ def set_fallback_operator(pool: int, operator: int, threshold: int):
     "--main-dir",
     envvar="GEONIUS_DIR",
     required=False,
-    is_eager=True,
+    is_eager=False,
     callback=load_env,
     type=click.STRING,
     default=".geonius",
@@ -92,8 +138,30 @@ def set_fallback_operator(pool: int, operator: int, threshold: int):
     "Provided Operator can create infinitely many validators "
     "after the provided threshold is filled."
 )
-def main(chain: str, main_dir: str, pool: int, operator: int, threshold: int, interval: int):
-    setup(chain=chain, main_dir=main_dir, no_log_file=True, send_test_email=False)
+def main(
+    chain: str,
+    main_dir: str,
+    private_key: str,
+    api_key_execution: str,
+    api_key_consensus: str,
+    api_key_gas: str,
+    pool: int,
+    operator: int,
+    threshold: int,
+    interval: int,
+):
+    setup(
+        chain=chain,
+        main_dir=main_dir,
+        private_key=private_key,
+        api_key_execution=api_key_execution,
+        api_key_consensus=api_key_consensus,
+        api_key_gas=api_key_gas,
+        no_log_file=True,
+        test_email=False,
+        test_ethdo=False,
+        test_operator=True,
+    )
 
     if interval:
         while True:

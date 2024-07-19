@@ -2,7 +2,16 @@
 
 import click
 
-from src.utils.env import load_env
+from src.utils.env import (
+    load_env,
+    set_geonius_private_key,
+    set_ethdo_wallet_passphrase,
+    set_ethdo_account_passphrase,
+    set_api_key_execution,
+    set_api_key_consensus,
+    set_api_key_gas,
+    set_email_password,
+)
 from src.globals import get_logger
 from src.setup import setup, init_dbs, run_daemons
 
@@ -150,6 +159,73 @@ def config_reset(ctx, option, value):
     help="Reset the database and start over. Suggested after a new update or unexpected error.",
 )
 @click.option(
+    "--private-key",
+    envvar="GEONIUS_PRIVATE_KEY",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_geonius_private_key,
+    help="Password for the ethdo wallet that will be used to create validators. Overrides .env file.",
+)
+@click.option(
+    "--ethdo-wallet-passphrase",
+    envvar="ETHDO_WALLET_PASSPHRASE",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_ethdo_wallet_passphrase,
+    help="Password for the ethdo accounts corresponding to the created validators. Overrides .env file.",
+)
+@click.option(
+    "--ethdo-account-passphrase",
+    envvar="ETHDO_ACCOUNT_PASSPHRASE",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_ethdo_account_passphrase,
+    help="Overrides .env file.",
+)
+@click.option(
+    "--api-key-execution",
+    envvar="API_KEY_EXECUTION",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_api_key_execution,
+    help="Api key for the execution layer end point."
+    " Could be the rest api of the execution client. Overrides .env file.",
+)
+@click.option(
+    "--api-key-consensus",
+    envvar="API_KEY_CONSENSUS",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_api_key_consensus,
+    help="Api key for the consensus layer end point."
+    " Could be the rest api of the consensus client."
+    " Overrides .env file.",
+)
+@click.option(
+    "--api-key-gas",
+    envvar="API_KEY_GAS",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_api_key_gas,
+    help="Api key for the end point used fetching gas prices in gwei. Overrides .env file.",
+)
+@click.option(
+    "--email-password",
+    envvar="EMAIL_PASSWORD",
+    required=False,
+    type=click.STRING,
+    is_eager=True,
+    callback=set_email_password,
+    help="Private key for the Node Operator maintainer who will run geonius."
+    " Overrides .env file.",
+)
+@click.option(
     "--chain",
     envvar="GEONIUS_CHAIN",
     required=True,
@@ -163,7 +239,7 @@ def config_reset(ctx, option, value):
     envvar="GEONIUS_DIR",
     required=False,
     type=click.STRING,
-    is_eager=True,
+    is_eager=False,
     callback=load_env,
     default=".geonius",
     help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
@@ -175,7 +251,7 @@ def main(**kwargs):
     Initializes the databases and starts the daemons.
     """
     try:
-        setup(**kwargs, send_test_email=True)
+        setup(**kwargs, test_email=True, test_ethdo=False, test_operator=True)
         init_dbs(reset=kwargs["reset"])
         run_daemons()
 
