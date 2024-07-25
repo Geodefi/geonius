@@ -108,6 +108,6 @@ def main(
         no_log_file=True,
         test_email=False,
         test_ethdo=False,
-        test_operator=False,
+        test_operator=True,
     )
     check_wallet()

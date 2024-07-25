@@ -51,13 +51,13 @@ class Loggable:
             stream_handler: StreamHandler = self.__get_stream_handler()
             handlers.append(stream_handler)
             logger.addHandler(stream_handler)
-            logger.info(f"Logger is provided with a stream handler. Level: {self.__level}")
+            logger.debug(f"Logger is provided with a stream handler. Level: {self.__level}")
 
         if not get_config().logger.no_file:
             file_handler: TimedRotatingFileHandler = self.__get_file_handler()
             handlers.append(file_handler)
             logger.addHandler(file_handler)
-            logger.info(f"Logger is provided with a file handler. Level: {self.__level}")
+            logger.debug(f"Logger is provided with a file handler. Level: {self.__level}")
 
         basicConfig(handlers=handlers, force=True)
         return logger

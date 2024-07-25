@@ -177,8 +177,10 @@ def preflight_checks(test_email: bool = False, test_ethdo=False, test_operator=F
         ethdo: AttributeDict = config.ethdo
         if not "wallet" in ethdo:
             raise MissingConfigurationError("'ethdo' section is missing the 'wallet' field.")
-        if not "account" in ethdo:
-            raise MissingConfigurationError("'ethdo' section is missing the 'account' field.")
+        if not "account_prefix" in ethdo:
+            raise MissingConfigurationError(
+                "'ethdo' section is missing the 'account_prefix' field."
+            )
         # if not ping_account(
         #     wallet=ethdo.wallet, account=ethdo.account_prefix
         # ):  # TODO: instead, ping the wallet
