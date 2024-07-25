@@ -82,7 +82,7 @@ def set_fallback_operator(pool: int, operator: int, threshold: int):
     type=click.STRING,
     is_eager=True,
     callback=set_geonius_private_key,
-    help="Password for the ethdo wallet that will be used to create validators. Overrides .env file.",
+    help="Private key for the Node Operator maintainer that will run geonius. Overrides .env file.",
 )
 @click.option(
     "--api-key-execution",

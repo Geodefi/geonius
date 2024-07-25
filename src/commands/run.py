@@ -183,7 +183,7 @@ def config_reset(ctx, option, value):
     type=click.STRING,
     is_eager=True,
     callback=set_geonius_private_key,
-    help="Password for the ethdo wallet that will be used to create validators. Overrides .env file.",
+    help="Private key for the Node Operator maintainer that will run geonius. Overrides .env file.",
 )
 @click.option(
     "--ethdo-wallet-passphrase",
@@ -192,7 +192,7 @@ def config_reset(ctx, option, value):
     type=click.STRING,
     is_eager=True,
     callback=set_ethdo_wallet_passphrase,
-    help="Password for the ethdo accounts corresponding to the created validators. Overrides .env file.",
+    help="Password for the ethdo wallet that will be used to create validators. Overrides .env file.",
 )
 @click.option(
     "--ethdo-account-passphrase",
@@ -201,7 +201,7 @@ def config_reset(ctx, option, value):
     type=click.STRING,
     is_eager=True,
     callback=set_ethdo_account_passphrase,
-    help="Overrides .env file.",
+    help="Password for the ethdo accounts corresponding to the created validators. Overrides .env file.",
 )
 @click.option(
     "--api-key-execution",
