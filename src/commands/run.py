@@ -25,72 +25,10 @@ def config_reset(ctx, option, value):
 
 
 @click.option(
-    "--min-proposal-queue",
-    required=False,
-    type=click.IntRange(0, 50),
-    help="Minimum amount of proposals to wait before creating a tx",
-)
-@click.option(
-    "--max-proposal-delay",
-    required=False,
-    type=click.IntRange(0, 604800),
-    help="Max seconds for any proposals to wait",
-)
-@click.option(
-    "--network-refresh-rate",
-    required=False,
-    type=click.IntRange(0, 360),
-    help="Cached data will be refreshed after provided delay (s)",
-)
-@click.option(
-    "--network-attempt-rate",
-    required=False,
-    type=click.IntRange(0, 10),
-    help="Interval between api requests (s)",
-)
-@click.option(
-    "--network-max-attempt",
-    required=False,
-    type=click.IntRange(0, 100),
-    help="Api requests will fail after given max calls",
-)
-@click.option(
-    "--logger-dir",
-    required=False,
-    type=click.STRING,
-    help="Directory name that log files will be stored",
-)
-@click.option(
-    "--logger-level",
-    required=False,
-    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
-    help="Set logging level",
-)
-@click.option(
-    "--logger-when",
-    required=False,
-    type=click.Choice(
-        ["S", "M", "H", "D", "W0", "W1", "W2", "W3", "W4", "W5", "W6", "midnight"],
-    ),
-    help="When should logger continue with a new file",
-)
-@click.option(
-    "--logger-interval",
+    "--operator-id",
     required=False,
     type=click.INT,
-    help="how many intervals before logger continue with a new file",
-)
-@click.option(
-    "--logger-backup",
-    required=False,
-    type=click.INT,
-    help="how many logger files will be saved per logger",
-)
-@click.option(
-    "--database-dir",
-    required=False,
-    type=click.STRING,
-    help="Directory name that for the database",
+    help="geodefi ID for the Node Operator",
 )
 @click.option(
     "--chain-start",
@@ -102,47 +40,127 @@ def config_reset(ctx, option, value):
     "--chain-identifier",
     required=False,
     type=click.Choice(["latest", "earliest", "pending", "safe", "finalized"]),
-    help="method to rely when fetching new blocks: latest, earliest, pending, safe, finalized.",
+    help="Identifier fetching new blocks.",
 )
 @click.option(
     "--chain-period",
     required=False,
     type=click.INT,
-    help="the amount of periods before checking for new blocks.",
+    help="The amount of periods before checking for new blocks.",
 )
 @click.option(
     "--chain-interval",
     required=False,
     type=click.INT,
-    help="avg block time to rely on for given chain.",
+    help="Average block time to rely on for given chain.",
 )
 @click.option(
     "--chain-range",
     required=False,
     type=click.INT,
-    help="maximum block to use when grouping a range of blocks.",
+    help="Maximum block to use when grouping a range of blocks.",
+)
+@click.option(
+    "--chain-execution-api",
+    required=False,
+    type=click.STRING,
+    help="Api endpoint for the execution layer. Could be the rest api of the execution client.",
+)
+@click.option(
+    "--chain-consensus-api",
+    required=False,
+    type=click.STRING,
+    help="Api endpoint for the consensus layer. Could be the rest api of the consensus client.",
+)
+@click.option(
+    "--network-refresh-rate",
+    required=False,
+    type=click.IntRange(0, 360),
+    help="Cached data will be refreshed after provided delay (s).",
+)
+@click.option(
+    "--network-attempt-rate",
+    required=False,
+    type=click.IntRange(0, 10),
+    help="Interval between api requests (s).",
+)
+@click.option(
+    "--network-max-attempt",
+    required=False,
+    type=click.IntRange(0, 100),
+    help="Api requests will fail after given max calls.",
+)
+@click.option(
+    "--min-proposal-queue",
+    required=False,
+    type=click.IntRange(0, 50),
+    help="Minimum amount of proposals to wait before creating a tx.",
+)
+@click.option(
+    "--max-proposal-delay",
+    required=False,
+    type=click.IntRange(0, 604800),
+    help="Max seconds for any proposals to wait.",
+)
+@click.option(
+    "--no-log-file",
+    is_flag=True,
+    help="Don't store log messages in a file.",
+)
+@click.option(
+    "--no-log-stream",
+    is_flag=True,
+    help="Don't print log messages to the terminal.",
+)
+@click.option(
+    "--logger-dir",
+    required=False,
+    type=click.STRING,
+    help="Directory name that log files will be stored.",
+)
+@click.option(
+    "--logger-level",
+    required=False,
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
+    help="Set logging level for both stream and log file.",
+)
+@click.option(
+    "--logger-when",
+    required=False,
+    type=click.Choice(
+        ["S", "M", "H", "D", "W0", "W1", "W2", "W3", "W4", "W5", "W6", "midnight"],
+    ),
+    help="When should logger continue with a new file.",
+)
+@click.option(
+    "--logger-interval",
+    required=False,
+    type=click.INT,
+    help="How many intervals before logger continue with a new file.",
+)
+@click.option(
+    "--logger-backup",
+    required=False,
+    type=click.INT,
+    help="How many logger files will be saved per logger.",
+)
+@click.option(
+    "--database-dir",
+    required=False,
+    type=click.STRING,
+    help="Directory name that for the database.",
 )
 @click.option(
     "--ethdo-wallet",
     required=False,
     type=click.STRING,
-    help="default ethdo wallet name to be created/used",
+    help="Default ethdo wallet name to be created/used.",
 )
 @click.option(
-    "--ethdo-account",
+    "--ethdo-account-prefix",
     required=False,
     type=click.STRING,
-    help="deafult ethdo account name to be created/used",
-)
-@click.option(
-    "--no-log-file",
-    is_flag=True,
-    help="Don't store log messages in a file",
-)
-@click.option(
-    "--no-log-stream",
-    is_flag=True,
-    help="don't print log messages to the terminal",
+    help="Default ethdo account name to be created/used.",
 )
 @click.option(
     "--dont-notify-devs",
