@@ -231,7 +231,7 @@ Up until this point, if you have:
 2. Similarly, a consensus node is ready.
 3. Installed ethdo and created a wallet for geonius.
 4. Installed vouch and configured it with a yml/json file.
-5. Installed geonius as a binary, from source or with pipx.
+5. Installed geonius with pipx, or downloaded it as a binary, or built it from source.
 6. Configured it with `geonius config`
 
 So, you are ready to start geonius.
@@ -250,8 +250,8 @@ Because of the bug explained [here](https://medium.com/immunefi/rocketpool-lido-
 
 You will be reimbursed after activating the validator. However, this amount limits how many proposals you can have at the same time.
 
-> If you have 100 Ether in your internal wallet, and if it takes 1 day for proposals to be approved:
-> You can propose 100 validators a day.
+> If you have 10 Ether in your internal wallet, and since it takes around 24 hours for a proposal to be approved:
+> You can propose 10 validators a day.
 
 > The Internal Wallet is also the place where your fees will accrue over time.
 

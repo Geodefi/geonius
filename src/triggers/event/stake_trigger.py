@@ -8,7 +8,7 @@ from geodefi.classes import Validator
 
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
-from src.triggers.time import ExpectDepositsTrigger
+from src.triggers.time import ExpectPubkeysTrigger
 from src.exceptions import DatabaseError
 from src.globals import get_config, get_logger, get_constants, get_sdk
 from src.helpers.event import event_handler
@@ -20,7 +20,7 @@ class StakeTrigger(Trigger):
 
     Attributes:
         name (str): name of the trigger to be used when logging etc. (value: STAKE_PROPOSAL)
-        expect_deposit_daemon (str): A time daemon that will work every 15 min.\
+        expect_pubkeys_daemon (str): A time daemon that will work every 15 min.\
             Checks if there are any pubkeys that requires pinging.
     """
 
@@ -36,16 +36,16 @@ class StakeTrigger(Trigger):
         Trigger.__init__(self, name=self.name, action=self.expect_validators)
 
         # initiate a TimeDaemon to keep track
-        self.__except_deposit_trigger: ExpectDepositsTrigger = ExpectDepositsTrigger(
+        self.__except_pubkeys_trigger: ExpectPubkeysTrigger = ExpectPubkeysTrigger(
             balance=DEPOSIT_SIZE.PROPOSAL, keep_alive=True
         )
-        self.__except_deposit_daemon: TimeDaemon = TimeDaemon(
+        self.__except_pubkeys_daemon: TimeDaemon = TimeDaemon(
             interval=15 * get_constants().one_minute,
-            trigger=self.__except_deposit_trigger,
+            trigger=self.__except_pubkeys_trigger,
             initial_delay=0,
         )
 
-        self.__except_deposit_daemon.run()
+        self.__except_pubkeys_daemon.run()
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         """Parses the events to saveable format.
@@ -125,4 +125,4 @@ class StakeTrigger(Trigger):
             pubkey for event in filtered_events for pubkey in event.args.pubkeys
         ]
 
-        self.__except_deposit_trigger.extend(all_proposed_pks)
+        self.__except_pubkeys_trigger.extend(all_proposed_pks)

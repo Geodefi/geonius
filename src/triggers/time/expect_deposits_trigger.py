@@ -1,56 +1,43 @@
 # -*- coding: utf-8 -*-
 
 from itertools import repeat
-
 from src.classes import Trigger
 from src.daemons import TimeDaemon
 from src.utils.thread import multithread
 from src.database.validators import fill_validators_table
-from src.globals import get_sdk, get_logger
-
-
-def ping_pubkey(pubkey: str, expected_balance: int) -> bool:
-    """Checks if a validator pubkey can be reached on beaconchain.
-    Unusually, it checks if the underlying call
-    fires an error since it got 404 as a response instead of 200.
-    If it exists (not considering its status) it checks for the balance.
-
-    Args:
-        pubkey (str): public key of the validator to be pinged
-        expected_balance (str): expected effective balance,\
-            note that it can be lower than expected if slashed.
-
-    Returns:
-        bool: True if the validator exists on the beaconchain, False if not.
-    """
-    try:
-        res = get_sdk().beacon.beacon_states_validators_id(state_id="head", validator_id=pubkey)
-        return int(res["validator"]["effective_balance"]) == expected_balance
-    except Exception:
-        return False
+from src.globals import get_logger
+from src.helpers.validator import ping_pubkey_balance, ping_pubkey_status
 
 
 # TODO: (later) Stop and throw error after x attempts: This should be fault tolerant.
-class ExpectDepositsTrigger(Trigger):
-    """Trigger for the EXPECT_DEPOSITS. This time trigger waits until deposits for the
-    multiple validators become processed on beaconchain. Works every 15 minutes.
-    Validators should be proposed in a proposeStake call previously.
-    Initial delay is proposed to be 12 hours after the call, which is usual. However, there is non
-    if the script is rebooted. It stops the daemon after all the validators are recorded in db.
+class ExpectPubkeysTrigger(Trigger):
+    """Trigger for the EXPECT_PUBKEYS.
+    A time trigger that waits for a list of pubkeys, and checks if any can be filtered
+    according to the provided filter function. Works every 15 minutes.
+    Initial delay can be provided.
+    Can stop the daemon after all the validators are recorded in db, if keep_alive is False.
 
     Attributes:
         name (str): The name of the trigger to be used when logging etc. (value: EXPECT_DEPOSIT)
+        __balance (int): When provided, the pubkeys will be filtered by the balance when detected.
+        __status (str): When provided, the pubkeys will be filtered by the status when detected.
         __pubkeys (str): Internal list of validator pubkeys to be finalized when ALL exited.
-        __balance (int): The expected value for the validator when it is detected.
         __keep_alive (str): TimeDaemon will not be shot down when pubkeys list is empty.
         Useful for event listeners.
     """
 
-    name: str = "EXPECT_DEPOSITS"
+    name: str = "EXPECT_PUBKEYS"
 
-    def __init__(self, balance: int, pubkeys: list[str] = [], keep_alive: bool = False) -> None:
+    def __init__(
+        self,
+        balance: int = None,
+        status: str = None,
+        pubkeys: list[str] = [],
+        keep_alive: bool = False,
+    ) -> None:
         Trigger.__init__(self, name=self.name, action=self.process_deposits)
         self.__balance: int = balance
+        self.__status: int = status
         self.__pubkeys: str = pubkeys
         self.__keep_alive: bool = keep_alive
         get_logger().debug(f"{self.name} is initated.")
@@ -86,11 +73,17 @@ class ExpectDepositsTrigger(Trigger):
             daemon (TimeDaemon): daemon to be stopped if the pubkey is empty
         """
         if self.__pubkeys:
-            response_filter: bool = multithread(ping_pubkey, self.__pubkeys, repeat(self.__balance))
+
+            filtered = self.__pubkeys
+            if self.__balance:
+                filtered: bool = multithread(ping_pubkey_balance, filtered, repeat(self.__balance))
+
+            if self.__status:
+                filtered: bool = multithread(ping_pubkey_status, filtered, repeat(self.__status))
 
             responded = []
             remaining = []
-            for pk, res in zip(self.__pubkeys, response_filter):
+            for pk, res in zip(self.__pubkeys, filtered):
                 if res:
                     responded.append(pk)
                 else:

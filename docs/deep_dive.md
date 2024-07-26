@@ -4,7 +4,8 @@ geonius internal structure is explained.
 
 ## Validator Creation
 
-When there is enough ether (32 ETH) deposited in a pool, the pool owner can delegate it to any Node Operator that is registered in the Operator Marketplace.
+Pool owners can delegate any amount of validators to Node Operators.
+When there are enough funds (32 ETH per validator) in the pool, any of the Node Operators that is registered in the Operator Marketplace, can create validators up to their allowance.
 
 Then,
 
@@ -12,7 +13,7 @@ Then,
    1. Initiates the validator on beaconchain.
    2. Operator uses 1 eth to secure the proposal, no funds leave the staking pool yet.
 2. The proposal is approved by the Oracle.
-   1. This happens regularly with at most 24 delay.
+   1. This happens regularly with at most 24 hours delay.
 3. The Node Operator finalizes the validator creation.
    1. Node Operator gets the 1 ETH back into their internal wallet.
 
@@ -26,7 +27,7 @@ There are 3 type of daemons:
 
 1. Time Daemon: triggers the provided task every x second.
 2. Block Daemon: triggers the provided task every x block.
-3. Event Daemon: triggers the provided task every time there is a new event with the Provided name.
+3. Event Daemon: triggers the provided task every time there is a new event from the provided smart contract. Mostly, Portal or gETH contracts.
 
 ### IdInitiated Daemon
 
@@ -40,7 +41,9 @@ Checks if there are any new possible validators to propose.
 
 Watches the `Deposit` events.
 
-Triggered when surplus changes for a pool. Updates the database with the latest info.
+Triggered when there is a new deposit for the pool, which increases the `surplus`.
+
+Updates the database with the latest info.
 
 Checks if there are any new possible validators to propose for given pool.
 
@@ -68,7 +71,7 @@ Watches the `StakeProposal` events.
 
 Triggered when a new validator is proposed.
 
-Only functions to update the validator on the database when it is detected on the beacon chain.
+Just updates the validator on the database, when the deposit is processed by the beacon chain.
 
 ### Stake Daemon
 
@@ -84,11 +87,11 @@ Watches the `Alienated` events.
 
 Alienation is important because when a validator is Alienated it's Operator will be prisoned.
 
-### ExpectDeposit Daemon
+### ExpectPubkeys Daemon
 
 This is a time daemon that runs every 15 minutes.
 
-It checks if a deposit is processed by the Beacon chain. Then, it updates the database accordingly.
+It checks if a deposit is processed according to the provided filter. Then, it updates the database accordingly.
 
 ### ExitRequest Daemon
 

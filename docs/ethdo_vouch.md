@@ -83,5 +83,4 @@ Attestant provides two separate products, Vouch for the validator client and Dir
 Optionally, [Dirk](https://github.com/attestantio/dirk) can be configured with ethdo & Vouch as a wallet manager.
 
 Although it is not covered within the documentation provided here, it is **highly recommended** to utilize its functionality to create a safer environment for your validator servers with distributed signing.
-
-Here is the d -->
+-->

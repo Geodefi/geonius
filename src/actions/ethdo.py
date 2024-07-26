@@ -105,6 +105,10 @@ def ping_account(wallet: str, account: str) -> bool:
 def create_wallet(wallet_name: str, passphrase: str) -> dict:
     """Creates a new wallet on ethdo
 
+    Args:
+        wallet (str): Name for the ethdo wallet that will be created
+        passphrase (str): passphrase to unlock the provided ethdo wallet
+
     Returns:
         dict: Returns the wallet info in JSON format.
 
@@ -129,14 +133,15 @@ def create_wallet(wallet_name: str, passphrase: str) -> dict:
 
     try:
         return json.loads(res)
-    except (json.JSONDecodeError, TypeError) as e:
-        raise e
-    except Exception as e:
+    except (json.JSONDecodeError, TypeError, Exception) as e:
         raise e
 
 
 def create_account(account_name: str = None) -> dict:
     """Creates a new account on given ethdo wallet
+
+    Args:
+        account_name (str): Name for the ethdo account that will be created
 
     Returns:
         dict: Returns the account data in JSON format.
