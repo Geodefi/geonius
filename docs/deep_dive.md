@@ -68,7 +68,15 @@ Watches the `StakeProposal` events.
 
 Triggered when a new validator is proposed.
 
-Only function is to update the validator on the database when it is detected on the beacon chain.
+Only functions to update the validator on the database when it is detected on the beacon chain.
+
+### Stake Daemon
+
+Watches the `Stake` events.
+
+Triggered when a validator is activated on Portal.
+
+Only functions to update the validator on the database when the balance change is detected on the beacon chain.
 
 ### Alienated Daemon
 

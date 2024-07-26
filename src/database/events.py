@@ -347,7 +347,7 @@ def create_stake_proposal_table() -> None:
                     transaction_index INTEGER NOT NULL,
                     log_index INTEGER NOT NULL,
                     event_index INTEGER NOT NULL,
-                    PRIMARY KEY (pk)                       
+                    PRIMARY KEY (pk),                       
                     FOREIGN KEY (pk) REFERENCES Validators (pk),
                     FOREIGN KEY (pool_id) REFERENCES Pools (id)
                 )
@@ -378,3 +378,50 @@ def reinitialize_stake_proposal_table() -> None:
 
     drop_stake_proposal_table()
     create_stake_proposal_table()
+
+
+def create_stake_table() -> None:
+    """Creates the sql database table for Stake.
+
+    Raises:
+        DatabaseError: Error creating Stake table
+    """
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS Stake (
+                    pk TEXT UNIQUE NOT NULL,
+                    block_number INTEGER NOT NULL,
+                    transaction_index INTEGER NOT NULL,
+                    log_index INTEGER NOT NULL,
+                    event_index INTEGER NOT NULL,
+                    PRIMARY KEY (pk),                       
+                    FOREIGN KEY (pk) REFERENCES Validators (pk)                )
+                """
+            )
+        get_logger().debug(f"Created a new table: Stake")
+    except Exception as e:
+        raise DatabaseError("Error creating Stake table") from e
+
+
+def drop_stake_table() -> None:
+    """Removes Stake table from the database.
+
+    Raises:
+        DatabaseError: Error dropping Stake table
+    """
+
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS Stake""")
+        get_logger().debug(f"Dropped Table: Stake")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping Stake table") from e
+
+
+def reinitialize_stake_table() -> None:
+    """Removes Stake table and creates an empty one."""
+
+    drop_stake_table()
+    create_stake_table()
