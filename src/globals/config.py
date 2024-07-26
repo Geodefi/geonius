@@ -130,10 +130,9 @@ def init_config(main_dir: str) -> AttributeDict:
     Raises:
         TypeError: if the config file is not a dict after loading from json.
     """
-    main_dir_path = os.path.join(os.getcwd(), main_dir)  # TODO: this can be home or cwd
+    main_dir_path = os.path.join(os.getcwd(), main_dir)
 
     if not os.path.exists(main_dir_path):
-        # TODO: log.error and ask if want to create
         raise ConfigurationFileError(
             f"Could not locate the provided path for the main directory: {main_dir_path}"
         )
@@ -151,7 +150,6 @@ def init_config(main_dir: str) -> AttributeDict:
             ) from e
 
     else:
-        # TODO: log.error and ask if want to create
         raise ConfigurationFileError(f"Could not find a config.json file in {main_dir_path}")
 
     config: AttributeDict = AttributeDict.convert_recursive(config_dict)

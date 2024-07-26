@@ -9,7 +9,6 @@ from src.database.validators import fill_validators_table
 from src.globals import get_sdk, get_logger
 
 
-# TODO: convert this so it also checks the balance
 def ping_pubkey(pubkey: str, expected_balance: int) -> bool:
     """Checks if a validator pubkey can be reached on beaconchain.
     Unusually, it checks if the underlying call
