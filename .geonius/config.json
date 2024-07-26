@@ -37,7 +37,7 @@
     "account_prefix": "Validator"
   },
   "gas": {
-    "max_priority": 3,
+    "max_priority": 10,
     "max_fee": 100,
     "api": "https://gas.api.infura.io/v3/<API_KEY_GAS>/networks/1/suggestedGasFees",
     "parser": {
