@@ -23,8 +23,7 @@ def tx_params() -> dict:
             "maxPriorityFeePerGas": priority_fee,
             "maxFeePerGas": base_fee,
         }
-    else:
-        return {}
+    return {}
 
 
 def deposit(
@@ -133,7 +132,8 @@ def deposit(
     callback=load_env,
     type=click.STRING,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
+    help="Relative path for the main directory that will be used to store data."
+    " Default is ./.geonius",
 )
 @click.command(
     help="Deposit ether into a Staking pool."

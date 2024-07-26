@@ -22,7 +22,8 @@ class EventDaemon(Daemon):
         name (str): name of the daemon to be used when logging etc. (value: EVENT_DAEMON)
         event (_type_): event to be checked.
         block_period (int): number of blocks to wait before running the triggers.
-        block_identifier (int): block_identifier sets if we are looking for 'latest', 'earliest', 'pending', 'safe', 'finalized'.
+        block_identifier (int): block_identifier that can be set to
+            'latest', 'earliest', 'pending', 'safe', 'finalized'.
     """
 
     name: str = "EVENT_DAEMON"
@@ -37,7 +38,8 @@ class EventDaemon(Daemon):
         Args:
             trigger (Trigger): an initialized Trigger instance.
             event (ContractEvent): event to be checked.
-            start_block (int, optional): block number to start checking for events. Default is what is set in the config.
+            start_block (int, optional): block number to start checking for events.
+                Default is what is set in the config.
         """
         chain = get_constants().chain
         Daemon.__init__(
@@ -83,7 +85,7 @@ class EventDaemon(Daemon):
 
         # check if required number of blocks have past:
         if curr_block >= self.__last_snapshot.block_number + self.block_period:
-            unknown_events = list()
+            unknown_events = []
 
             try:
                 detected_events: Iterable[EventData] = get_all_events(
@@ -103,7 +105,8 @@ class EventDaemon(Daemon):
 
             except Exception as e:
                 raise EventFetchingError(
-                    f"There was an issue while fetching the {self.event.event_name} event from the chain"
+                    "There was an issue while fetching the"
+                    f"{self.event.event_name} event from the chain"
                 ) from e
 
             # take a snapshot after finishing processing the block.\
@@ -118,12 +121,8 @@ class EventDaemon(Daemon):
                 )
                 return unknown_events
 
-            else:
-                return None
-
         else:
             get_logger().debug(
                 f"Block period have not been met yet.\
                 Expected block:{self.__last_snapshot.block_number + self.block_period}"
             )
-            return None

@@ -27,8 +27,8 @@ def get_batch_events(event: ContractEvent, from_block: int, limit: int) -> Itera
     # get_batch_events would search 0-3, 3-6 and 6-9
     # but we want 0-3, 3-6, 6-7
     to_block: int = from_block + int(get_constants().chain.range)
-    if to_block > limit:
-        to_block = limit
+
+    to_block = min(to_block, limit)
 
     # @dev do not use filters instead, some providers do not support it.
     logs = event.get_logs(fromBlock=from_block, toBlock=to_block)

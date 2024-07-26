@@ -17,7 +17,8 @@ from src.database.validators import (
     check_pk_in_db,
 )
 from src.helpers.event import event_handler
-from src.helpers.validator import run_finalize_exit_triggers
+
+# from src.helpers.validator import run_finalize_exit_triggers
 from src.globals import get_constants, get_sdk, get_logger
 from src.utils.notify import send_email
 
@@ -32,8 +33,10 @@ class ExitRequestTrigger(Trigger):
     name: str = "EXIT_REQUEST"
 
     def __init__(self) -> None:
-        """Initializes an ExitRequestTrigger object. The trigger will process the changes of the daemon after a loop.
-        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """Initializes an ExitRequestTrigger object.
+        The trigger will process the changes of the daemon after a loop.
+        It is a callable object.
+        It is used to process the changes of the daemon. It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.update_validators_status)
@@ -54,7 +57,8 @@ class ExitRequestTrigger(Trigger):
         return check_pk_in_db(event.args.pubkey)
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
-        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
+        """Parses the events to saveable format.
+        Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
             events (Iterable[EventData]): list of ExitRequest emits
@@ -91,6 +95,7 @@ class ExitRequestTrigger(Trigger):
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table ExitRequest") from e
 
+    # pylint: disable-next=unused-argument
     def update_validators_status(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Updates the status of validators that have requested to exit the network.
 
@@ -111,7 +116,8 @@ class ExitRequestTrigger(Trigger):
             pubkey: str = event.args.pubkey
             save_portal_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
 
-            # TODO: (later) if this is not waiting for tx to be mined, there should be a way to handle and check the portal_state/beacon_status.
+            # TODO: (later) if this is not waiting for tx to be mined,
+            # there should be a way to handle and check the portal_state/beacon_status.
             try:
                 exit_validator(pubkey)
             except EthdoError as e:
@@ -130,8 +136,8 @@ class ExitRequestTrigger(Trigger):
             else:
                 raise BeaconStateMismatchError(f"Beacon state mismatch for pubkey {pubkey}")
 
-        # TODO: (later) exit_validator function (ethdo) is waiting for finalization, we do not need to
-        #       seperate the for loops and we can continue under the same loop
+        # TODO: (later) exit_validator function (ethdo) is waiting for finalization
+        # we do not need to seperate the for loops and we can continue under the same loop
         for pubkey in exitted_pks:
             save_local_state(pubkey, VALIDATOR_STATE.EXIT_REQUESTED)
 

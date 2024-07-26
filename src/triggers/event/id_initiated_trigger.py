@@ -22,8 +22,11 @@ class IdInitiatedTrigger(Trigger):
     name: str = "ID_INITIATED"
 
     def __init__(self) -> None:
-        """Initializes a IdInitiatedTrigger object. The trigger will process the changes of the daemon after a loop.
-        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """Initializes a IdInitiatedTrigger object.
+        The trigger will process the changes of the daemon after a loop.
+        It is a callable object.
+        It is used to process the changes of the daemon.
+        It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.insert_pool)
@@ -38,13 +41,11 @@ class IdInitiatedTrigger(Trigger):
         Returns:
             bool: True if the event is a pool event, False otherwise
         """
-        if event.args.TYPE == ID_TYPE.POOL:
-            return True
-        else:
-            return False
+        return event.args.TYPE == ID_TYPE.POOL
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
-        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
+        """Parses the events to saveable format.
+        Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
             events (Iterable[EventData]): list of IdInitiated emits
@@ -86,6 +87,7 @@ class IdInitiatedTrigger(Trigger):
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table IdInitiated") from e
 
+    # pylint: disable-next=unused-argument
     def insert_pool(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Creates a new pool and fills it with data
         for encountered pool ids within provided "IdInitiated" emits.

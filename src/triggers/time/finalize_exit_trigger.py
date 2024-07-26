@@ -9,7 +9,7 @@ from src.database.validators import save_portal_state, save_local_state, fetch_p
 from src.globals import get_logger, get_sdk
 
 
-# TODO: (later) Stop and throw error after x attempts: This should be fault tolerant. rely on config.json
+# TODO: (later) Stop and throw error after x attempts: This should be fault tolerant.
 class FinalizeExitTrigger(Trigger):
     """Trigger for the FINALIZE_EXIT. This time trigger is used to finalize the exit of a validator.
     It is triggered after the initial delay is passed. Initial delay is set according to exit epoch.
@@ -23,8 +23,10 @@ class FinalizeExitTrigger(Trigger):
     name: str = "FINALIZE_EXIT"
 
     def __init__(self, pubkey: str) -> None:
-        """Initializes a FinalizeExitTrigger object. The trigger will process the changes of the daemon after a loop.
-        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """Initializes a FinalizeExitTrigger object.
+        The trigger will process the changes of the daemon after a loop.
+        It is a callable object. It is used to process the changes of the daemon.
+        It can only have 1 action.
 
         Args:
             pubkey (str): The public key of the validator to finalize the exit
@@ -34,6 +36,7 @@ class FinalizeExitTrigger(Trigger):
         self.pubkey: str = pubkey
         get_logger().debug(f"{self.name} is initated for pubkey: {pubkey}")
 
+    # pylint: disable-next=unused-argument
     def finalize_exit(self, daemon: TimeDaemon, *args, **kwargs) -> None:
         """Finalizes the exit of the validator. Stops the daemon after the exit is finalized.
         Updates the database by setting the portal and local status to EXITED for the validator.

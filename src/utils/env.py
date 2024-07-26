@@ -4,9 +4,9 @@ import os
 from dotenv import load_dotenv
 
 
-def load_env(ctx, option, value):
+def load_env(ctx, _option, value):
     if ctx.resilient_parsing:
-        return
+        return value
     # Should not override the key-value pairs if they exists
     # since we allow .env pairs to be flags or env vars.
     # Thus, --main-dir which loads .env is not eager but
@@ -19,49 +19,49 @@ def __set_env_var(key: str, value: str):
     os.environ[str(key)] = str(value)
 
 
-def set_geonius_private_key(ctx, option, value):
+def set_geonius_private_key(ctx, _option, value):
     if not value or ctx.resilient_parsing:
         return
 
     __set_env_var("GEONIUS_PRIVATE_KEY", value)
 
 
-def set_ethdo_wallet_passphrase(ctx, option, value):
+def set_ethdo_wallet_passphrase(ctx, _option, value):
     if not value or ctx.resilient_parsing:
         return
 
     __set_env_var("ETHDO_WALLET_PASSPHRASE", value)
 
 
-def set_ethdo_account_passphrase(ctx, option, value):
+def set_ethdo_account_passphrase(ctx, _option, value):
     if not value or ctx.resilient_parsing:
         return
 
     __set_env_var("ETHDO_ACCOUNT_PASSPHRASE", value)
 
 
-def set_api_key_execution(ctx, option, value):
+def set_api_key_execution(ctx, _option, value):
     if not value or ctx.resilient_parsing:
         return
 
     __set_env_var("API_KEY_EXECUTION", value)
 
 
-def set_api_key_consensus(ctx, option, value):
+def set_api_key_consensus(ctx, _option, value):
     if not value or ctx.resilient_parsing:
         return
 
     __set_env_var("API_KEY_CONSENSUS", value)
 
 
-def set_api_key_gas(ctx, option, value):
+def set_api_key_gas(ctx, _option, value):
     if not value or ctx.resilient_parsing:
         return
 
     __set_env_var("API_KEY_GAS", value)
 
 
-def set_email_password(ctx, option, value):
+def set_email_password(ctx, _option, value):
     if not value or ctx.resilient_parsing:
         return
 

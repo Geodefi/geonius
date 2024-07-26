@@ -60,7 +60,8 @@ def fetch_pools_batch(ids: list[int]) -> list[dict]:
         ids (list[int]): pool IDs that will be fetched
 
     Returns:
-        list[dict]: list of dictionaries containing the pool info, in format of [{id: val, fallback: bool,...},...]
+        list[dict]: list of dictionaries containing the pool info
+         in format of [{id: val, fallback: bool,...},...]
     """
     get_logger().debug(f"Fetching pools.")
 
@@ -82,7 +83,8 @@ def insert_many_pools(new_pools: list[dict]) -> None:
     """Inserts the given pools data into the database.
 
     Args:
-        new_pools (list[dict]): list of dictionaries containing the pool info, in format of [{id: val, surplus: val,...},...]
+        new_pools (list[dict]): list of dictionaries containing the pool info,
+         in format of [{id: val, surplus: val,...},...]
 
     Raises:
         DatabaseError: Error inserting many pools into table
@@ -169,8 +171,8 @@ def save_last_proposal_timestamp(pool_id: int, timestamp: int) -> None:
             )
     except Exception as e:
         raise DatabaseError(
-            f"Error updating last proposal timestamp of pool with id {pool_id} and timestamp {timestamp} \
-                in table Pools"
+            f"Error updating last proposal timestamp of pool with id {pool_id}"
+            f"and timestamp {timestamp} in table Pools"
         ) from e
 
 

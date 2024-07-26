@@ -22,8 +22,7 @@ def tx_params() -> dict:
             "maxPriorityFeePerGas": priority_fee,
             "maxFeePerGas": base_fee,
         }
-    else:
-        return {}
+    return {}
 
 
 def change_maintainer(address: str):
@@ -113,10 +112,12 @@ def change_maintainer(address: str):
     is_eager=False,
     callback=load_env,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
+    help="Relative path for the main directory that will be used to store data."
+    " Default is ./.geonius",
 )
 @click.command(
-    help="Set a new maintainer for the Node Operator. Maintainers are allowed to create validators, and should be the ones operating geonius."
+    help="Set a new maintainer for the Node Operator."
+    " Maintainers are allowed to create validators, and should be the ones operating geonius."
 )
 def main(
     chain: str,

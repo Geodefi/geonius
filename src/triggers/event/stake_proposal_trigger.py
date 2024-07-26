@@ -17,14 +17,17 @@ class StakeProposalTrigger(Trigger):
 
     Attributes:
         name (str): name of the trigger to be used when logging etc. (value: STAKE_PROPOSAL)
-        expect_deposit_daemon (str): name of the trigger to be used when logging etc. (value: STAKE_PROPOSAL)
+        expect_deposit_daemon (str): name of the trigger to be used when logging etc.
     """
 
     name: str = "STAKE_PROPOSAL"
 
     def __init__(self) -> None:
-        """Initializes a StakeProposalTrigger object. The trigger will process the changes of the daemon after a loop.
-        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """Initializes a StakeProposalTrigger object.
+        The trigger will process the changes of the daemon after a loop.
+        It is a callable object.
+        It is used to process the changes of the daemon.
+        It can only have 1 action.
         """
         Trigger.__init__(self, name=self.name, action=self.expect_validators)
 
@@ -49,13 +52,12 @@ class StakeProposalTrigger(Trigger):
             bool: True if the event is for the script's OPERATOR_ID, False otherwise
         """
 
-        if event.args.operatorId == get_config().operator_id:
-            return True
-        else:
-            return False
+        return event.args.operatorId == get_config().operator_id
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
-        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
+        """Parses the events to saveable format.
+        Returns a list of tuples.
+        Each tuple represents a saveable event.
 
         Args:
             events (Iterable[EventData]): list of StakeProposal emits
@@ -96,6 +98,7 @@ class StakeProposalTrigger(Trigger):
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table StakeProposal") from e
 
+    # pylint: disable-next=unused-argument
     def expect_validators(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Creates a new pool and fills it with data
         for encountered pool ids within provided "StakeProposal" emits.

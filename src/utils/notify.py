@@ -13,7 +13,7 @@ from src.globals import get_config, get_logger
 
 
 def send_email(
-    subject: str, body: str, attachments: list[tuple[str, str]] = list(), dont_notify_devs=None
+    subject: str, body: str, attachments: list[tuple[str, str]] = [], dont_notify_devs=None
 ):
     """Sends an email to the provided developer address,
     as well as admin when allowed and applicable.

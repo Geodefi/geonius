@@ -65,7 +65,8 @@ class Daemon:
             initial_delay (int, optional): Initial delay before starting the loop. Defaults to 0.
         """
         get_logger().debug(
-            f"Initializing a Daemon object. interval: {interval}, trigger:{trigger.name}, delay:{initial_delay}"
+            f"Initializing a Daemon object. interval: {interval},"
+            f"trigger:{trigger.name}, delay:{initial_delay}"
         )
         self.__set_task(task)
         self.__set_interval(interval)
@@ -137,11 +138,13 @@ class Daemon:
             raise TypeError("Given trigger is not an instince of Trigger")
 
     def __loop(self) -> None:
-        """Runs the loop, checks for the task and trigger on every iteration. Stops when stop_flag is set.
-
-        If the task raises an exception, the daemon stops and raises a DaemonError. This is to prevent
-        the daemon from running with a broken task. The exception is raised to the caller to handle the error. The
-        daemon can be restarted after the error is handled. The stop_flag is set to prevent the daemon from running again.
+        """Runs the loop, checks for the task and trigger on every iteration.
+        Stops when stop_flag is set.
+        If the task raises an exception, the daemon stops and raises a DaemonError.
+        This is to prevent the daemon from running with a broken task.
+        The exception is raised to the caller to handle the error.
+        The daemon can be restarted after the error is handled.
+        The stop_flag is set to prevent the daemon from running again.
 
         Raises:
             DaemonError: Raised if the daemon stops due to an exception.
@@ -160,49 +163,60 @@ class Daemon:
 
             except (TimeExhausted, CallFailedError):
                 get_logger().warning(
-                    f"One of the calls failed for {self.trigger.name:^17}. Continuing but may need to be checked in case of a problem."
+                    f"One of the calls failed for {self.trigger.name:^17}."
+                    " Continuing but may need to be checked in case of a problem."
                 )
                 try:
                     send_email(
-                        f"Tx failed",
-                        f"A Portal transaction is either failed, or could not be called for some reason. Will continue operations as usual, but an investigation is suggested.",
+                        "Tx failed",
+                        " A Portal transaction is either failed,"
+                        " or could not be called for some reason."
+                        " Will continue operations as usual, but an investigation is suggested.",
                     )
                 except EmailError:
                     get_logger().warning(
-                        f"Not able to communicate with the owners. Continuing without an assistance."
+                        "Not able to communicate with the owners."
+                        " Continuing without an assistance."
                     )
             except HighGasError as e:
                 get_logger().error(str(e))
                 get_logger().warning(
-                    f"One of the calls failed for {self.trigger.name:^17}. Continuing but may need to be checked in case of a problem."
+                    f"One of the calls failed for {self.trigger.name:^17}."
+                    " Continuing but may need to be checked in case of a problem."
                 )
                 try:
                     send_email(
                         "High Gas Alert",
-                        f"On Chain gas api reported that gas prices have surpassed the default max settings.",
+                        "On Chain gas api reported that gas prices have surpassed the max setting.",
                         dont_notify_devs=True,
                     )
                 except EmailError:
                     get_logger().warning(
-                        f"Not able to communicate with the owners. Continuing without an assistance."
+                        "Not able to communicate with the owners."
+                        " Continuing without an assistance."
                     )
             except EventFetchingError as e:
                 get_logger().error(str(e))
                 try:
                     send_email(
                         "Could not get some events from the chain",
-                        f"There was an issue while fetching an event from the chain. Will not shot down geonius and will be trying again later. However, it might be worth checking what is wrong.",
+                        " There was an issue while fetching an event from the chain."
+                        " Will not shot down geonius and will be trying again later."
+                        " However, it might be worth checking what is wrong.",
                         dont_notify_devs=True,
                     )
                 except EmailError:
                     get_logger().warning(
-                        f"Not able to communicate with the owners. Continuing without an assistance."
+                        "Not able to communicate with the owners."
+                        " Continuing without an assistance."
                     )
 
             except BeaconStateMismatchError:
-                # These Exceptions can not be handled but there is no need to close the whole thing down for it.
+                # These Exceptions can not be handled
+                # but there is no need to close the whole thing down for it.
                 get_logger().exception(
-                    f"Daemon stopped: {self.trigger.name:^17}. Others will continue to operate...",
+                    f"Daemon stopped: {self.trigger.name:^17}."
+                    " Others will continue to operate...",
                     exc_info=True,
                 )
                 try:
@@ -212,7 +226,8 @@ class Daemon:
                     )
                 except EmailError:
                     get_logger().warning(
-                        f"Can be not able to communicate with the owners. Continuing without an assistance."
+                        f"Can be not able to communicate with the owners."
+                        " Continuing without an assistance."
                     )
                 self.start_flag.clear()
                 self.stop_flag.set()
@@ -220,7 +235,8 @@ class Daemon:
             except Exception:
                 # All of the remaining Exceptions will force the MainThread to exit.>
                 get_logger().exception(
-                    f"Stopping Geonius due to unhandled exception on a Daemon for : {self.trigger.name:^17}"
+                    f"Stopping Geonius due to unhandled exception on a Daemon for:"
+                    f"{self.trigger.name:^17}"
                 )
                 try:
                     send_email(

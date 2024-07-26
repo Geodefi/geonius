@@ -69,9 +69,9 @@ class BlockDaemon(Daemon):
             self.__recent_block = curr_block.number
             get_logger().debug(f"{self.trigger.name} will be triggered")
             return curr_block
-        else:
-            get_logger().debug(
-                f"Block period have not been met yet.\
-                Expected block:{self.__recent_block + self.block_period}"
-            )
-            return None
+
+        get_logger().debug(
+            f"Block period have not been met yet.\
+            Expected block:{self.__recent_block + self.block_period}"
+        )
+        return None

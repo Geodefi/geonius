@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+# pylint: disable=import-outside-toplevel
 import sys
 from geodefi.exceptions import PythonVersionError
 

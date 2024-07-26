@@ -20,7 +20,7 @@ from src.exceptions import (
     CallFailedError,
 )
 
-from src.helpers.portal import get_operatorAllowance, get_surplus, get_withdrawal_address, get_name
+from src.helpers.portal import get_operator_allowance, get_surplus, get_withdrawal_address, get_name
 from src.database.validators import save_local_state, fetch_filtered_pubkeys
 from src.database.pools import save_last_proposal_timestamp, fetch_last_proposal_timestamp
 from src.database.operators import save_last_stake_timestamp, fetch_last_stake_timestamp
@@ -43,7 +43,7 @@ def max_proposals_count(pool_id: int) -> int:
         DatabaseError: Error fetching allowance and surplus for pool from table
     """
 
-    allowance: int = get_operatorAllowance(pool_id)
+    allowance: int = get_operator_allowance(pool_id)
 
     get_logger().debug(f"Allowance for pool {get_name(pool_id)}: {allowance}")
 
@@ -89,8 +89,7 @@ def max_proposals_count(pool_id: int) -> int:
         )
         return eth_per_wallet_balance
 
-    else:
-        return curr_max
+    return curr_max
 
 
 def check_and_propose(pool_id: int) -> None:
@@ -112,7 +111,8 @@ def check_and_propose(pool_id: int) -> None:
             return []
 
         try:
-            # This returns the length of the validators array in the contract so it is same as the index of the next validator
+            # This returns the length of the validators array in the contract
+            # so it is same as the index of the next validator
             new_val_ind: int = (
                 get_sdk()
                 .portal.functions.readUint(get_config().operator_id, to_bytes32("validators"))
@@ -150,8 +150,6 @@ def check_and_propose(pool_id: int) -> None:
         signatures31: list[str] = ["0x" + prop["signature"] for prop in stake_data]
 
         # last_proposal_timestamp: int = fetch_last_proposal_timestamp(pool_id)
-
-        # get_logger().info(f"Last proposal timestamp for pool {pool_id}: {last_proposal_timestamp}")
 
         for i in range(0, len(pubkeys), 50):
             temp_pks: list[str] = pubkeys[i : i + 50]

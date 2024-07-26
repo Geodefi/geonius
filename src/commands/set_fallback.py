@@ -25,15 +25,15 @@ def tx_params() -> dict:
             "maxPriorityFeePerGas": priority_fee,
             "maxFeePerGas": base_fee,
         }
-    else:
-        return {}
+    return {}
 
 
 def set_fallback_operator(pool: int, operator: int, threshold: int):
     try:
         perc_threshold: int = threshold * PERCENTAGE_DENOMINATOR / 100
         get_logger().info(
-            f"Setting threshold as {perc_threshold} from pool {get_name(pool)} for {get_name(operator)}"
+            f"Setting threshold as {perc_threshold} from pool {get_name(pool)}"
+            f" for {get_name(operator)}."
         )
 
         tx: dict = (
@@ -131,7 +131,8 @@ def set_fallback_operator(pool: int, operator: int, threshold: int):
     callback=load_env,
     type=click.STRING,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
+    help="Relative path for the main directory that will be used to store data."
+    " Default is ./.geonius",
 )
 @click.command(
     help="Sets a new fallback operator for the provided pool id. "

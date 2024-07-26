@@ -16,9 +16,9 @@ from src.globals import get_logger
 from src.setup import setup, init_dbs, run_daemons
 
 
-def config_reset(ctx, option, value):
+def config_reset(ctx, _option, value):
     if not value or ctx.resilient_parsing:
-        return
+        return value
 
     click.confirm("Are you sure you want to drop the db?", abort=True)
     return value
@@ -183,7 +183,8 @@ def config_reset(ctx, option, value):
     type=click.STRING,
     is_eager=True,
     callback=set_geonius_private_key,
-    help="Private key for the Node Operator maintainer that will run geonius. Overrides .env file.",
+    help="Private key for the Node Operator maintainer that will run geonius."
+    "Overrides .env file.",
 )
 @click.option(
     "--ethdo-wallet-passphrase",
@@ -192,7 +193,8 @@ def config_reset(ctx, option, value):
     type=click.STRING,
     is_eager=True,
     callback=set_ethdo_wallet_passphrase,
-    help="Password for the ethdo wallet that will be used to create validators. Overrides .env file.",
+    help="Password for the ethdo wallet that will be used to create validators."
+    "Overrides .env file.",
 )
 @click.option(
     "--ethdo-account-passphrase",
@@ -201,7 +203,8 @@ def config_reset(ctx, option, value):
     type=click.STRING,
     is_eager=True,
     callback=set_ethdo_account_passphrase,
-    help="Password for the ethdo accounts corresponding to the created validators. Overrides .env file.",
+    help="Password for the ethdo accounts corresponding to the created validators."
+    "Overrides .env file.",
 )
 @click.option(
     "--api-key-execution",
@@ -260,7 +263,8 @@ def config_reset(ctx, option, value):
     is_eager=False,
     callback=load_env,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
+    help="Relative path for the main directory that will be used to store data."
+    " Default is ./.geonius",
 )
 @click.command(help="Start geonius.")
 def main(**kwargs):

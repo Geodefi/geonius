@@ -131,7 +131,8 @@ def get_pools_count() -> int:
 
 
 def get_all_pool_ids(start_index: int = 0) -> list[int]:
-    """Returns the all current pool IDs from async Portal calls. It uses multithread to get all pool IDs.
+    """Returns the all current pool IDs from async Portal calls.
+    It uses multithread to get all pool IDs.
 
     Args:
         start_index (int, optional): Index to start fetching pool IDs from. Default is 0.
@@ -196,7 +197,7 @@ def get_all_owned_pubkeys(start_index: int = 0) -> list[str]:
     )
 
 
-def get_operatorAllowance(pool_id: int) -> int:
+def get_operator_allowance(pool_id: int) -> int:
     """Returns the result of portal.operatorAllowance function.
 
     Args:

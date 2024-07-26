@@ -20,7 +20,8 @@ class AttributeDict(dict):
 
     @classmethod
     def convert_recursive(cls, d: dict, i: int = 0):
-        """Recursively converts intertwined dicts into AttributeDict objects. This is a helper function for CONFIG.
+        """Recursively converts intertwined dicts into AttributeDict objects.
+        This is a helper function for CONFIG.
 
         Args:
             d (dict): A dict to recursively create an AttributeDict instance from.

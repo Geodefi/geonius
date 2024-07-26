@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from threading import Lock
-
 from src.classes.database import Database
 from src.common import AttributeDict
 from src.exceptions import DatabaseError

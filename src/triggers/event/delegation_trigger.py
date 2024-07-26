@@ -21,8 +21,10 @@ class DelegationTrigger(Trigger):
     name: str = "DELEGATION"
 
     def __init__(self):
-        """Initializes a DelegationTrigger object. The trigger will process the changes of the daemon after a loop.
-        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """Initializes a DelegationTrigger object.
+        The trigger will process the changes of the daemon after a loop.
+        It is a callable object. It is used to process the changes of the daemon.
+        It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.consider_allowance)
@@ -38,13 +40,11 @@ class DelegationTrigger(Trigger):
             bool: True if the event is for the script's OPERATOR_ID, False otherwise
         """
 
-        if event.args.operatorId == get_config().operator_id:
-            return True
-        else:
-            return False
+        return event.args.operatorId == get_config().operator_id
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
-        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
+        """Parses the events to saveable format.
+        Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
             events (Iterable[EventData]): list of Delegation emits
@@ -85,6 +85,7 @@ class DelegationTrigger(Trigger):
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Delegation") from e
 
+    # pylint: disable-next=unused-argument
     def consider_allowance(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """If the allowance is changed, it proposes new validators for the pool if possible.
         If new validators are proposed, it also fills the validators table

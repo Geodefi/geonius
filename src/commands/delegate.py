@@ -23,14 +23,14 @@ def tx_params() -> dict:
             "maxPriorityFeePerGas": priority_fee,
             "maxFeePerGas": base_fee,
         }
-    else:
-        return {}
+    return {}
 
 
 def delegate(pool: int, operator: int, allowance: int):
     try:
         get_logger().info(
-            f"Delegating {allowance} to operator {get_name(get_config().operator_id)} in pool {get_name(pool)}"
+            f"Delegating {allowance} to operator {get_name(get_config().operator_id)}"
+            f" in pool {get_name(pool)}"
         )
 
         tx: dict = (
@@ -127,7 +127,8 @@ def delegate(pool: int, operator: int, allowance: int):
     callback=load_env,
     type=click.STRING,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
+    help="Relative path for the main directory that will be used to store data."
+    " Default is ./.geonius",
 )
 @click.command(help="Allow an Operator to propose validators on behalf of the staking pool.")
 def main(

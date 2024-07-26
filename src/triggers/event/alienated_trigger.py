@@ -28,8 +28,11 @@ class AlienatedTrigger(Trigger):
     name: str = "ALIENATED"
 
     def __init__(self) -> None:
-        """Initializes a AlienatedTrigger object. The trigger will process the changes of the daemon after a loop.
-        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """Initializes a AlienatedTrigger object.
+        The trigger will process the changes of the daemon after a loop.
+        It is a callable object.
+        It is used to process the changes of the daemon.
+        It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.alienate_validators)
@@ -49,7 +52,8 @@ class AlienatedTrigger(Trigger):
         return check_pk_in_db(event.args.pubkey)
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
-        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
+        """Parses the events to saveable format. Returns a list of tuples.
+        Each tuple represents a saveable event.
 
         Args:
             events (Iterable[EventData]): list of Alienated emits
@@ -88,8 +92,10 @@ class AlienatedTrigger(Trigger):
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Alienated") from e
 
+    # pylint: disable-next=unused-argument
     def alienate_validators(self, events: Iterable[EventData], *args, **kwargs) -> None:
-        """Alienates the validators in the database. Updates the database local and portal state of the validators to ALIENATED.
+        """Alienates the validators in the database.
+        Updates the database local and portal state of the validators to ALIENATED.
 
         Args:
             events (Iterable[EventData]): list of events
@@ -113,5 +119,6 @@ class AlienatedTrigger(Trigger):
 
             send_email(
                 "Proposal is Alienated and You are Prisoned!",
-                "Alienated event is triggered, you will be prisoned. Please contact the admin and exit the program.",
+                "Alienated event is triggered, you will be prisoned."
+                + " Please contact the admin and exit the program.",
             )

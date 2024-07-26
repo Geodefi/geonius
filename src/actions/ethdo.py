@@ -14,7 +14,8 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
     """Generates the deposit data for a new validator proposal.
 
     Args:
-        withdrawal_address (str): WithdrawalPackage contract address of the desired pool to withdraw the deposit.
+        withdrawal_address (str): WithdrawalPackage contract address of\
+            the desired pool to withdraw the deposit.
         deposit_value (str): The amount of deposit to be made, 1 ETH on proposal, 31 ETH on stake.
 
     Returns:

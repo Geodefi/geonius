@@ -28,7 +28,8 @@ def __set_web3_account(sdk: Geode, private_key: str) -> Geode:
 
 
 def init_sdk(exec_api: str, cons_api: str, priv_key: str = None) -> Geode:
-    """Initializes the SDK with the provided APIs and private key. If private key is provided, sets the web3 account.
+    """Initializes the SDK with the provided APIs and private key.
+     If private key is provided, sets the web3 account.
 
     Args:
         exec_api (str): Execution API URL.

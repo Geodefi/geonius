@@ -3,14 +3,14 @@
 import os
 import json
 import click
-
-from src.setup import setup
 from dotenv import load_dotenv
 
+from src.setup import setup
 
-def reset_config(ctx, option, value):
+
+def reset_config(ctx, _option, value):
     if not value or ctx.resilient_parsing:
-        return
+        return value
 
     click.confirm("Are you sure you want to reset the configuration?", abort=True)
     return value
@@ -113,7 +113,7 @@ def config(main_dir: str, main_dir_path: str):
         _config["database"] = {"dir": "db"}
 
         if click.confirm("Would you like to setup the gas oracle service?"):
-            _config["gas"] = dict()
+            _config["gas"] = {}
             _config["gas"]["api"] = click.prompt(
                 "Please provide the api endpoint that responds with the gas prices in gwei"
             )
@@ -139,7 +139,7 @@ def config(main_dir: str, main_dir_path: str):
             )
 
         if click.confirm("Would you like to setup the notification service?"):
-            _config["email"] = dict()
+            _config["email"] = {}
             _config["email"]["sender"] = click.prompt("Provide the sender email address")
             _config["email"]["receivers"] = [click.prompt("Provide the receiver email address")]
             _config["email"]["smtp_server"] = click.prompt(
@@ -151,12 +151,12 @@ def config(main_dir: str, main_dir_path: str):
             )
 
         print("Successful configuration.")
-        with open(config_path, "w") as outfile:
+        with open(config_path, "w", encoding="utf-8") as outfile:
             json.dump(_config, outfile)
         print("Saved .env...")
 
         env_path = os.path.join(main_dir_path, ".env")
-        with open(env_path, "w") as outfile:
+        with open(env_path, "w", encoding="utf-8") as outfile:
             for key, value in env.items():
                 outfile.write(f"{key.upper()}={value}\n")
         print("Saved config.json...")
@@ -183,7 +183,8 @@ def config(main_dir: str, main_dir_path: str):
 
 def print_config(config_path: str):
     try:
-        config_dict: dict = json.load(open(config_path, encoding="utf-8"))
+        with open(config_path, encoding="utf-8") as user_file:
+            config_dict = json.load(user_file)
         print(json.dumps(config_dict, indent=4))
         print(f"\nconfig.json is located in: {config_path}")
     except Exception:
@@ -204,7 +205,8 @@ def print_config(config_path: str):
     is_eager=False,
     type=click.STRING,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
+    help="Relative path for the main directory that will be used to store data."
+    " Default is ./.geonius",
 )
 @click.command(
     help="Prints the current config file and its path."

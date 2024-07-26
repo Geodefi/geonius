@@ -7,9 +7,11 @@ from src.database.validators import fill_validators_table
 from src.globals import get_sdk, get_logger
 
 
+# TODO: convert this so it also checks the balance
 def ping_pubkey(pubkey: str) -> bool:
     """Checks if a validator pubkey can be reached on beaconchain,
-    if it exists without considering its status/state. Unusually, it just checks if the underlying call
+    if it exists without considering its status/state.
+    Unusually, it just checks if the underlying call
     fires an error since it got 404 as a response instead of 200.
 
     Args:
@@ -25,7 +27,7 @@ def ping_pubkey(pubkey: str) -> bool:
         return False
 
 
-# TODO: (later) Stop and throw error after x attempts: This should be fault tolerant. Rely on config.json
+# TODO: (later) Stop and throw error after x attempts: This should be fault tolerant.
 class ExpectDepositsTrigger(Trigger):
     """Trigger for the EXPECT_DEPOSITS. This time trigger waits until deposits for the
     multiple validators become processed on beaconchain. Works every 15 minutes.
@@ -36,7 +38,7 @@ class ExpectDepositsTrigger(Trigger):
     Attributes:
         name (str): The name of the trigger to be used when logging etc. (value: EXPECT_DEPOSIT)
         __pubkeys (str): Internal list of validator pubkeys to be finalized when ALL exited.
-        __keep_alive (str): TimeDaemon will not be shot down when pubkeys list is empty, if provided.
+        __keep_alive (str): TimeDaemon will not be shot down when pubkeys list is empty.
         Useful for event listeners.
     """
 
@@ -70,7 +72,8 @@ class ExpectDepositsTrigger(Trigger):
         self.__pubkeys.extend(pubkeys)
         self.process_deposits(daemon)
 
-    def process_deposits(self, daemon: TimeDaemon = None, *args, **kwargs) -> None:
+    # pylint: disable-next=unused-argument
+    def process_deposits(self, *args, daemon: TimeDaemon = None, **kwargs) -> None:
         """Checks if any of the expected pubkeys are responding after the proposal deposit.
         Processes the ones that respond and keeps the ones that don't for the next iteration.
 
@@ -80,8 +83,8 @@ class ExpectDepositsTrigger(Trigger):
         if self.__pubkeys:
             response_filter: bool = multithread(ping_pubkey, self.__pubkeys)
 
-            responded = list()
-            remaining = list()
+            responded = []
+            remaining = []
             for pk, res in zip(self.__pubkeys, response_filter):
                 if res:
                     responded.append(pk)

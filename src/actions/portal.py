@@ -12,13 +12,14 @@ from src.utils.gas import get_gas
 def tx_params() -> dict:
 
     priority_fee, base_fee = get_gas()
+
     if priority_fee and base_fee:
         return {
             "maxPriorityFeePerGas": priority_fee,
             "maxFeePerGas": base_fee,
         }
-    else:
-        return {}
+
+    return {}
 
 
 # pylint: disable-next=invalid-name
@@ -37,11 +38,10 @@ def call_proposeStake(
     Args:
         pool_id (int): The pool id to propose new validators.
         pubkeys (list): A list of pubkeys that will be proposed for the given pool_id.
-        sig1s (list): A list of corresponding sigs to be used when initiating the validator with 1 ETH.
-        sig31s (list): A list of corresponding sigs to be used when activating the validator with 31 ETH.
-
-    Returns:
-        bool: True if the proposeStake call is successful, False otherwise.
+        sig1s (list): A list of corresponding sigs to be used when initiating\
+            the validator with 1 ETH.
+        sig31s (list): A list of corresponding sigs to be used when activating\
+            the validator with 31 ETH.
 
     Raises:
         TimeExhausted: Raised if the transaction takes too long to be mined.
@@ -121,3 +121,5 @@ def call_stake(pubkeys: list[str]) -> bool:
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call stake on portal contract") from e
+
+    return False

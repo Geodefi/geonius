@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import os
 from web3.contract.contract import ContractEvent
 
-import os
 from geodefi import Geode
 from geodefi.globals.constants import ETHER_DENOMINATOR
 
@@ -195,14 +195,15 @@ def preflight_checks(test_email: bool = False, test_ethdo=False, test_operator=F
 
         if maintainer != signer:
             raise ConfigurationFieldError(
-                f"'maintainer' of {config.operator_id} is {maintainer}. Provided private key for {signer} does not match."
+                f"'maintainer' of {config.operator_id} is {maintainer}."
+                "Provided private key for {signer} does not match."
             )
 
         balance: int = get_wallet_balance(config.operator_id)
 
         get_logger().warning(
-            f"{get_name(config.operator_id)} has {balance/ETHER_DENOMINATOR}ETH ({balance} wei) balance in portal."
-            f" Use 'geonius increase-wallet' to deposit more."
+            f"{get_name(config.operator_id)} has {balance/ETHER_DENOMINATOR}ETH ({balance} wei)"
+            f" balance in portal. Use 'geonius increase-wallet' to deposit more."
         )
 
     if test_email:
@@ -224,7 +225,7 @@ def preflight_checks(test_email: bool = False, test_ethdo=False, test_operator=F
                 send_email(
                     "Email notification service is active",
                     "Looks like geonius is functional and it is sailing smoothly at the moment."
-                    "We will send you regular emails when something important happens or when there is an error."
+                    "We will send you emails when something important happens or there is an error."
                     "Don't forget to check your script regularly tho. This service can fail too!",
                     dont_notify_devs=True,
                 )

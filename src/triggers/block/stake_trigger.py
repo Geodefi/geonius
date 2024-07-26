@@ -26,15 +26,20 @@ class StakeTrigger(Trigger):
     name: str = "STAKE"
 
     def __init__(self) -> None:
-        """Initializes a StakeTrigger object. The trigger will process the changes of the daemon after a loop.
-        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """Initializes a StakeTrigger object.
+        The trigger will process the changes of the daemon after a loop.
+        It is a callable object. It is used to process the changes of the daemon.
+        It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.activate_validators)
         get_logger().debug(f"{self.name} is initated.")
 
+    # pylint: disable-next=unused-argument
     def activate_validators(self, *args, **kwargs) -> None:
-        """Checks for approved proposals and calls portal.stake() for them. Finalizes the validator creation."""
+        """Checks for approved proposals and calls portal.stake() for them.
+        Finalizes the validator creation.
+        """
         # check if there are any pending validator proposals.
         staked_pks: list[str] = check_and_stake(fetch_verified_pks())
 

@@ -46,7 +46,7 @@ class Loggable:
         logger: Logger = getLogger()
         logger.setLevel(self.__level)
         logger.propagate = False
-        handlers: list = list()
+        handlers: list = []
         if not get_config().logger.no_stream:
             stream_handler: StreamHandler = self.__get_stream_handler()
             handlers.append(stream_handler)

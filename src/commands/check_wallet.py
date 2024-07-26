@@ -83,7 +83,8 @@ def check_wallet():
     callback=load_env,
     type=click.STRING,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data. Default is ./.geonius",
+    help="Relative path for the main directory that will be used to store data."
+    " Default is ./.geonius",
 )
 @click.command(
     help="Prints the balance that can be utilized by Node Operators to propose new validators. "

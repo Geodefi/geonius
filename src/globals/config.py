@@ -143,7 +143,8 @@ def init_config(main_dir: str) -> AttributeDict:
     if os.path.exists(config_path):
         # Catch configuration variables
         try:
-            config_dict: dict = json.load(open(config_path, encoding="utf-8"))
+            with open(config_path, encoding="utf-8") as user_file:
+                config_dict = json.load(user_file)
         except Exception as e:
             raise ConfigurationFileError(
                 "Error while loading the configuration file 'config.json'"
