@@ -204,7 +204,7 @@ def print_config(config_path: str):
     required=False,
     is_flag=True,
     callback=reset_config,
-    help="Reset the config file and start over. Suggested if there is anything failing.",
+    help="Resets the config file and start over. Suggested if there is anything failing.",
 )
 @click.option(
     "--main-dir",
@@ -213,13 +213,13 @@ def print_config(config_path: str):
     is_eager=False,
     type=click.STRING,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data."
+    help="Relative path for the directory that will be used to store data."
     " Default is ./.geonius",
 )
 @click.command(
     help="Prints the current config file and its path."
     " If there is no config file already, helps creating a new one"
-    " This command should be called before the first time running geonius."
+    " This command should be called before running geonius for the first time."
 )
 def main(
     main_dir: str,

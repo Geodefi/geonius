@@ -88,7 +88,7 @@ def decrease_wallet(value: int):
     type=click.STRING,
     is_eager=True,
     callback=set_api_key_execution,
-    help="Api key for the execution layer end point."
+    help="Api key for the execution layer endpoint."
     " Could be the rest api of the execution client. Overrides .env file.",
 )
 @click.option(
@@ -98,7 +98,7 @@ def decrease_wallet(value: int):
     type=click.STRING,
     is_eager=True,
     callback=set_api_key_consensus,
-    help="Api key for the consensus layer end point."
+    help="Api key for the consensus layer endpoint."
     " Could be the rest api of the consensus client."
     " Overrides .env file.",
 )
@@ -109,7 +109,7 @@ def decrease_wallet(value: int):
     type=click.STRING,
     is_eager=True,
     callback=set_api_key_gas,
-    help="Api key for the end point used fetching gas prices in gwei. Overrides .env file.",
+    help="Api key for the endpoint used fetching gas prices in gwei. Overrides .env file.",
 )
 @click.option(
     "--chain",
@@ -128,7 +128,7 @@ def decrease_wallet(value: int):
     callback=load_env,
     type=click.STRING,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data."
+    help="Relative path for the directory that will be used to store data."
     + "Default is ./.geonius",
 )
 @click.command(

@@ -121,7 +121,7 @@ However, since the validator ops is delegated to ethdo and vouch, it only needs 
 
 ### Using pipx
 
-> **Preffered**
+> **Preferred**
 >
 > [pipx](https://pipx.pypa.io/stable/) is the go-to choice for executable python applications.
 > Running this cli app with pipx will make it easy to update, and less error prone compared to using a binary executable or building from source.
@@ -170,7 +170,7 @@ It will be used for the database, store the log files and keep the configuration
 
 A sample config.json with gas and email services activated can be found [here](./.geonius/config.json).
 
-If you want to understand the meaning of the fields, you can check the [Commands \& Flags](#commands--flags).
+If you want to understand the meaning of the fields, you can check [Commands \& Flags](#commands--flags).
 
 #### .env
 
@@ -188,8 +188,8 @@ A sample config.json with gas and email services activated can be found [here](.
 
 > Not suggested for holesky deployments.
 
-Simply, you can provide any endpoint that responds as **gwei**, which will be sued as a gas price oracle.
-Moreover, you can add maxiumum limits to the base and priority fees when api is provided.
+Simply, you can provide any endpoint that responds as **gwei**, which will be used as a gas price oracle.
+Moreover, you can add maximum limits to the base and priority fees when api is provided.
 
 Note that you can also create a custom parser! For example, if the response has a body that looks like this, and you want to choose the "high" option.
 
@@ -211,17 +211,17 @@ For an easy setup, visit [infura](https://docs.infura.io/api/infura-expansion-ap
 
 ### 4. Setting up the notification service
 
-You can configure easily so geonius send you regular updates or notifications on its current situation. This can be crucial if there is a bug and geonius fully or partially stops.
+You can configure this service easily so geonius send you regular updates or notifications on its current situation. This can be crucial if there is a bug and geonius fully or partially stops.
 
 Sign into gmail and head to: `https://myaccount.google.com/apppasswords`. Then you will acquire a passphrase like "xxx xxx xxx xxx". This password can be provided during the configuration with `geonius config` or as `EMAIL_PASSWORD` directly in .env file.
 
 Then all you need to do is to provide the mail addresses for receiver and sender.
 
-> Note that, you can add many
+> Note that, you can add many for the receiver field.
 
 #### --dont-notify-devs
 
-When there is an unexpected error, geonius will send emails to the geodefi team as well (<notifications@geode.fi>). To prevent this provide `dont-notify-devs` flag when running it.
+When there is an unexpected error, geonius will send emails to the geodefi team as well (<notifications@geode.fi>). To prevent this, provide `dont-notify-devs` flag when running it.
 
 ## Running geonius
 

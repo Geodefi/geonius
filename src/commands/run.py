@@ -46,7 +46,7 @@ def config_reset(ctx, _option, value):
     "--chain-period",
     required=False,
     type=click.INT,
-    help="The amount of periods before checking for new blocks.",
+    help="The amount of 'chain-interval' before checking for new blocks.",
 )
 @click.option(
     "--chain-interval",
@@ -88,7 +88,7 @@ def config_reset(ctx, _option, value):
     "--network-max-attempt",
     required=False,
     type=click.IntRange(0, 100),
-    help="Api requests will fail after given max calls.",
+    help="Api requests will fail after these many call attempts.",
 )
 @click.option(
     "--min-proposal-queue",
@@ -100,7 +100,7 @@ def config_reset(ctx, _option, value):
     "--max-proposal-delay",
     required=False,
     type=click.IntRange(0, 604800),
-    help="Max seconds for any proposals to wait.",
+    help="Maximum seconds for any proposals to wait.",
 )
 @click.option(
     "--no-log-file",
@@ -130,7 +130,7 @@ def config_reset(ctx, _option, value):
     type=click.Choice(
         ["S", "M", "H", "D", "W0", "W1", "W2", "W3", "W4", "W5", "W6", "midnight"],
     ),
-    help="When should logger continue with a new file.",
+    help="When should logger continues with a new file.",
 )
 @click.option(
     "--logger-interval",
@@ -142,25 +142,25 @@ def config_reset(ctx, _option, value):
     "--logger-backup",
     required=False,
     type=click.INT,
-    help="How many logger files will be saved per logger.",
+    help="The number of maximum logger files that will be kept. After that, will delete the oldest ones.",
 )
 @click.option(
     "--database-dir",
     required=False,
     type=click.STRING,
-    help="Directory name that for the database.",
+    help="Directory name for database.",
 )
 @click.option(
     "--ethdo-wallet",
     required=False,
     type=click.STRING,
-    help="Default ethdo wallet name to be created/used.",
+    help="Default ethdo wallet name to create/utilize.",
 )
 @click.option(
     "--ethdo-account-prefix",
     required=False,
     type=click.STRING,
-    help="Default ethdo account name to be created/used.",
+    help="Default ethdo account name to create/utilize.",
 )
 @click.option(
     "--dont-notify-devs",
@@ -174,7 +174,7 @@ def config_reset(ctx, _option, value):
     is_eager=True,
     is_flag=True,
     callback=config_reset,
-    help="Reset the database and start over. Suggested after a new update or unexpected error.",
+    help="Resets the database and start over.Suggested after a new update or unexpected error.",
 )
 @click.option(
     "--private-key",
@@ -213,7 +213,7 @@ def config_reset(ctx, _option, value):
     type=click.STRING,
     is_eager=True,
     callback=set_api_key_execution,
-    help="Api key for the execution layer end point."
+    help="Api key for the execution layer endpoint."
     " Could be the rest api of the execution client. Overrides .env file.",
 )
 @click.option(
@@ -223,7 +223,7 @@ def config_reset(ctx, _option, value):
     type=click.STRING,
     is_eager=True,
     callback=set_api_key_consensus,
-    help="Api key for the consensus layer end point."
+    help="Api key for the consensus layer endpoint."
     " Could be the rest api of the consensus client."
     " Overrides .env file.",
 )
@@ -234,7 +234,7 @@ def config_reset(ctx, _option, value):
     type=click.STRING,
     is_eager=True,
     callback=set_api_key_gas,
-    help="Api key for the end point used fetching gas prices in gwei. Overrides .env file.",
+    help="Api key for the endpoint used fetching gas prices in gwei. Overrides .env file.",
 )
 @click.option(
     "--email-password",
@@ -263,7 +263,7 @@ def config_reset(ctx, _option, value):
     is_eager=False,
     callback=load_env,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data."
+    help="Relative path for the directory that will be used to store data."
     " Default is ./.geonius",
 )
 @click.command(help="Start geonius.")

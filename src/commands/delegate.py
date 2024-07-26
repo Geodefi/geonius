@@ -55,7 +55,7 @@ def delegate(pool: int, operator: int, allowance: int):
     required=True,
     type=click.INT,
     prompt="Please specify the allowance (validators)",
-    help="Number of validators provided Operator can create on behalf of the provided Pool",
+    help="Maximum number of validators that the provided Operator can create on behalf of the provided Pool",
 )
 @click.option(
     "--operator",
@@ -87,7 +87,7 @@ def delegate(pool: int, operator: int, allowance: int):
     type=click.STRING,
     is_eager=True,
     callback=set_api_key_execution,
-    help="Api key for the execution layer end point."
+    help="Api key for the execution layer endpoint."
     " Could be the rest api of the execution client. Overrides .env file.",
 )
 @click.option(
@@ -97,7 +97,7 @@ def delegate(pool: int, operator: int, allowance: int):
     type=click.STRING,
     is_eager=True,
     callback=set_api_key_consensus,
-    help="Api key for the consensus layer end point."
+    help="Api key for the consensus layer endpoint."
     " Could be the rest api of the consensus client."
     " Overrides .env file.",
 )
@@ -108,7 +108,7 @@ def delegate(pool: int, operator: int, allowance: int):
     type=click.STRING,
     is_eager=True,
     callback=set_api_key_gas,
-    help="Api key for the end point used fetching gas prices in gwei. Overrides .env file.",
+    help="Api key for the endpoint used fetching gas prices in gwei. Overrides .env file.",
 )
 @click.option(
     "--chain",
@@ -127,7 +127,7 @@ def delegate(pool: int, operator: int, allowance: int):
     callback=load_env,
     type=click.STRING,
     default=".geonius",
-    help="Relative path for the main directory that will be used to store data."
+    help="Relative path for the directory that will be used to store data."
     " Default is ./.geonius",
 )
 @click.command(help="Allow an Operator to propose validators on behalf of the staking pool.")
