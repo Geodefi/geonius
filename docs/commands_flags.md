@@ -1,4 +1,4 @@
-# Geonius Commands & Flags
+# Commands & Flags
 
 ## Global flags
 

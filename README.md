@@ -8,7 +8,7 @@
   - [Prerequisites](#prerequisites)
     - [Ethdo](#ethdo)
     - [Vouch](#vouch)
-    - [Vouch: A Novel Approach on Client Diversity](#vouch-a-novel-approach-on-client-diversity)
+      - [Vouch: A Novel Approach on Client Diversity](#vouch-a-novel-approach-on-client-diversity)
     - [Execution node](#execution-node)
     - [Consensus node](#consensus-node)
   - [Installation](#installation)
@@ -23,7 +23,10 @@
     - [3. Setting up the gas api](#3-setting-up-the-gas-api)
     - [4. Setting up the notification service](#4-setting-up-the-notification-service)
       - [--dont-notify-devs](#--dont-notify-devs)
-  - [Usage](#usage)
+  - [Running geonius](#running-geonius)
+    - [Preflight checks](#preflight-checks)
+      - [Maintainer](#maintainer)
+      - [Internal Wallet](#internal-wallet)
     - [with pipx](#with-pipx)
     - [with Binary](#with-binary)
     - [with source files](#with-source-files)
@@ -73,7 +76,9 @@ Simply, it does not interact with anything other than the bare minimum required 
 
 ## Prerequisites
 
-Geonius does not actually need a consensus or execution client! It only needs an api endpoint to start running. But, ethdo and vouch does for validator operations.
+Geonius does not actually need a consensus or execution client! It only needs an api endpoint to start running. But, ethdo and vouch does need the nodes for the validator operations.
+
+![Dependency graphs](./docs/img/dependency.png)
 
 ### Ethdo
 
@@ -81,17 +86,17 @@ Geonius does not actually need a consensus or execution client! It only needs an
 
 [Ethdo](https://github.com/wealdtech/ethdo) contains a large number of features that are useful for day-to-day interactions, suitable with the different consensus clients. It helps anything related with the Beacon chain wallets and accounts.
 
-> If you need help while installing or interacting with Ethdo, check out [this document](./docs/ethdo.md).
+> If you need help while installing or interacting with Ethdo, check out [this document](./docs/ethdo_vouch.md).
 
 ### Vouch
 
 [Vouch](https://github.com/attestantio/vouch) is a multi-node validator client that will create the bridge between the wallet managers (ethdo, dirk, etc.) and beacon chain clients.
 
-### Vouch: A Novel Approach on Client Diversity
+#### Vouch: A Novel Approach on Client Diversity
 
 Vouch is a powerful tool. Thanks to Vouch, Geonius supports utilizing multiple beacon chain clients at the same time. Thus, it helps solving the client diversity by choosing to delegate the validator operations to Vouch.
 
-> If you need help while installing or interacting with Vouch, check out [this document](./docs/ethdo.md).
+> If you need help while installing or interacting with Vouch, check out [this document](./docs/ethdo_vouch.md).
 >
 ### Execution node
 
@@ -107,10 +112,15 @@ Any client that supports[API specification v2.3.0](https://ethereum.github.io/be
 
 However, since the validator ops is delegated to ethdo and vouch, it only needs the api endpoint to track the validator on the beacon chain.
 
+> #### Do not use MEV clients
+>
+> Currently Geodefi Staking Library does not support MEV income.
+> However, it will be supported on the mainnet launch.
+
 ## Installation
 
 ### Using pipx
->
+
 > **Preffered**
 >
 > [pipx](https://pipx.pypa.io/stable/) is the go-to choice for executable python applications.
@@ -139,6 +149,8 @@ Check out [this document](./docs/installation_guide.md).
 ### 1. Register as a Permissioned Node Operator
 
 Before configuration, visit [join.geodefi](https://www.join.geode.fi/?chain=holesky) to register as a Node Operator. Keep your operator ID to be utilized in geonius.
+
+> Here, you will obtain an `OPERATOR_ID` that will define your Node Operator. **Take a note of it!**
 
 ### 2. Create a .geonius folder
 
@@ -211,13 +223,55 @@ Then all you need to do is to provide the mail addresses for receiver and sender
 
 When there is an unexpected error, geonius will send emails to the geodefi team as well (<notifications@geode.fi>). To prevent this provide `dont-notify-devs` flag when running it.
 
-## Usage
+## Running geonius
+
+Up until this point, if you have:
+
+1. Got a execution node is ready or already have one running for the target chain.
+2. Similarly, a consensus node is ready.
+3. Installed ethdo and created a wallet for geonius.
+4. Installed vouch and configured it with a yml/json file.
+5. Installed geonius as a binary, from source or with pipx.
+6. Configured it with `geonius config`
+
+So, you are ready to start geonius.
+
+### Preflight checks
+
+#### Maintainer
+
+Note that, you can set a new maintainer using the current CONTROLLER (registerer) address.
+
+Check out [Commands \& Flags](#commands--flags) for `change-maintainer` command.
+
+#### Internal Wallet
+
+Because of the bug explained [here](https://medium.com/immunefi/rocketpool-lido-frontrunning-bug-fix-postmortem-e701f26d7971), Operators need **1 Ether per validator proposal** available in your internal wallet.
+
+You will be reimbursed after activating the validator. However, this amount limits how many proposals you can have at the same time.
+
+> If you have 100 Ether in your internal wallet, and if it takes 1 day for proposals to be approved:
+> You can propose 100 validators a day.
+
+> The Internal Wallet is also the place where your fees will accrue over time.
+
+Check out [Commands \& Flags](#commands--flags) for `increase-wallet` command.
 
 ### with pipx
 
+```bash
+geonius run --chain holesky
+```
+
 ### with Binary
 
+```bash
+geonius run --chain holesky
+```
+
 ### with source files
+
+Check out [this document](./docs/installation_guide.md).
 
 ## Commands & Flags
 
