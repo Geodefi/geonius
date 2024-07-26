@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from itertools import repeat
+
 from src.classes import Trigger
 from src.daemons import TimeDaemon
 from src.utils.thread import multithread
@@ -8,21 +10,23 @@ from src.globals import get_sdk, get_logger
 
 
 # TODO: convert this so it also checks the balance
-def ping_pubkey(pubkey: str) -> bool:
-    """Checks if a validator pubkey can be reached on beaconchain,
-    if it exists without considering its status/state.
-    Unusually, it just checks if the underlying call
+def ping_pubkey(pubkey: str, expected_balance: int) -> bool:
+    """Checks if a validator pubkey can be reached on beaconchain.
+    Unusually, it checks if the underlying call
     fires an error since it got 404 as a response instead of 200.
+    If it exists (not considering its status) it checks for the balance.
 
     Args:
         pubkey (str): public key of the validator to be pinged
+        expected_balance (str): expected effective balance,\
+            note that it can be lower than expected if slashed.
 
     Returns:
         bool: True if the validator exists on the beaconchain, False if not.
     """
     try:
-        get_sdk().beacon.beacon_states_validators_id(state_id="head", validator_id=pubkey)
-        return True
+        res = get_sdk().beacon.beacon_states_validators_id(state_id="head", validator_id=pubkey)
+        return int(res["validator"]["effective_balance"]) == expected_balance
     except Exception:
         return False
 
@@ -38,14 +42,16 @@ class ExpectDepositsTrigger(Trigger):
     Attributes:
         name (str): The name of the trigger to be used when logging etc. (value: EXPECT_DEPOSIT)
         __pubkeys (str): Internal list of validator pubkeys to be finalized when ALL exited.
+        __balance (int): The expected value for the validator when it is detected.
         __keep_alive (str): TimeDaemon will not be shot down when pubkeys list is empty.
         Useful for event listeners.
     """
 
     name: str = "EXPECT_DEPOSITS"
 
-    def __init__(self, pubkeys: list[str] = [], keep_alive: bool = False) -> None:
+    def __init__(self, balance: int, pubkeys: list[str] = [], keep_alive: bool = False) -> None:
         Trigger.__init__(self, name=self.name, action=self.process_deposits)
+        self.__balance: int = balance
         self.__pubkeys: str = pubkeys
         self.__keep_alive: bool = keep_alive
         get_logger().debug(f"{self.name} is initated.")
@@ -81,7 +87,7 @@ class ExpectDepositsTrigger(Trigger):
             daemon (TimeDaemon): daemon to be stopped if the pubkey is empty
         """
         if self.__pubkeys:
-            response_filter: bool = multithread(ping_pubkey, self.__pubkeys)
+            response_filter: bool = multithread(ping_pubkey, self.__pubkeys, repeat(self.__balance))
 
             responded = []
             remaining = []

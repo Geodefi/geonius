@@ -3,6 +3,7 @@
 
 from typing import Iterable
 from web3.types import EventData
+from geodefi.globals.beacon import DEPOSIT_SIZE
 
 from src.classes import Trigger, Database
 from src.daemons import TimeDaemon
@@ -33,7 +34,7 @@ class StakeProposalTrigger(Trigger):
 
         # initiate a TimeDaemon to keep track
         self.__except_deposit_trigger: ExpectDepositsTrigger = ExpectDepositsTrigger(
-            keep_alive=True
+            balance=DEPOSIT_SIZE.PROPOSAL, keep_alive=True
         )
         self.__except_deposit_daemon: TimeDaemon = TimeDaemon(
             interval=15 * get_constants().one_minute,
