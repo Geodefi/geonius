@@ -6,6 +6,7 @@ import click
 from dotenv import load_dotenv
 
 from src.setup import setup
+from src.actions.ethdo import ping_wallet, create_wallet
 
 
 def reset_config(ctx, _option, value):
@@ -98,6 +99,13 @@ def config(main_dir: str, main_dir_path: str):
         env["ETHDO_WALLET_PASSPHRASE"] = click.prompt(
             "What is the passphrase for this wallet?", type=str
         )
+
+        if not ping_wallet(_config["ethdo"]["wallet"]):
+            if click.confirm(
+                "Seems like this wallet does not exist. Would you like to create it now?"
+            ):
+                create_wallet(_config["ethdo"]["wallet"], env["ETHDO_WALLET_PASSPHRASE"])
+                print(f"Created a new ethdo wallet: {_config['ethdo']['wallet']}")
 
         _config["ethdo"]["account_prefix"] = click.prompt(
             f"Validator accounts created on {_config['ethdo']['wallet']} will have a prefix."

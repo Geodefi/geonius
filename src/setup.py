@@ -26,7 +26,7 @@ from src.triggers.event import (
 from src.triggers.block import (
     StakeTrigger,
 )
-from src.actions.ethdo import ping_account
+from src.actions.ethdo import ping_wallet
 
 from src.utils.gas import parse_gas, fetch_gas
 from src.utils.notify import send_email
@@ -57,6 +57,7 @@ from src.database.events import (
     reinitialize_deposit_table,
     reinitialize_exit_request_table,
     reinitialize_stake_proposal_table,
+    reinitialize_stake_table,
     reinitialize_fallback_operator_table,
     reinitialize_id_initiated_table,
     create_alienated_table,
@@ -64,6 +65,7 @@ from src.database.events import (
     create_deposit_table,
     create_exit_request_table,
     create_stake_proposal_table,
+    create_stake_table,
     create_fallback_operator_table,
     create_id_initiated_table,
 )
@@ -181,12 +183,8 @@ def preflight_checks(test_email: bool = False, test_ethdo=False, test_operator=F
             raise MissingConfigurationError(
                 "'ethdo' section is missing the 'account_prefix' field."
             )
-        # if not ping_account(
-        #     wallet=ethdo.wallet, account=ethdo.account_prefix
-        # ):  # TODO: instead, ping the wallet
-        #     raise EthdoError(
-        #         f"Provided account: {ethdo.wallet}/{ethdo.ethdo.account_prefix} does not exists."
-        #     )
+        if not ping_wallet(wallet=ethdo.wallet):
+            raise EthdoError(f"Provided wallet: {ethdo.wallet} does not exist.")
 
     if test_operator:
         sdk: Geode = get_sdk()
@@ -290,6 +288,7 @@ def init_dbs(reset: bool = False):
         reinitialize_deposit_table()
         reinitialize_exit_request_table()
         reinitialize_stake_proposal_table()
+        reinitialize_stake_table()
         reinitialize_fallback_operator_table()
         reinitialize_id_initiated_table()
 
@@ -303,6 +302,7 @@ def init_dbs(reset: bool = False):
         create_deposit_table()
         create_exit_request_table()
         create_stake_proposal_table()
+        create_stake_table()
         create_fallback_operator_table()
         create_id_initiated_table()
 
@@ -320,10 +320,10 @@ def run_daemons():
     deposit_trigger: DepositTrigger = DepositTrigger()
     delegation_trigger: DelegationTrigger = DelegationTrigger()
     stake_proposal_trigger: StakeProposalTrigger = StakeProposalTrigger()
+    stake_trigger: StakeProposalTrigger = StakeProposalTrigger()
     fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
     alienated_trigger: AlienatedTrigger = AlienatedTrigger()
     # exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
-    # stake_trigger: StakeTrigger = StakeTrigger()
 
     # Create appropriate type of Daemons for the triggers
     id_initiated_daemon: EventDaemon = EventDaemon(
@@ -342,6 +342,10 @@ def run_daemons():
         trigger=stake_proposal_trigger,
         event=events.StakeProposal(),
     )
+    stake_daemon: EventDaemon = EventDaemon(
+        trigger=stake_trigger,
+        event=events.StakeProposal(),
+    )
     fallback_operator_daemon: EventDaemon = EventDaemon(
         trigger=fallback_operator_trigger,
         event=events.FallbackOperator(),
@@ -354,16 +358,13 @@ def run_daemons():
     #     trigger=exit_request_trigger,
     #     event=events.ExitRequest(),
     # )
-    # stake_daemon: BlockDaemon = BlockDaemon(
-    #     trigger=stake_trigger, block_period=0.5 * get_constants().hour_blocks
-    # )
 
     # Run the daemons
     id_initiated_daemon.run()
     deposit_daemon.run()
     delegation_daemon.run()
     stake_proposal_daemon.run()
+    stake_daemon.run()
     fallback_operator_daemon.run()
     alienated_daemon.run()
     # exit_request_daemon.run()
-    # stake_daemon.run()

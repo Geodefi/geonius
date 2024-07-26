@@ -284,3 +284,5 @@ def main(**kwargs):
             get_logger().info("Exiting...")
         except Exception:
             print(str(e) + "\nCould not initiate geonius.\nExiting...")
+
+        raise e

@@ -69,6 +69,22 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         raise EthdoError(f"Failed to interpret the response from ethdo: {res}") from e
 
 
+def ping_wallet(wallet: str) -> bool:
+    """Checks if a wallet exist on ethdo.
+
+    Args:
+        wallet (str): Provided ethdo wallet
+
+    Returns:
+        bool: True if exists, False if not.
+    """
+    try:
+        check_output(["ethdo", "wallet", "info", f"--wallet={wallet}"])
+        return True
+    except Exception:
+        return False
+
+
 def ping_account(wallet: str, account: str) -> bool:
     """Checks if an account exist on ethdo.
 
@@ -86,7 +102,40 @@ def ping_account(wallet: str, account: str) -> bool:
         return False
 
 
-def create_account(account_name: int = None) -> dict:
+def create_wallet(wallet_name: str, passphrase: str) -> dict:
+    """Creates a new wallet on ethdo
+
+    Returns:
+        dict: Returns the wallet info in JSON format.
+
+    Raises:
+        EthdoError: Raised if the wallet creation fails.
+        JSONDecodeError: Raised if the response cannot be decoded to JSON.
+        TypeError: Raised if the response is not type of str, bytes or bytearray.
+    """
+    try:
+        res: str = check_output(
+            [
+                "ethdo",
+                "wallet",
+                "create",
+                f"--wallet={wallet_name}",
+                f"--passphrase={passphrase}",
+            ]
+        )
+
+    except Exception as e:
+        raise EthdoError(f"Failed to create wallet: {wallet_name}") from e
+
+    try:
+        return json.loads(res)
+    except (json.JSONDecodeError, TypeError) as e:
+        raise e
+    except Exception as e:
+        raise e
+
+
+def create_account(account_name: str = None) -> dict:
     """Creates a new account on given ethdo wallet
 
     Returns:
