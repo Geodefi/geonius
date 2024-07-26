@@ -2,6 +2,13 @@
 
 from .actions import EthdoError, CannotStakeError, CallFailedError
 from .classes import DaemonError, DatabaseError, DatabaseMismatchError
-from .globals import SDKError, MissingPrivateKeyError, ConfigurationError
-from .utils import HighGasException
+from .daemons import EventFetchingError
+from .globals import (
+    SDKError,
+    MissingPrivateKeyError,
+    ConfigurationFileError,
+    MissingConfigurationError,
+    ConfigurationFieldError,
+)
+from .utils import HighGasError, GasApiError, EmailError
 from .triggers import BeaconStateMismatchError

@@ -3,9 +3,9 @@
 import os
 import sqlite3 as sql
 from typing import Any
-from src.globals import CONFIG
-from src.logger import log
+
 from src.exceptions import DatabaseError
+from src.globals import get_config, get_logger
 
 
 class Database:
@@ -20,8 +20,6 @@ class Database:
             ''')
 
     Attributes:
-        main_dir (str): Main directory of the project.
-        db_dir (str): Directory to store the database files.
         db_name (str): Name of the database file.
         db_ext (str): Extension of the database file.
         path (str): Path of the database file.
@@ -32,8 +30,6 @@ class Database:
         DatabaseError: Error while connecting to the database.
     """
 
-    main_dir: str = CONFIG.directory
-    db_dir: str = CONFIG.database.directory
     db_name: str = "operator"
     db_ext: str = ".db"
 
@@ -48,7 +44,7 @@ class Database:
         """
 
         self.db_name: str = db_name
-        self.path: str = os.path.join(self.main_dir, self.db_dir)
+        self.path: str = os.path.join(get_config().dir, get_config().database.dir)
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
@@ -58,8 +54,8 @@ class Database:
             self.connection: sql.Connection = sql.connect(connection_path)
             self.cursor: sql.Cursor = self.connection.cursor()
         except Exception as e:
-            log.debug(f"SQL version: {sql.version}")
-            log.debug(f"sqlite version: {sql.sqlite_version}")
+            get_logger().debug(f"SQL version: {sql.version}")
+            get_logger().debug(f"sqlite version: {sql.sqlite_version}")
             raise DatabaseError(
                 f"Error while connecting to the database with database path {connection_path}"
             ) from e

@@ -3,18 +3,11 @@
 from typing import Iterable
 from web3.types import EventData
 
-from src.logger import log
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
-from src.helpers import (
-    create_deposit_table,
-    event_handler,
-    fill_validators_table,
-    get_surplus,
-    create_pools_table,
-    check_and_propose,
-    create_operators_table,
-)
+from src.helpers.event import event_handler
+from src.helpers.validator import check_and_propose
+from src.globals import get_logger
 
 
 class DepositTrigger(Trigger):
@@ -28,18 +21,19 @@ class DepositTrigger(Trigger):
     name: str = "DEPOSIT"
 
     def __init__(self) -> None:
-        """Initializes a DepositTrigger object. The trigger will process the changes of the daemon after a loop.
-        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """Initializes a DepositTrigger object.
+        The trigger will process the changes of the daemon after a loop.
+        It is a callable object.
+        It is used to process the changes of the daemon.
+        It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.consider_deposit)
-        create_operators_table()
-        create_pools_table()
-        create_deposit_table()
-        log.debug(f"{self.name} is initated.")
+        get_logger().debug(f"{self.name} is initated.")
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
-        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
+        """Parses the events to saveable format.
+        Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
             events (Iterable[EventData]): list of Deposit emits
@@ -75,21 +69,18 @@ class DepositTrigger(Trigger):
                     "INSERT INTO Deposit VALUES (?,?,?,?,?,?)",
                     events,
                 )
-            log.debug(f"Inserted {len(events)} events into Deposit table")
+            get_logger().debug(f"Inserted {len(events)} events into Deposit table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Deposit") from e
 
+    # pylint: disable-next=unused-argument
     def consider_deposit(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Updates the surplus for given pool with the current data.
         for encountered pool ids within provided "Deposit" emits.
 
         Args:
             events (Iterable[EventData]): list of events
-            *args: Variable length argument list
-            **kwargs: Arbitrary keyword arguments
         """
-        log.info(f"{self.name} is triggered.")
-
         # parse and save events
         filtered_events: Iterable[EventData] = event_handler(
             events, self.__parse_events, self.__save_events
@@ -97,11 +88,6 @@ class DepositTrigger(Trigger):
 
         pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        all_proposed_pks: list[str] = []
         for pool_id in pool_ids:
             # if able to propose any new validators do so
-            proposed_pks: list[str] = check_and_propose(pool_id)
-            all_proposed_pks.extend(proposed_pks)
-
-        if all_proposed_pks:
-            fill_validators_table(all_proposed_pks)
+            check_and_propose(pool_id)

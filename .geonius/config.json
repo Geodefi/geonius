@@ -1,0 +1,54 @@
+{
+  "operator_id": 46876274494823354384428212092516289553647577426286656470167864486523402510788,
+  "chains": {
+    "holesky": {
+      "start": 1550551,
+      "identifier": "latest",
+      "period": "5",
+      "interval": "12",
+      "range": "3000",
+      "execution_api": "https://rpc.ankr.com/eth_holesky/<API_KEY_EXECUTION>",
+      "consensus_api": "https://rpc.ankr.com/premium-http/eth_holesky_beacon/<API_KEY_CONSENSUS>"
+    }
+  },
+  "network": {
+    "refresh_rate": 60,
+    "max_attempt": 20,
+    "attempt_rate": 0.1
+  },
+  "strategy": {
+    "min_proposal_queue": 0,
+    "max_proposal_delay": 0
+  },
+  "logger": {
+    "no_stream": false,
+    "no_file": false,
+    "dir": "logs",
+    "level": "INFO",
+    "when": "midnight",
+    "interval": 1,
+    "backup": 30
+  },
+  "database": {
+    "dir": "db"
+  },
+  "ethdo": {
+    "wallet": "geonius",
+    "account_prefix": "Validator"
+  },
+  "gas": {
+    "max_priority": 10,
+    "max_fee": 100,
+    "api": "https://gas.api.infura.io/v3/<API_KEY_GAS>/networks/1/suggestedGasFees",
+    "parser": {
+      "base": "low.suggestedMaxFeePerGas",
+      "priority": "low.suggestedMaxPriorityFeePerGas"
+    }
+  },
+  "email": {
+    "sender": "admin@geode.fi",
+    "receivers": ["admin@geode.fi", "admin@geode.fi", "admin@geode.fi"],
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587
+  }
+}

@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
-
+import os
+import signal
 from time import sleep
 from typing import Callable
 from threading import Thread, Event
 from web3.exceptions import TimeExhausted
 
-from src.logger import log
-from src.exceptions import DaemonError, CallFailedError, BeaconStateMismatchError
-from .trigger import Trigger
+from src.classes.trigger import Trigger
+from src.exceptions import (
+    DaemonError,
+    CallFailedError,
+    BeaconStateMismatchError,
+    EmailError,
+    HighGasError,
+    EventFetchingError,
+)
+from src.globals import get_logger
+from src.utils.notify import send_email
 
 
 class Daemon:
@@ -55,8 +64,9 @@ class Daemon:
             trigger (Trigger): an initialized Trigger instance
             initial_delay (int, optional): Initial delay before starting the loop. Defaults to 0.
         """
-        log.debug(
-            f"Initializing a Daemon object. interval: {interval}, trigger:{trigger.name}, delay:{initial_delay}"
+        get_logger().debug(
+            f"Initializing a Daemon object. interval: {interval},"
+            f"trigger:{trigger.name}, delay:{initial_delay}"
         )
         self.__set_task(task)
         self.__set_interval(interval)
@@ -66,7 +76,7 @@ class Daemon:
         self.__worker: Thread = Thread(name=trigger.name, target=self.__loop)
         self.start_flag: Event = Event()
         self.stop_flag: Event = Event()
-        log.debug(f"Initialized a Daemon for: {trigger.name:^17}.")
+        get_logger().debug(f"Initialized a Daemon for: {trigger.name:^17}.")
 
     @property
     def interval(self) -> int:
@@ -128,11 +138,13 @@ class Daemon:
             raise TypeError("Given trigger is not an instince of Trigger")
 
     def __loop(self) -> None:
-        """Runs the loop, checks for the task and trigger on every iteration. Stops when stop_flag is set.
-
-        If the task raises an exception, the daemon stops and raises a DaemonError. This is to prevent
-        the daemon from running with a broken task. The exception is raised to the caller to handle the error. The
-        daemon can be restarted after the error is handled. The stop_flag is set to prevent the daemon from running again.
+        """Runs the loop, checks for the task and trigger on every iteration.
+        Stops when stop_flag is set.
+        If the task raises an exception, the daemon stops and raises a DaemonError.
+        This is to prevent the daemon from running with a broken task.
+        The exception is raised to the caller to handle the error.
+        The daemon can be restarted after the error is handled.
+        The stop_flag is set to prevent the daemon from running again.
 
         Raises:
             DaemonError: Raised if the daemon stops due to an exception.
@@ -149,20 +161,92 @@ class Daemon:
                 else:
                     pass
 
-            except CallFailedError:
-                log.warning(
-                    f"One of the calls failed for {self.trigger.name:^17}. Continuing but may need to be checked in case of a problem."
+            except (TimeExhausted, CallFailedError):
+                get_logger().warning(
+                    f"One of the calls failed for {self.trigger.name:^17}."
+                    " Continuing but may need to be checked in case of a problem."
                 )
-            except (TimeExhausted, BeaconStateMismatchError):
-                log.exception(
-                    f"Stopping the Daemon for {self.trigger.name:^17} due to unhandled condition:",
+                try:
+                    send_email(
+                        "Tx failed",
+                        " A Portal transaction is either failed,"
+                        " or could not be called for some reason."
+                        " Will continue operations as usual, but an investigation is suggested.",
+                    )
+                except EmailError:
+                    get_logger().warning(
+                        "Not able to communicate with the owners."
+                        " Continuing without an assistance."
+                    )
+            except HighGasError as e:
+                get_logger().error(str(e))
+                get_logger().warning(
+                    f"One of the calls failed for {self.trigger.name:^17}."
+                    " Continuing but may need to be checked in case of a problem."
+                )
+                try:
+                    send_email(
+                        "High Gas Alert",
+                        "On Chain gas api reported that gas prices have surpassed the max setting.",
+                        dont_notify_devs=True,
+                    )
+                except EmailError:
+                    get_logger().warning(
+                        "Not able to communicate with the owners."
+                        " Continuing without an assistance."
+                    )
+            except EventFetchingError as e:
+                get_logger().error(str(e))
+                try:
+                    send_email(
+                        "Could not get some events from the chain",
+                        " There was an issue while fetching an event from the chain."
+                        " Will not shot down geonius and will be trying again later."
+                        " However, it might be worth checking what is wrong.",
+                        dont_notify_devs=True,
+                    )
+                except EmailError:
+                    get_logger().warning(
+                        "Not able to communicate with the owners."
+                        " Continuing without an assistance."
+                    )
+
+            except BeaconStateMismatchError:
+                # These Exceptions can not be handled
+                # but there is no need to close the whole thing down for it.
+                get_logger().exception(
+                    f"Daemon stopped: {self.trigger.name:^17}."
+                    " Others will continue to operate...",
                     exc_info=True,
                 )
+                try:
+                    send_email(
+                        f"Daemon stopped: {self.trigger.name:^17}",
+                        f"One Daemon stopped, others will continue to operate. Come take a look!",
+                    )
+                except EmailError:
+                    get_logger().warning(
+                        f"Can be not able to communicate with the owners."
+                        " Continuing without an assistance."
+                    )
                 self.start_flag.clear()
                 self.stop_flag.set()
-            except Exception as e:
-                log.error("Stopping Geonius")
-                raise DaemonError("Daemon stopped due to an exception.") from e
+
+            except Exception:
+                # All of the remaining Exceptions will force the MainThread to exit.>
+                get_logger().exception(
+                    f"Stopping Geonius due to unhandled exception on a Daemon for:"
+                    f"{self.trigger.name:^17}"
+                )
+                try:
+                    send_email(
+                        "STOPPED",
+                        f"All Daemons stopped, script exited. Come take a look!",
+                    )
+                except EmailError:
+                    get_logger().warning(f"Could not send email while exiting Geonius. Well...")
+
+                os.kill(os.getpid(), signal.SIGUSR1)
 
     def run(self) -> None:
         """Starts the daemon, runs the loop when called.
@@ -171,15 +255,15 @@ class Daemon:
             DaemonError: Raised if the daemon is already running.
         """
         if self.start_flag.is_set():
-            log.error("Stopping Geonius")
+            get_logger().error("Stopping Geonius")
             raise DaemonError("Daemon is already running.")
         self.stop_flag.clear()
 
         self.__worker.start()
 
         self.start_flag.set()
-        log.info(
-            f"Daemon for {self.trigger.name:^17} is running. Use stop() to stop, and CTRL+C to exit."
+        get_logger().info(
+            f"Daemon for {self.trigger.name:^17} will run every {self.interval} seconds."
         )
 
     def stop(self) -> None:
@@ -191,8 +275,8 @@ class Daemon:
 
         # if already stopped
         if not self.start_flag.is_set() or self.stop_flag.is_set():
-            log.error("Stopping Geonius")
+            get_logger().error("Stopping Geonius")
             raise DaemonError("Daemon is already stopped.")
 
         self.stop_flag.set()
-        log.info(f"Daemon for {self.trigger.name:^17} is stopped.")
+        get_logger().info(f"Daemon for {self.trigger.name:^17} is stopped.")

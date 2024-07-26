@@ -4,15 +4,12 @@ from typing import Iterable
 from web3.types import EventData
 from geodefi.globals import ID_TYPE
 
-from src.logger import log
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
-from src.helpers import (
-    create_pools_table,
-    fill_pools_table,
-    create_id_initiated_table,
-    event_handler,
-)
+from src.database.pools import fill_pools_table
+
+from src.helpers.event import event_handler
+from src.globals import get_logger
 
 
 class IdInitiatedTrigger(Trigger):
@@ -25,14 +22,15 @@ class IdInitiatedTrigger(Trigger):
     name: str = "ID_INITIATED"
 
     def __init__(self) -> None:
-        """Initializes a IdInitiatedTrigger object. The trigger will process the changes of the daemon after a loop.
-        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """Initializes a IdInitiatedTrigger object.
+        The trigger will process the changes of the daemon after a loop.
+        It is a callable object.
+        It is used to process the changes of the daemon.
+        It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.insert_pool)
-        create_pools_table()
-        create_id_initiated_table()
-        log.debug(f"{self.name} is initated.")
+        get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is a pool event.
@@ -43,13 +41,11 @@ class IdInitiatedTrigger(Trigger):
         Returns:
             bool: True if the event is a pool event, False otherwise
         """
-        if event.args.TYPE == ID_TYPE.POOL:
-            return True
-        else:
-            return False
+        return event.args.TYPE == ID_TYPE.POOL
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
-        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
+        """Parses the events to saveable format.
+        Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
             events (Iterable[EventData]): list of IdInitiated emits
@@ -87,20 +83,18 @@ class IdInitiatedTrigger(Trigger):
                     "INSERT INTO IdInitiated VALUES(?,?,?,?)",
                     events,
                 )
-            log.debug(f"Inserted {len(events)} events into IdInitiated table")
+            get_logger().debug(f"Inserted {len(events)} events into IdInitiated table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table IdInitiated") from e
 
+    # pylint: disable-next=unused-argument
     def insert_pool(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """Creates a new pool and fills it with data
         for encountered pool ids within provided "IdInitiated" emits.
 
         Args:
             events (Iterable[EventData]): list of events
-            *args: Variable length argument list
-            **kwargs: Arbitrary keyword arguments
         """
-        log.info(f"{self.name} is triggered.")
 
         filtered_events: Iterable[EventData] = event_handler(
             events,

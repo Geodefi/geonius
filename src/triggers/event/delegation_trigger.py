@@ -3,18 +3,11 @@
 from typing import Iterable
 from web3.types import EventData
 
-from src.logger import log
-from src.globals import OPERATOR_ID
 from src.classes import Trigger, Database
 from src.exceptions import DatabaseError
-from src.helpers import (
-    create_delegation_table,
-    event_handler,
-    check_and_propose,
-    fill_validators_table,
-    create_pools_table,
-    create_operators_table,
-)
+from src.helpers.event import event_handler
+from src.helpers.validator import check_and_propose
+from src.globals import get_logger, get_config
 
 
 class DelegationTrigger(Trigger):
@@ -28,15 +21,14 @@ class DelegationTrigger(Trigger):
     name: str = "DELEGATION"
 
     def __init__(self):
-        """Initializes a DelegationTrigger object. The trigger will process the changes of the daemon after a loop.
-        It is a callable object. It is used to process the changes of the daemon. It can only have 1 action.
+        """Initializes a DelegationTrigger object.
+        The trigger will process the changes of the daemon after a loop.
+        It is a callable object. It is used to process the changes of the daemon.
+        It can only have 1 action.
         """
 
         Trigger.__init__(self, name=self.name, action=self.consider_allowance)
-        create_operators_table()
-        create_pools_table()
-        create_delegation_table()
-        log.debug(f"{self.name} is initated.")
+        get_logger().debug(f"{self.name} is initated.")
 
     def __filter_events(self, event: EventData) -> bool:
         """Filters the events to check if the event is for the script's OPERATOR_ID.
@@ -48,13 +40,11 @@ class DelegationTrigger(Trigger):
             bool: True if the event is for the script's OPERATOR_ID, False otherwise
         """
 
-        if event.args.operatorId == OPERATOR_ID:
-            return True
-        else:
-            return False
+        return event.args.operatorId == get_config().operator_id
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
-        """Parses the events to saveable format. Returns a list of tuples. Each tuple represents a saveable event.
+        """Parses the events to saveable format.
+        Returns a list of tuples. Each tuple represents a saveable event.
 
         Args:
             events (Iterable[EventData]): list of Delegation emits
@@ -91,10 +81,11 @@ class DelegationTrigger(Trigger):
                     "INSERT INTO Delegation VALUES (?,?,?,?,?,?)",
                     events,
                 )
-            log.debug(f"Inserted {len(events)} events into Delegation table")
+            get_logger().debug(f"Inserted {len(events)} events into Delegation table")
         except Exception as e:
             raise DatabaseError(f"Error inserting events to table Delegation") from e
 
+    # pylint: disable-next=unused-argument
     def consider_allowance(self, events: Iterable[EventData], *args, **kwargs) -> None:
         """If the allowance is changed, it proposes new validators for the pool if possible.
         If new validators are proposed, it also fills the validators table
@@ -102,10 +93,7 @@ class DelegationTrigger(Trigger):
 
         Args:
             events (Iterable[EventData]): list of Delegation emits
-            *args: Variable length argument list
-            **kwargs: Arbitrary keyword arguments
         """
-        log.info(f"{self.name} is triggered.")
 
         # filter, parse and save events
         filtered_events: Iterable[EventData] = event_handler(
@@ -118,20 +106,6 @@ class DelegationTrigger(Trigger):
         # gather pool ids from filtered events
         pool_ids: list[int] = [x.args.poolId for x in filtered_events]
 
-        print(f"{self.name} pool ids from filtered events: ", pool_ids)
-
-        all_proposed_pks: list[str] = []
         for pool_id in pool_ids:
             # if able to propose any new validators do so
-            if (
-                pool_id
-                == 58051384563972203095105188535531542842616860810471359890274174995766880197138
-            ):
-                print(f"{self.name} considering allowance for pool {pool_id}")
-                proposed_pks: list[str] = check_and_propose(pool_id)
-                print(f"{self.name} proposed pks for pool {pool_id}: ", proposed_pks)
-                all_proposed_pks.extend(proposed_pks)
-
-        # TODO: proposed pks are not ready yet so it breaks the program, need to fix
-        if all_proposed_pks:
-            fill_validators_table(all_proposed_pks)
+            check_and_propose(pool_id)
