@@ -112,5 +112,5 @@ poetry run geonius run
 > In case you want to run it on background put `&` after the command:
 >
 > ```bash
-> PYTHONPATH=. poetry run python src/main.py --flags &
+> poetry run geonius run --flags &
 > ```
