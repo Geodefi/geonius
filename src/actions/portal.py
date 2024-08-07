@@ -3,7 +3,7 @@
 from web3.types import TxReceipt
 from web3.exceptions import TimeExhausted
 
-from src.exceptions import CannotStakeError, CallFailedError
+from src.exceptions import CallFailedError
 from src.globals import get_sdk, get_config, get_logger
 from src.utils.notify import send_email
 from src.utils.gas import get_gas
@@ -68,7 +68,7 @@ def call_proposeStake(
         raise CallFailedError("Failed to call proposeStake on portal contract") from e
 
 
-def call_stake(pubkeys: list[str]) -> None:
+def call_stake(pubkeys: list[str]) -> str:
     """Transact on stake function with given pubkeys, activating the approved validators.
 
     This function initiates a transaction to stake the approved validators. It takes a list of
@@ -80,33 +80,26 @@ def call_stake(pubkeys: list[str]) -> None:
         pubkeys (list[str]): list of public keys of the approved validators.
 
     Raises:
-        CannotStakeError: Raised if any of the validators cannot stake.
         TimeExhausted: Raised if the transaction takes too long to be mined.
         CallFailedError: Raised if the stake call fails.
+
+    Returns:
+        str: Transaction hash
     """
 
     try:
         if len(pubkeys) > 0:
-            # Confirm all approves canStake before calling stake
-
-            for pubkey in pubkeys:
-                if not get_sdk().portal.functions.canStake(pubkey).call():
-                    get_logger().critical(
-                        f"Not allowed to finalize staking for provided pubkey: {pubkey}"
-                    )
-                    raise CannotStakeError(f"Validator with pubkey {pubkey} cannot stake")
-
             tx_hash: str = get_sdk().portal.functions.stake(pubkeys).transact(tx_params())
             get_logger().etherscan("stake", tx_hash)
+            return tx_hash
 
-    except CannotStakeError as e:
-        send_email(
-            e.__class__.__name__,
-            str(e),
-        )
-        return False
+        else:
+            return ""
+
     except TimeExhausted as e:
-        get_logger().error(f"stake tx could not conclude in time.")
+        get_logger().error(f"Stake tx could not conclude in time.")
         raise e
     except Exception as e:
-        raise CallFailedError("Failed to call stake on portal contract") from e
+        raise CallFailedError(
+            "Failed to call stake on portal contract for some unknown reason."
+        ) from e

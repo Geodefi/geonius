@@ -119,6 +119,19 @@ def get_fallback_operator(pool_id: int) -> int:
     return get_sdk().portal.functions.readUint(pool_id, to_bytes32("fallbackOperator")).call()
 
 
+def can_stake(pubkey: str) -> bool:
+    """Checks if the validator proposal for the given pubkey is approved by Oracle
+
+    Args:
+        pubkey (str): public key of the validator.
+
+    Returns:
+        bool: True if can proceed and call stake. False if not yet confirmed; or alienated.
+    """
+    get_logger().debug(f"Checking if the validator can be staked and finalized: {pubkey}")
+    return get_sdk().portal.functions.canStake(pubkey).call()
+
+
 def get_pools_count() -> int:
     """Returns the number of current pools from Portal
 

@@ -5,24 +5,21 @@ from threading import Lock
 from datetime import datetime
 from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE, BEACON_DENOMINATOR
 from geodefi.utils import to_bytes32
-from web3.exceptions import TimeExhausted
 
-# from src.classes import Database
+from src.exceptions import DatabaseMismatchError, EthdoError
 from src.globals import get_sdk, get_config, get_constants, get_logger
 from src.utils.notify import send_email
+from src.utils.thread import multithread
 from src.actions.ethdo import generate_deposit_data
 from src.actions.portal import call_proposeStake, call_stake
-
-from src.exceptions import (
-    # DatabaseError,
-    DatabaseMismatchError,
-    EthdoError,
-    CallFailedError,
+from src.helpers.portal import (
+    get_operator_allowance,
+    get_surplus,
+    get_withdrawal_address,
+    get_name,
+    can_stake,
 )
-
-from src.helpers.portal import get_operator_allowance, get_surplus, get_withdrawal_address, get_name
-from src.database.validators import save_local_state, fetch_filtered_pubkeys, fetch_validators_batch
-
+from src.database.validators import save_local_state, fetch_filtered_pubkeys
 from src.database.pools import save_last_proposal_timestamp
 
 
@@ -163,9 +160,6 @@ def check_and_stake(pks: list[str]):
 
     Args:
         pks (list[str]): pubkeys to stake for
-
-    Returns:
-        list[str]: list of pubkeys staked
     """
     # TODO: (later) implement "min_proposal_queue" and "max_proposal_delay"
     # under strategy for both propose and stake steps.
@@ -174,8 +168,41 @@ def check_and_stake(pks: list[str]):
     # max_proposal_delay => max delay a proposal will wait.
     # Then, they should be grouped by the pool id to save gas as well.
     with stake_mutex:
-        for i in range(0, len(pks), 50):
-            call_stake(i)
+        txs: list[list[str]] = []
+        failed_pks: list[str] = []
+
+        # Confirm all with canStake before calling stake
+        confirmations: list[bool] = multithread(can_stake, pks)
+
+        confirmed_pks: list[str] = []
+        for pk, conf in zip(pks, confirmations):
+            if conf:
+                if len(confirmed_pks) < 50:
+                    confirmed_pks.append(pk)
+                else:
+                    txs.append(confirmed_pks)
+                    confirmed_pks = []
+            else:
+                get_logger().critical(f"Not allowed to finalize staking for: {pk}")
+                failed_pks.append(pks)
+
+        if txs:
+            for tx in txs:
+                if tx:
+                    tx_hash: str = call_stake(pubkeys=tx)
+                    send_email(
+                        f"{len(tx)} proposals have been staked",
+                        f"Here is the transaction hash:\n{tx_hash}",
+                        dont_notify_devs=True,
+                    )
+
+        if failed_pks:
+            f_pks: str = "\n".join(failed_pks)
+            send_email(
+                f"{len(failed_pks)} validator proposals have failed unexpectedly",
+                f"Here is the list of validator pubkeys that have failed:\n{f_pks}",
+                dont_notify_devs=True,
+            )
 
 
 def run_finalize_exit_triggers():
