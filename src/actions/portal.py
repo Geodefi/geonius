@@ -68,7 +68,7 @@ def call_proposeStake(
         raise CallFailedError("Failed to call proposeStake on portal contract") from e
 
 
-def call_stake(pubkeys: list[str]) -> bool:
+def call_stake(pubkeys: list[str]) -> None:
     """Transact on stake function with given pubkeys, activating the approved validators.
 
     This function initiates a transaction to stake the approved validators. It takes a list of
@@ -78,9 +78,6 @@ def call_stake(pubkeys: list[str]) -> bool:
 
     Args:
         pubkeys (list[str]): list of public keys of the approved validators.
-
-    Returns:
-        bool: True if the stake call is successful, False otherwise.
 
     Raises:
         CannotStakeError: Raised if any of the validators cannot stake.
@@ -102,14 +99,6 @@ def call_stake(pubkeys: list[str]) -> bool:
             tx_hash: str = get_sdk().portal.functions.stake(pubkeys).transact(tx_params())
             get_logger().etherscan("stake", tx_hash)
 
-            # Wait for the transaction to be mined, and get the transaction receipt
-            tx_receipt: TxReceipt = get_sdk().portal.w3.eth.wait_for_transaction_receipt(
-                tx_hash.hex()
-            )
-            get_logger().info(f"stake tx is concluded: {tx_receipt}")
-
-            return True
-
     except CannotStakeError as e:
         send_email(
             e.__class__.__name__,
@@ -121,5 +110,3 @@ def call_stake(pubkeys: list[str]) -> bool:
         raise e
     except Exception as e:
         raise CallFailedError("Failed to call stake on portal contract") from e
-
-    return False

@@ -21,11 +21,9 @@ from src.exceptions import (
 )
 
 from src.helpers.portal import get_operator_allowance, get_surplus, get_withdrawal_address, get_name
-from src.database.validators import save_local_state, fetch_filtered_pubkeys
+from src.database.validators import save_local_state, fetch_filtered_pubkeys, fetch_validators_batch
 
 from src.database.pools import save_last_proposal_timestamp
-
-from src.database.operators import save_last_stake_timestamp, fetch_last_stake_timestamp
 
 
 propose_mutex = Lock()
@@ -143,27 +141,14 @@ def check_and_propose(pool_id: int) -> None:
             send_email("Ethdo failed", str(e), dont_notify_devs=True)
             return []
 
-        # pubkeys: list[bytes] = [bytes.fromhex(prop["pubkey"]) for prop in proposal_data]
-        # signatures1: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in proposal_data]
-        # signatures31: list[bytes] = [bytes.fromhex(prop["signature"]) for prop in stake_data]
-
         pubkeys: list[str] = ["0x" + prop["pubkey"] for prop in proposal_data]
         signatures1: list[str] = ["0x" + prop["signature"] for prop in proposal_data]
         signatures31: list[str] = ["0x" + prop["signature"] for prop in stake_data]
-
-        # last_proposal_timestamp: int = fetch_last_proposal_timestamp(pool_id)
 
         for i in range(0, len(pubkeys), 50):
             temp_pks: list[str] = pubkeys[i : i + 50]
             temp_sigs1: list[str] = signatures1[i : i + 50]
             temp_sigs31: list[str] = signatures31[i : i + 50]
-
-            # if i >= len(pubkeys) - get_config().strategy.min_proposal_queue:
-            #     if (
-            #         get_config().strategy.max_proposal_delay
-            #         >= int(round(datetime.now().timestamp())) - last_proposal_timestamp
-            #     ):
-            #         break
 
             call_proposeStake(pool_id, temp_pks, temp_sigs1, temp_sigs31)
             save_last_proposal_timestamp(
@@ -171,9 +156,10 @@ def check_and_propose(pool_id: int) -> None:
             )  # why is this needed?
 
 
-def check_and_stake(pks: list[str]) -> list[str]:
-    """Stake for given pubkeys if able to stake for all of them at \
-        once or in batches of 50 pubkeys at a time if needed to.
+def check_and_stake(pks: list[str]):
+    """Stake for given pubkeys if able to stake for all of them at
+    once or in batches of 50 pubkeys at a time if needed to.
+    Pubkeys are ordered according to their poolId to decrease gas costs.
 
     Args:
         pks (list[str]): pubkeys to stake for
@@ -181,30 +167,15 @@ def check_and_stake(pks: list[str]) -> list[str]:
     Returns:
         list[str]: list of pubkeys staked
     """
+    # TODO: (later) implement "min_proposal_queue" and "max_proposal_delay"
+    # under strategy for both propose and stake steps.
+    # Thus allow delays on stake and proposal to save gas.
+    # min_proposal_queue => min number of validators to be filled before sending a tx.
+    # max_proposal_delay => max delay a proposal will wait.
+    # Then, they should be grouped by the pool id to save gas as well.
     with stake_mutex:
-        last_stake_timestamp: int = fetch_last_stake_timestamp()
-        pks: list[str] = []
         for i in range(0, len(pks), 50):
-            temp_pks: list[str] = pks[i : i + 50]
-
-            if i >= len(pks) - get_config().strategy.min_proposal_queue:
-                if (
-                    get_config().strategy.max_proposal_delay
-                    >= int(round(datetime.now().timestamp())) - last_stake_timestamp
-                ):
-                    break
-
-            try:
-                success: bool = call_stake(temp_pks)
-                save_last_stake_timestamp(int(round(datetime.now().timestamp())))
-            except (CallFailedError, TimeExhausted) as e:
-                # TODO: (later) reconsider how stake part works...
-                raise e
-
-            if success:
-                pks.extend(temp_pks)
-
-        return pks
+            call_stake(i)
 
 
 def run_finalize_exit_triggers():

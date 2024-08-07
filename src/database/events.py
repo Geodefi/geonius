@@ -397,7 +397,8 @@ def create_stake_table() -> None:
                     log_index INTEGER NOT NULL,
                     event_index INTEGER NOT NULL,
                     PRIMARY KEY (pk),                       
-                    FOREIGN KEY (pk) REFERENCES Validators (pk)                )
+                    FOREIGN KEY (pk) REFERENCES Validators (pk)
+                )
                 """
             )
         get_logger().debug(f"Created a new table: Stake")
@@ -425,3 +426,48 @@ def reinitialize_stake_table() -> None:
 
     drop_stake_table()
     create_stake_table()
+
+
+def create_verification_index_updated_table() -> None:
+    """Creates the sql database table for VerificationIndexUpdated.
+
+    Raises:
+        DatabaseError: Error creating VerificationIndexUpdated table
+    """
+    try:
+        with Database() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS VerificationIndexUpdated (
+                    validator_index INTEGER UNIQUE NOT NULL,
+                    block_number INTEGER NOT NULL,
+                    transaction_index INTEGER NOT NULL,
+                    log_index INTEGER NOT NULL
+                    )
+                """
+            )
+        get_logger().debug(f"Created a new table: VerificationIndexUpdated")
+    except Exception as e:
+        raise DatabaseError("Error creating VerificationIndexUpdated table") from e
+
+
+def drop_verification_index_updated_table() -> None:
+    """Removes VerificationIndexUpdated table from the database.
+
+    Raises:
+        DatabaseError: Error dropping VerificationIndexUpdated table
+    """
+
+    try:
+        with Database() as db:
+            db.execute("""DROP TABLE IF EXISTS VerificationIndexUpdated""")
+        get_logger().debug(f"Dropped Table: VerificationIndexUpdated")
+    except Exception as e:
+        raise DatabaseError(f"Error dropping VerificationIndexUpdated table") from e
+
+
+def reinitialize_verification_index_updated_table() -> None:
+    """Removes VerificationIndexUpdated table and creates an empty one."""
+
+    drop_verification_index_updated_table()
+    create_verification_index_updated_table()

@@ -76,7 +76,7 @@ class Daemon:
         self.__worker: Thread = Thread(name=trigger.name, target=self.__loop)
         self.start_flag: Event = Event()
         self.stop_flag: Event = Event()
-        get_logger().debug(f"Initialized a Daemon for: {trigger.name:^17}.")
+        get_logger().debug(f"Initialized a Daemon for: {trigger.name:^20}.")
 
     @property
     def interval(self) -> int:
@@ -163,7 +163,7 @@ class Daemon:
 
             except (TimeExhausted, CallFailedError):
                 get_logger().warning(
-                    f"One of the calls failed for {self.trigger.name:^17}."
+                    f"One of the calls failed for {self.trigger.name:^20}."
                     " Continuing but may need to be checked in case of a problem."
                 )
                 try:
@@ -181,7 +181,7 @@ class Daemon:
             except HighGasError as e:
                 get_logger().error(str(e))
                 get_logger().warning(
-                    f"One of the calls failed for {self.trigger.name:^17}."
+                    f"One of the calls failed for {self.trigger.name:^20}."
                     " Continuing but may need to be checked in case of a problem."
                 )
                 try:
@@ -215,13 +215,13 @@ class Daemon:
                 # These Exceptions can not be handled
                 # but there is no need to close the whole thing down for it.
                 get_logger().exception(
-                    f"Daemon stopped: {self.trigger.name:^17}."
+                    f"Daemon stopped: {self.trigger.name:^20}."
                     " Others will continue to operate...",
                     exc_info=True,
                 )
                 try:
                     send_email(
-                        f"Daemon stopped: {self.trigger.name:^17}",
+                        f"Daemon stopped: {self.trigger.name:^20}",
                         f"One Daemon stopped, others will continue to operate. Come take a look!",
                     )
                 except EmailError:
@@ -236,7 +236,7 @@ class Daemon:
                 # All of the remaining Exceptions will force the MainThread to exit.>
                 get_logger().exception(
                     f"Stopping Geonius due to unhandled exception on a Daemon for:"
-                    f"{self.trigger.name:^17}"
+                    f"{self.trigger.name:^20}"
                 )
                 try:
                     send_email(
@@ -263,7 +263,7 @@ class Daemon:
 
         self.start_flag.set()
         get_logger().info(
-            f"Daemon for {self.trigger.name:^17} will run every {self.interval} seconds."
+            f"Daemon for {self.trigger.name:^20} will run every {self.interval} seconds."
         )
 
     def stop(self) -> None:
@@ -279,4 +279,4 @@ class Daemon:
             raise DaemonError("Daemon is already stopped.")
 
         self.stop_flag.set()
-        get_logger().info(f"Daemon for {self.trigger.name:^17} is stopped.")
+        get_logger().info(f"Daemon for {self.trigger.name:^20} is stopped.")

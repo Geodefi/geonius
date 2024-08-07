@@ -21,10 +21,9 @@ from src.triggers.event import (
     IdInitiatedTrigger,
     DepositTrigger,
     StakeProposalTrigger,
-    ExitRequestTrigger,
-)
-from src.triggers.block import (
+    VerificationTrigger,
     StakeTrigger,
+    ExitRequestTrigger,
 )
 from src.actions.ethdo import ping_wallet
 
@@ -40,7 +39,6 @@ from src.globals import (
     get_config,
     get_sdk,
     get_logger,
-    get_constants,
 )
 from src.helpers.portal import get_maintainer, get_wallet_balance
 
@@ -49,7 +47,6 @@ from src.globals.constants import init_constants
 from src.globals.sdk import init_sdk
 
 from src.database.pools import reinitialize_pools_table, create_pools_table
-from src.database.operators import reinitialize_operators_table, create_operators_table
 from src.database.validators import reinitialize_validators_table, create_validators_table
 from src.database.events import (
     reinitialize_alienated_table,
@@ -58,6 +55,7 @@ from src.database.events import (
     reinitialize_exit_request_table,
     reinitialize_stake_proposal_table,
     reinitialize_stake_table,
+    reinitialize_verification_index_updated_table,
     reinitialize_fallback_operator_table,
     reinitialize_id_initiated_table,
     create_alienated_table,
@@ -66,6 +64,7 @@ from src.database.events import (
     create_exit_request_table,
     create_stake_proposal_table,
     create_stake_table,
+    create_verification_index_updated_table,
     create_fallback_operator_table,
     create_id_initiated_table,
 )
@@ -280,7 +279,6 @@ def init_dbs(reset: bool = False):
         get_logger().warning("Dropping the database...")
 
         reinitialize_pools_table()
-        reinitialize_operators_table()
         reinitialize_validators_table()
 
         reinitialize_alienated_table()
@@ -289,12 +287,12 @@ def init_dbs(reset: bool = False):
         reinitialize_exit_request_table()
         reinitialize_stake_proposal_table()
         reinitialize_stake_table()
+        reinitialize_verification_index_updated_table()
         reinitialize_fallback_operator_table()
         reinitialize_id_initiated_table()
 
     else:
         create_pools_table()
-        create_operators_table()
         create_validators_table()
 
         create_alienated_table()
@@ -303,6 +301,7 @@ def init_dbs(reset: bool = False):
         create_exit_request_table()
         create_stake_proposal_table()
         create_stake_table()
+        create_verification_index_updated_table()
         create_fallback_operator_table()
         create_id_initiated_table()
 
@@ -320,7 +319,8 @@ def run_daemons():
     deposit_trigger: DepositTrigger = DepositTrigger()
     delegation_trigger: DelegationTrigger = DelegationTrigger()
     stake_proposal_trigger: StakeProposalTrigger = StakeProposalTrigger()
-    stake_trigger: StakeProposalTrigger = StakeProposalTrigger()
+    stake_trigger: StakeTrigger = StakeTrigger()
+    verification_trigger: VerificationTrigger = VerificationTrigger()
     fallback_operator_trigger: FallbackOperatorTrigger = FallbackOperatorTrigger()
     alienated_trigger: AlienatedTrigger = AlienatedTrigger()
     # exit_request_trigger: ExitRequestTrigger = ExitRequestTrigger()
@@ -342,9 +342,13 @@ def run_daemons():
         trigger=stake_proposal_trigger,
         event=events.StakeProposal(),
     )
+    verification_daemon: EventDaemon = EventDaemon(
+        trigger=verification_trigger,
+        event=events.VerificationIndexUpdated(),
+    )
     stake_daemon: EventDaemon = EventDaemon(
         trigger=stake_trigger,
-        event=events.StakeProposal(),
+        event=events.Stake(),
     )
     fallback_operator_daemon: EventDaemon = EventDaemon(
         trigger=fallback_operator_trigger,
@@ -364,6 +368,7 @@ def run_daemons():
     deposit_daemon.run()
     delegation_daemon.run()
     stake_proposal_daemon.run()
+    verification_daemon.run()
     stake_daemon.run()
     fallback_operator_daemon.run()
     alienated_daemon.run()

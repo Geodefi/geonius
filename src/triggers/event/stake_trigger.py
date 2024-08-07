@@ -20,8 +20,9 @@ class StakeTrigger(Trigger):
 
     Attributes:
         name (str): name of the trigger to be used when logging etc. (value: STAKE_PROPOSAL)
-        expect_pubkeys_daemon (str): A time daemon that will work every 15 min.\
+        __expect_pubkeys_daemon (TimeDaemon): A time daemon that will work every 15 min.\
             Checks if there are any pubkeys that requires pinging.
+        __expect_pubkeys_trigger (ExpectPubkeysTrigger): The trigger for __expect_pubkeys_daemon.
     """
 
     name: str = "STAKE"
@@ -36,16 +37,16 @@ class StakeTrigger(Trigger):
         Trigger.__init__(self, name=self.name, action=self.expect_validators)
 
         # initiate a TimeDaemon to keep track
-        self.__except_pubkeys_trigger: ExpectPubkeysTrigger = ExpectPubkeysTrigger(
+        self.__expect_pubkeys_trigger: ExpectPubkeysTrigger = ExpectPubkeysTrigger(
             balance=DEPOSIT_SIZE.PROPOSAL, keep_alive=True
         )
-        self.__except_pubkeys_daemon: TimeDaemon = TimeDaemon(
+        self.__expect_pubkeys_daemon: TimeDaemon = TimeDaemon(
             interval=15 * get_constants().one_minute,
-            trigger=self.__except_pubkeys_trigger,
+            trigger=self.__expect_pubkeys_trigger,
             initial_delay=0,
         )
 
-        self.__except_pubkeys_daemon.run()
+        self.__expect_pubkeys_daemon.run()
 
     def __parse_events(self, events: Iterable[EventData]) -> list[tuple]:
         """Parses the events to saveable format.
@@ -125,4 +126,4 @@ class StakeTrigger(Trigger):
             pubkey for event in filtered_events for pubkey in event.args.pubkeys
         ]
 
-        self.__except_pubkeys_trigger.extend(all_proposed_pks)
+        self.__expect_pubkeys_trigger.extend(all_proposed_pks)
