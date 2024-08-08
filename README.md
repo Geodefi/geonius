@@ -51,7 +51,7 @@ Geonius keeps track of all of the staking pools created through geodefi's Portal
 
 > There are multiple daemons that are mostly just listening some events on Portal.
 >
-> Check [this document](docs/daemons.md) to learn more about these daemons.
+> Check [this document](docs/deep_dive.md) to learn more about these daemons.
 
 ### What geonius does not do
 
@@ -59,7 +59,7 @@ Simply, it does not interact with anything other than the bare minimum required 
 
 - Does not register or initiate a Node Operator service to be available on geodefi, visit [join.geodefi](https://www.join.geode.fi) for that
 - Does not maintain the validators, keep the validator keys or secure the withdrawal keys. Delegates to [ethdo](https://github.com/wealdtech/ethdo) for that.
-- Does not create a bridge for the communication between ethdo and the validator, that is crucial for block building. Delegates to [vouch](<https://github.com/attestantio/vouch/tree/master>) for that.
+- Does not create a bridge for the communication between ethdo and the validator, that is crucial for block building. Delegates to [vouch](https://github.com/attestantio/vouch/tree/master) for that.
 - Does not create validator keys, ask for mnemonic, ask for permission to build blocks, or in any way communicate with the validator.
 - Does not trust you or your friends.
 
@@ -97,7 +97,7 @@ Geonius does not actually need a consensus or execution client! It only needs an
 Vouch is a powerful tool. Thanks to Vouch, Geonius supports utilizing multiple beacon chain clients at the same time. Thus, it helps solving the client diversity by choosing to delegate the validator operations to Vouch.
 
 > If you need help while installing or interacting with Vouch, check out [this document](./docs/ethdo_vouch.md).
->
+
 ### Execution node
 
 Geonius likes to have access to a execution client that is fully synced and running.
@@ -174,7 +174,7 @@ If you want to understand the meaning of the fields, you can check [Commands \& 
 
 #### .env
 
-A sample config.json with gas and email services activated can be found [here](./.geonius/.env.sample).
+A sample .env can be found [here](./.geonius/.env.sample). Below you can find descriptions of required and optional environment parameters.
 
 - `GEONIUS_PRIVATE_KEY` : private key for the Node Operator maintainer that will run geonius.
 - `ETHDO_WALLET_PASSPHRASE` : wallet password for the ethdo wallet that is specified in config.json
@@ -203,8 +203,8 @@ Note that you can also create a custom parser! For example, if the response has 
 
 Then you can provide the parser as :
 {
-  "base": "high.base",
-  "priority": "high.priority"
+"base": "high.base",
+"priority": "high.priority"
 }
 
 For an easy setup, visit [infura](https://docs.infura.io/api/infura-expansion-apis/gas-api/api-reference/gasprices-type2) and aquire an app key. Then you can use the default parsers on the configuration step.
