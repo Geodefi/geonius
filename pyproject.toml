@@ -2,7 +2,7 @@
 version = "1.0.0"
 name = "geonius"
 description = "Geonius is a daemonic script that allows Node Operators to automate their operations on geodefi Operator Marketplace"
-authors = ["0xIceBear", "Crash Bandicoot"]
+authors = ["0xicebear <admin@geode.fi>", "crashbandicoott <bandicoot@geode.fi>"]
 readme = "README.md"
 packages = [
     { include = "src" }
