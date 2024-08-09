@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from typing_extensions import Self
+
 from src.classes import Daemon, Trigger
+from src.globals import get_logger
 
 
 class TimeDaemon(Daemon):
@@ -25,10 +27,11 @@ class TimeDaemon(Daemon):
         )
 
     def reflect(self) -> Self:
-        """Returns self. Self will be used to stop the deamon when needed by trigger itself
+        """Returns self. Self will be used to stop the daemon when needed by trigger itself
         since return value will be passed to the trigger function.
 
         Returns:
             Self: self
         """
+        get_logger().debug(f"Time Daemon will be triggered.")
         return self

@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from .custom_exception import CustomException
-from .actions import EthdoError, CannotStakeError, CallFailedError
-from .classes import DaemonError, DatabaseError, DatabaseMismatchError, TriggerError
-from .globals import SDKError, PrivateKeyMissingError
-from .utils import PythonVersionException
+from .actions import EthdoError, CallFailedError
+from .classes import DaemonError, DatabaseError, DatabaseMismatchError
+from .daemons import EventFetchingError
+from .globals import (
+    SDKError,
+    MissingPrivateKeyError,
+    ConfigurationFileError,
+    MissingConfigurationError,
+    ConfigurationFieldError,
+)
+from .utils import HighGasError, GasApiError, EmailError
 from .triggers import BeaconStateMismatchError

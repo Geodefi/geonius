@@ -3,10 +3,13 @@
 from typing import Iterable
 from web3.types import EventData
 from web3.contract.contract import ContractEvent
-from src.classes import Daemon, Trigger
-from src.globals import SDK, CONFIG
 
-# from src.helpers import get_all_events
+from src.classes import Daemon, Trigger
+from src.common import AttributeDict
+from src.exceptions import EventFetchingError
+from src.globals import get_sdk, get_constants, get_logger
+from src.database.events import find_latest_event
+from src.helpers.event import get_all_events
 
 
 class EventDaemon(Daemon):
@@ -19,7 +22,8 @@ class EventDaemon(Daemon):
         name (str): name of the daemon to be used when logging etc. (value: EVENT_DAEMON)
         event (_type_): event to be checked.
         block_period (int): number of blocks to wait before running the triggers.
-        block_identifier (int): block_identifier sets if we are looking for 'latest', 'earliest', 'pending', 'safe', 'finalized'.
+        block_identifier (int): block_identifier that can be set to
+            'latest', 'earliest', 'pending', 'safe', 'finalized'.
     """
 
     name: str = "EVENT_DAEMON"
@@ -28,19 +32,19 @@ class EventDaemon(Daemon):
         self,
         trigger: Trigger,
         event: ContractEvent,
-        start_block: int = CONFIG.chains[SDK.network.name].start,
     ) -> None:
         """Initializes a EventDaemon object. The daemon will run the trigger on every event emitted.
 
         Args:
             trigger (Trigger): an initialized Trigger instance.
             event (ContractEvent): event to be checked.
-            start_block (int, optional): block number to start checking for events. Default is what is set in the config.
+            start_block (int, optional): block number to start checking for events.
+                Default is what is set in the config.
         """
-
+        chain = get_constants().chain
         Daemon.__init__(
             self,
-            interval=int(CONFIG.chains[SDK.network.name].interval) + 1,
+            interval=int(chain.interval),
             task=self.listen_events,
             trigger=trigger,
         )
@@ -48,13 +52,26 @@ class EventDaemon(Daemon):
 
         # block_identifier sets if we are looking for:
         # 'latest', 'earliest', 'pending', 'safe', 'finalized'.
-        self.block_identifier: str = CONFIG.chains[SDK.network.name].identifier
-        self.block_period: int = int(CONFIG.chains[SDK.network.name].period)
+        self.block_identifier: str = chain.identifier
+        self.block_period: int = int(chain.period)
 
-        self.__recent_block: int = start_block
+        self.__last_snapshot: AttributeDict = find_latest_event(event.event_name)
+        get_logger().debug(f"{trigger.name} is attached to an Event Daemon")
+
+    def filter_known_events(self, e: EventData) -> bool:
+        """Filter events that are in the previous block, which are not processed."""
+        # TODO: (later) it might be useful to not check the events once any is found
+        if int(e.blockNumber) > self.__last_snapshot.block_number:
+            return True
+        if int(e.transactionIndex) > self.__last_snapshot.transaction_index:
+            return True
+        if int(e.logIndex) > self.__last_snapshot.log_index:
+            return True
+        return False
 
     def listen_events(self) -> Iterable[EventData]:
-        """The main task for the EventDaemon. Checks for new events. If any, runs the trigger and returns the events.
+        """The main task for the EventDaemon. Checks for new events.
+        If any, activates the trigger and returns the events.
         If no events are emitted, returns None.
 
         Returns:
@@ -63,27 +80,49 @@ class EventDaemon(Daemon):
 
         # eth.block_number or eth.get_block_number() can also be used
         # but this allows block_identifier.
-        curr_block: int = (SDK.w3.eth.get_block(self.block_identifier)).number
+        curr_block: int = (get_sdk().w3.eth.get_block(self.block_identifier)).number
+        get_logger().debug(f"Processing Block: {curr_block}")
 
         # check if required number of blocks have past:
-        if curr_block > self.__recent_block + self.block_period:
-            try:
-                events = []
-                # events = get_all_events(
-                #     event=self.event,
-                #     first_block=self.__recent_block,
-                #     last_block=curr_block,
-                # )
-            except Exception:
-                # TODO: log error
-                # TODO: send mail to us and them to figure problem out
-                pass
+        if curr_block >= self.__last_snapshot.block_number + self.block_period:
+            unknown_events = []
 
-            # save events to db
-            if events:
-                self.__recent_block = curr_block
-                return events
-            else:
-                return None
+            try:
+                detected_events: Iterable[EventData] = get_all_events(
+                    event=self.event,
+                    first_block=self.__last_snapshot.block_number,
+                    last_block=curr_block,
+                )
+
+                # take a snapshot from db before filtering (potentially) new events.
+                self.__last_snapshot: int = find_latest_event(self.event.event_name)
+                unknown_events: list[EventData] = list(
+                    filter(
+                        self.filter_known_events,
+                        detected_events,
+                    )
+                )
+
+            except Exception as e:
+                raise EventFetchingError(
+                    "There was an issue while fetching the"
+                    f"{self.event.event_name} event from the chain"
+                ) from e
+
+            # take a snapshot after finishing processing the block.\
+            # Does not matter if there are events or not.
+            self.__last_snapshot = AttributeDict.convert_recursive(
+                {"block_number": curr_block, "transaction_index": 0, "log_index": 0}
+            )
+
+            if unknown_events:
+                get_logger().debug(
+                    f"{self.trigger.name} will be triggered with {len(unknown_events)} events"
+                )
+                return unknown_events
+
         else:
-            return None
+            get_logger().debug(
+                f"Block period have not been met yet.\
+                Expected block:{self.__last_snapshot.block_number + self.block_period}"
+            )

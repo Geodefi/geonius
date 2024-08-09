@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 
+from os import getenv
 import json
 from subprocess import check_output
+
 import geodefi
 
-from src.globals import SDK, ACCOUNT_PASSPHRASE, WALLET_PASSPHRASE, CONFIG
 from src.exceptions import EthdoError
+from src.globals import get_sdk, get_config, get_logger
 
 
-def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int = None) -> dict:
+def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: int) -> dict:
     """Generates the deposit data for a new validator proposal.
 
     Args:
-        withdrawal_address (str): WithdrawalPackage contract address of the desired pool to withdraw the deposit.
+        withdrawal_address (str): WithdrawalPackage contract address of\
+            the desired pool to withdraw the deposit.
         deposit_value (str): The amount of deposit to be made, 1 ETH on proposal, 31 ETH on stake.
 
     Returns:
@@ -23,21 +26,32 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
-    account: str = CONFIG.ethdo.account
-    if index:
-        account += f"_{index}_"
+    get_logger().info(f"Generating deposit data{f'index: {index}'if index else '' }")
+
+    account: str = get_config().ethdo.account_prefix
+    wallet: str = get_config().ethdo.wallet
+
+    if index is not None or index < 0:
+        account += str(index)
+    else:
+        raise EthdoError("Provided invalid index for the validator")
+
+    fork_version = geodefi.globals.GENESIS_FORK_VERSION[get_sdk().network].hex()
 
     try:
+        if not ping_account(wallet=wallet, account=account):
+            create_account(account_name=account)
+
         res: str = check_output(
             [
                 "ethdo",
                 "validator",
                 "depositdata",
-                f"--validatoraccount={account}",
-                f"--passphrase={ACCOUNT_PASSPHRASE}",
+                f"--validatoraccount='{wallet}/{account}'",
+                f"--passphrase={getenv('ETHDO_ACCOUNT_PASSPHRASE')}",
                 f"--withdrawaladdress={withdrawal_address}",
                 f"--depositvalue={deposit_value}",
-                f"--forkversion={geodefi.globals.GENESIS_FORK_VERSION[SDK.network]}",
+                f"--forkversion={fork_version}",
                 "--launchpad",
             ]
         )
@@ -46,54 +60,88 @@ def generate_deposit_data(withdrawal_address: str, deposit_value: str, index: in
         raise EthdoError(
             f"Failed to generate deposit data from account {account} \
                 with withdrawal address {withdrawal_address}, deposit value {deposit_value} \
-                and fork version {geodefi.globals.GENESIS_FORK_VERSION[SDK.network]}"
+                and fork version {fork_version}. Will try again later.",
         ) from e
 
     try:
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
-        raise e
-    except Exception as e:
-        raise e
+        raise EthdoError(f"Failed to interpret the response from ethdo: {res}") from e
 
 
-def create_wallet() -> dict:
-    """Creates a new wallet to be used on ethdo
+def ping_wallet(wallet: str) -> bool:
+    """Checks if a wallet exist on ethdo.
+
+    Args:
+        wallet (str): Provided ethdo wallet
 
     Returns:
-        dict: Returns the wallet data in JSON format.
+        bool: True if exists, False if not.
+    """
+    try:
+        check_output(["ethdo", "wallet", "info", f"--wallet={wallet}"])
+        return True
+    except Exception:
+        return False
+
+
+def ping_account(wallet: str, account: str) -> bool:
+    """Checks if an account exist on ethdo.
+
+    Args:
+        wallet (str): Provided ethdo wallet
+        account (str): Provided ethdo account
+
+    Returns:
+        bool: True if exists, False if not.
+    """
+    try:
+        check_output(["ethdo", "account", "info", f"--validatoraccount={wallet}/{account}"])
+        return True
+    except Exception:
+        return False
+
+
+def create_wallet(wallet_name: str, passphrase: str) -> dict:
+    """Creates a new wallet on ethdo
+
+    Args:
+        wallet (str): Name for the ethdo wallet that will be created
+        passphrase (str): passphrase to unlock the provided ethdo wallet
+
+    Returns:
+        dict: Returns the wallet info in JSON format.
 
     Raises:
         EthdoError: Raised if the wallet creation fails.
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
-
     try:
         res: str = check_output(
             [
                 "ethdo",
                 "wallet",
                 "create",
-                f"--wallet={CONFIG.ethdo.wallet}",
-                f"--wallet-passphrase={WALLET_PASSPHRASE}",
-                f"-type=hd",
+                f"--wallet={wallet_name}",
+                f"--passphrase={passphrase}",
             ]
         )
 
     except Exception as e:
-        raise EthdoError(f"Failed to create wallet {CONFIG.ethdo.wallet}") from e
+        raise EthdoError(f"Failed to create wallet: {wallet_name}") from e
 
     try:
         return json.loads(res)
-    except (json.JSONDecodeError, TypeError) as e:
-        raise e
-    except Exception as e:
+    except (json.JSONDecodeError, TypeError, Exception) as e:
         raise e
 
 
-def create_account(index: int = None) -> dict:
+def create_account(account_name: str = None) -> dict:
     """Creates a new account on given ethdo wallet
+
+    Args:
+        account_name (str): Name for the ethdo account that will be created
 
     Returns:
         dict: Returns the account data in JSON format.
@@ -103,9 +151,8 @@ def create_account(index: int = None) -> dict:
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
-    account = CONFIG.ethdo.account
-    if index:
-        account += f"_{index}_"
+    wallet: str = get_config().ethdo.wallet
+    get_logger().info(f"Creating a new account: {account_name} on wallet: {wallet}")
 
     try:
         res: str = check_output(
@@ -113,18 +160,19 @@ def create_account(index: int = None) -> dict:
                 "ethdo",
                 "account",
                 "create",
-                f"--account={CONFIG.ethdo.wallet}/{account}",
-                f"--passphrase={ACCOUNT_PASSPHRASE}",
-                f"--wallet-passphrase={WALLET_PASSPHRASE}",
+                f"--account={wallet}/{account_name}",
+                f"--passphrase={getenv('ETHDO_ACCOUNT_PASSPHRASE')}",
+                f"--wallet-passphrase={getenv('ETHDO_WALLET_PASSPHRASE')}",
             ]
         )
 
     except Exception as e:
-        raise EthdoError(f"Failed to create account {account}") from e
+        raise EthdoError(f"Failed to create account {account_name}") from e
 
     try:
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
+        get_logger().error(f"Failed to interpret the response from ethdo: {res}")
         raise e
     except Exception as e:
         raise e
@@ -144,6 +192,7 @@ def exit_validator(pubkey: str) -> dict:
         JSONDecodeError: Raised if the response cannot be decoded to JSON.
         TypeError: Raised if the response is not type of str, bytes or bytearray.
     """
+    get_logger().info(f"Exiting from a validator: {pubkey}")
 
     try:
         res: str = check_output(
@@ -152,8 +201,8 @@ def exit_validator(pubkey: str) -> dict:
                 "validator",
                 "exit",
                 f"----validator={pubkey}",
-                f"--passphrase={ACCOUNT_PASSPHRASE}",
-                f"--wallet-passphrase={WALLET_PASSPHRASE}",
+                f"--passphrase={getenv('ETHDO_ACCOUNT_PASSPHRASE')}",
+                f"--wallet-passphrase={getenv('ETHDO_WALLET_PASSPHRASE')}",
             ]
         )
 
@@ -163,6 +212,7 @@ def exit_validator(pubkey: str) -> dict:
     try:
         return json.loads(res)
     except (json.JSONDecodeError, TypeError) as e:
+        get_logger().error(f"Failed to interpret the response from ethdo")
         raise e
     except Exception as e:
         raise e
