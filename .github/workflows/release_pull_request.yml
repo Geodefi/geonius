@@ -29,7 +29,6 @@ jobs:
           create-summary: true
           skip-ci: false
           skip-on-empty: false
-          output-file: false
           git-push: false
 
       - name: missing version output
