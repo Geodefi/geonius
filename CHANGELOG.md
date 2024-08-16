@@ -1,4 +1,4 @@
-# 1.2.0 (2024-08-16)
+# 1.3.0 (2024-08-16)
 
 
 ### Bug Fixes
@@ -37,6 +37,7 @@
 * max gas should be in wei ([7881aa5](https://github.com/Geodefi/geonius/commit/7881aa5b9090305dfeedf3c088f07555aa2af719))
 * no need to check if call_proposeStake is succesful anymore. ([e27fdfd](https://github.com/Geodefi/geonius/commit/e27fdfd2499f5c89d12a6a0617f68fae7d250316))
 * only create account for validator when not found ([58be4e2](https://github.com/Geodefi/geonius/commit/58be4e240770852d0be7f781720279c3a44f0000))
+* place event_daemon exceptions back in place ([99e629d](https://github.com/Geodefi/geonius/commit/99e629d125679f84fe5bbd34917d3966c0616f8c))
 * preflight_checks should raise MissingConfigurationError - not KeyError ([03f5915](https://github.com/Geodefi/geonius/commit/03f59159f49034fd3ce13250806823cdbe6ddea8))
 * remove name from mail ([730f1c3](https://github.com/Geodefi/geonius/commit/730f1c3188411945f48348a7549710b5161cf3a6))
 * revert the command name to the correct form of validator ([398e68f](https://github.com/Geodefi/geonius/commit/398e68f1fde765a1b5fe0f0efa064ba6c53c079a))
