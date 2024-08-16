@@ -23,13 +23,11 @@ jobs:
           pip install poetry
 
       - name: Configure Poetry
-        # Delete the first config line if you are not using a test PyPI repository and
-        # replace the commented lines with the above line if you are using a PyPI repository
         run: |
-          poetry config repositories.test-pypi https://test.pypi.org/legacy/
-          poetry config pypi-token.test-pypi ${{ secrets.TEST_PYPI_TOKEN }}
-      #   poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+      #   poetry config pypi-token.test-pypi ${{ secrets.TEST_PYPI_TOKEN }}
+      #   poetry config repositories.test-pypi https://test.pypi.org/legacy/
       - name: Publish to PyPI
         run: |
-          poetry publish --build -r test-pypi
-        #  poetry publish --build
+          poetry publish --build
+      #   poetry publish --build -r test-pypi

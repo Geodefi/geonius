@@ -262,9 +262,7 @@ class Daemon:
         self.__worker.start()
 
         self.start_flag.set()
-        get_logger().info(
-            f"Daemon for {self.trigger.name:^20} will run every {self.interval} seconds."
-        )
+        get_logger().info(f"Daemon for {self.trigger.name:^20} will run every {self.interval} (s).")
 
     def stop(self) -> None:
         """Stops the daemon, exits the loop.
