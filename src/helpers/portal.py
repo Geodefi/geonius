@@ -5,8 +5,8 @@ from itertools import repeat
 from geodefi.globals import ID_TYPE
 from geodefi.utils import to_bytes32, get_key
 
-from src.globals import SDK, OPERATOR_ID
-from src.utils import multithread
+from src.globals import get_sdk, get_config, get_logger
+from src.utils.thread import multithread
 
 
 # pylint: disable-next=invalid-name
@@ -16,11 +16,12 @@ def get_StakeParams() -> list[Any]:
     Returns:
         list: list of StakeParams
     """
-    return SDK.portal.functions.StakeParams().call()
+    get_logger().debug("Calling StakeParams() from portal")
+    return get_sdk().portal.functions.StakeParams().call()
 
 
 # pylint: disable-next=invalid-name
-def get_allIdsByType(type: ID_TYPE, index: int) -> int:
+def get_allIdsByType(_type: ID_TYPE, index: int) -> int:
     """A helper function to call allIdsByType on Portal. Returns the ID of the given type and index.
 
     Args:
@@ -31,7 +32,8 @@ def get_allIdsByType(type: ID_TYPE, index: int) -> int:
         int: ID of the given type and index.
     """
 
-    return SDK.portal.functions.allIdsByType(type, index).call()
+    get_logger().debug("Calling allIdsByType() from portal")
+    return get_sdk().portal.functions.allIdsByType(_type, index).call()
 
 
 # related to pools >
@@ -47,7 +49,30 @@ def get_name(pool_id: int) -> str:
         str: Name of the pool.
     """
 
-    return SDK.portal.functions.readBytes(pool_id, to_bytes32("NAME")).call()
+    get_logger().debug("Fetching the name of a pool: {pool_id}")
+    return get_sdk().portal.functions.readBytes(pool_id, to_bytes32("NAME")).call().decode("utf-8")
+
+
+def get_maintainer(_id: int) -> str:
+    """Returns the maintainer of the given ID.
+
+    Args:
+        id (int): ID of the pool or operator to fetch maintainer for.
+    """
+
+    get_logger().debug("Fetching the maintainer of id: {_id}")
+    return get_sdk().portal.functions.readAddress(_id, to_bytes32("maintainer")).call()
+
+
+def get_wallet_balance(_id: int) -> str:
+    """Returns the internal wallet a balance for the given ID.
+
+    Args:
+        id (int): ID of the pool or operator to fetch maintainer for.
+    """
+
+    get_logger().debug("Fetching the wallet balance for id: {_id}")
+    return get_sdk().portal.functions.readUint(_id, to_bytes32("wallet")).call()
 
 
 def get_withdrawal_address(pool_id: int) -> str:
@@ -60,9 +85,10 @@ def get_withdrawal_address(pool_id: int) -> str:
         str: Withdrawal address of the pool.
     """
 
-    res = SDK.portal.functions.readAddress(pool_id, to_bytes32("withdrawalCredential")).call()
+    get_logger().debug("Fetching the withdrawal address of a pool: {pool_id}")
+    res = get_sdk().portal.functions.readAddress(pool_id, to_bytes32("withdrawalPackage")).call()
 
-    return "0x" + res.hex()
+    return res
 
 
 def get_surplus(pool_id: int) -> int:
@@ -75,17 +101,8 @@ def get_surplus(pool_id: int) -> int:
         int: Surplus of the pool in wei.
     """
 
-    return SDK.portal.functions.readUint(pool_id, to_bytes32("surplus")).call()
-
-
-# Using the get_operatorAllowance function instead now.
-# def get_allowance(pool_id: int) -> int:
-#     """
-#     Returns Allowance.
-#     """
-#     return SDK.portal.functions.readUint(
-#         pool_id, get_key(int(OPERATOR_ID), "allowance")
-#     ).call()
+    get_logger().debug(f"Fetching the surplus of a pool: {get_name(pool_id)}")
+    return get_sdk().portal.functions.readUint(pool_id, to_bytes32("surplus")).call()
 
 
 def get_fallback_operator(pool_id: int) -> int:
@@ -98,8 +115,21 @@ def get_fallback_operator(pool_id: int) -> int:
     Returns:
         int: Fallback operator ID of the pool.
     """
+    get_logger().debug("Fetching the fallbackOperator of a pool: {pool_id}")
+    return get_sdk().portal.functions.readUint(pool_id, to_bytes32("fallbackOperator")).call()
 
-    return SDK.portal.functions.readUint(pool_id, to_bytes32("fallbackOperator")).call()
+
+def can_stake(pubkey: str) -> bool:
+    """Checks if the validator proposal for the given pubkey is approved by Oracle
+
+    Args:
+        pubkey (str): public key of the validator.
+
+    Returns:
+        bool: True if can proceed and call stake. False if not yet confirmed; or alienated.
+    """
+    get_logger().debug(f"Checking if the validator can be staked and finalized: {pubkey}")
+    return get_sdk().portal.functions.canStake(pubkey).call()
 
 
 def get_pools_count() -> int:
@@ -109,11 +139,13 @@ def get_pools_count() -> int:
         int: Number of pools.
     """
 
-    return SDK.portal.functions.allIdsByTypeLength(ID_TYPE.POOL).call()
+    get_logger().debug("Fetching the pools count of a pool: {pool_id}")
+    return get_sdk().portal.functions.allIdsByTypeLength(ID_TYPE.POOL).call()
 
 
 def get_all_pool_ids(start_index: int = 0) -> list[int]:
-    """Returns the all current pool IDs from async Portal calls. It uses multithread to get all pool IDs.
+    """Returns the all current pool IDs from async Portal calls.
+    It uses multithread to get all pool IDs.
 
     Args:
         start_index (int, optional): Index to start fetching pool IDs from. Default is 0.
@@ -137,7 +169,12 @@ def get_owned_pubkeys_count() -> int:
     Returns:
         int: Number of validators owned by the operator.
     """
-    return SDK.portal.functions.readUint(OPERATOR_ID, to_bytes32("validators")).call()
+    get_logger().debug("Fetching the number of pools owned pubkeys from a validator: {pool_id}")
+    return (
+        get_sdk()
+        .portal.functions.readUint(get_config().operator_id, to_bytes32("validators"))
+        .call()
+    )
 
 
 def get_owned_pubkey(index: int) -> str:
@@ -149,7 +186,13 @@ def get_owned_pubkey(index: int) -> str:
     Returns:
         str: Pubkey of the validator.
     """
-    return SDK.portal.functions.readBytes(index, get_key(OPERATOR_ID, "operators"))
+    pk: str = (
+        get_sdk()
+        .portal.functions.readBytes(index, get_key(get_config().operator_id, "validators"))
+        .call()
+    )
+    get_logger().debug("Fetching an owned pubkey. index:{index} : pubkey:{pk}")
+    return pk
 
 
 def get_all_owned_pubkeys(start_index: int = 0) -> list[str]:
@@ -167,7 +210,7 @@ def get_all_owned_pubkeys(start_index: int = 0) -> list[str]:
     )
 
 
-def get_operatorAllowance(pool_id: int) -> int:
+def get_operator_allowance(pool_id: int) -> int:
     """Returns the result of portal.operatorAllowance function.
 
     Args:
@@ -176,4 +219,4 @@ def get_operatorAllowance(pool_id: int) -> int:
     Returns:
         int: Operator allowance for the given pool.
     """
-    return SDK.portal.functions.operatorAllowance(pool_id, OPERATOR_ID).call()
+    return get_sdk().portal.functions.operatorAllowance(pool_id, get_config().operator_id).call()
