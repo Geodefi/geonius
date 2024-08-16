@@ -46,4 +46,4 @@ jobs:
           base: main
           title: "chore(release): ${{ steps.version-update.outputs.version }}"
           body: "This is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
- 
+          assignees: geode-main
