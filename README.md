@@ -127,10 +127,10 @@ However, since the validator ops is delegated to ethdo and vouch, it only needs 
 > Running this cli app with pipx will make it easy to update, and less error prone compared to using a binary executable or building from source.
 
 ```bash
-pipx install https://github.com/Geodefi/geonius/tree/main
+pipx install geonius
 ```
 
-Pipx installation requires python version between **3.8** to **3.12**.
+pipx installation requires python version between **3.8** to **3.12**.
 
 Check out [this document](./docs/installation_guide.md) if you need help or suggestions on this.
 

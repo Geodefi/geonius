@@ -37,13 +37,24 @@ jobs:
         run: >
           echo "ERROR: Version output is missing from the previous step!" && exit 1
 
-      - name: Create Pull Request
+      - name: Create Pull Request on dev
         uses: peter-evans/create-pull-request@v6.1.0
         if: ${{ steps.version-update.outputs.version }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: pre-release-${{ steps.version-update.outputs.version }}
+          base: dev
+          title: "chore: update version to ${{ steps.version-update.outputs.version }} before release"
+          body: "To keep the version on dev branch up-to-date, this PR should be merged before merging dev into the main branch in the following PR. This is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
+          assignees: geode-main,crashbandicoott
+
+      - name: Create Pull Request for release
+        uses: peter-evans/create-pull-request@v6.1.0
+        if: ${{ steps.version-update.outputs.version }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: dev
           base: main
           title: "chore(release): ${{ steps.version-update.outputs.version }}"
           body: "This is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
-          assignees: geode-main
+          assignees: geode-main,crashbandicoott
