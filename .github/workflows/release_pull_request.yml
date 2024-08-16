@@ -42,7 +42,7 @@ jobs:
         id: cpr-dev
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: pre-release-${{ steps.version-update.outputs.version }}
+          branch: release-${{ steps.version-update.outputs.version }}
           base: dev
           title: "chore: update version to ${{ steps.version-update.outputs.version }} on dev"
           body: ">To keep the version on dev branch up-to-date, this PR should be merged while merging dev into the main branch in the following PR.\n\nThis is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
@@ -54,7 +54,7 @@ jobs:
         if: ${{ steps.cpr-dev.outputs.pull-request-number }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: pre-release-${{ steps.version-update.outputs.version }}
+          branch: release-${{ steps.version-update.outputs.version }}
           base: main
           title: "chore(release): ${{ steps.version-update.outputs.version }}"
           body: "Merging this PR will release the new version on pypi.\n>Pull request #${{ steps.cpr-dev.outputs.pull-request-number }} should be merged to keep version updated.\n\nThis is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
