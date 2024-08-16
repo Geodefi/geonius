@@ -1,4 +1,4 @@
-# 1.1.0 (2024-08-16)
+# 1.2.0 (2024-08-16)
 
 
 ### Bug Fixes
@@ -40,6 +40,7 @@
 * preflight_checks should raise MissingConfigurationError - not KeyError ([03f5915](https://github.com/Geodefi/geonius/commit/03f59159f49034fd3ce13250806823cdbe6ddea8))
 * remove name from mail ([730f1c3](https://github.com/Geodefi/geonius/commit/730f1c3188411945f48348a7549710b5161cf3a6))
 * revert the command name to the correct form of validator ([398e68f](https://github.com/Geodefi/geonius/commit/398e68f1fde765a1b5fe0f0efa064ba6c53c079a))
+* small change to release on pypi ([7a5ed1c](https://github.com/Geodefi/geonius/commit/7a5ed1c5148365bf524170378a5287cc7231e7d1))
 * SQL injection bug is done. refactor: sql queries. ([962b1a7](https://github.com/Geodefi/geonius/commit/962b1a728ffd9233b2f36583916f3c862e910e2a))
 * start command should be 'run' ([c6a684d](https://github.com/Geodefi/geonius/commit/c6a684d688153d74300c2df8cd5004ca319541cd))
 * try to fix input values for proposeStake ([1bec2c0](https://github.com/Geodefi/geonius/commit/1bec2c087dae724439287bfea57ad2b11138eb28))
