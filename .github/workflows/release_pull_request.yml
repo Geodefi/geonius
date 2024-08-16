@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
@@ -41,7 +41,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6.1.0
         if: ${{ steps.version-update.outputs.version }}
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           branch: pre-release-${{ steps.version-update.outputs.version }}
           title: "chore(release): ${{ steps.version-update.outputs.version }}"
           body: "This is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."

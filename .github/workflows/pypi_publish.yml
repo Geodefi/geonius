@@ -2,8 +2,8 @@ name: Build and publish python 🐍 package 📦 to PyPI
 
 on:
   push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+    branches:
+      - main
 
 jobs:
   build-and-publish-to-pypi:
