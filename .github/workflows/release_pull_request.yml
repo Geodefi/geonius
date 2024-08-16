@@ -39,22 +39,24 @@ jobs:
 
       - name: Create Pull Request on dev
         uses: peter-evans/create-pull-request@v6.1.0
-        if: ${{ steps.version-update.outputs.version }}
+        id: cpr-dev
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: pre-release-${{ steps.version-update.outputs.version }}
           base: dev
-          title: "chore: update version to ${{ steps.version-update.outputs.version }} before release"
-          body: "To keep the version on dev branch up-to-date, this PR should be merged before merging dev into the main branch in the following PR. This is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
-          assignees: geode-main,crashbandicoott
+          title: "chore: update version to ${{ steps.version-update.outputs.version }} on dev"
+          body: ">To keep the version on dev branch up-to-date, this PR should be merged while merging dev into the main branch in the following PR.\n\nThis is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
+          assignees: geode-main
+          reviewers: geode-main
 
       - name: Create Pull Request for release
         uses: peter-evans/create-pull-request@v6.1.0
-        if: ${{ steps.version-update.outputs.version }}
+        if: ${{ steps.cpr-dev.outputs.pull-request-number }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: dev
+          branch: pre-release-${{ steps.version-update.outputs.version }}
           base: main
           title: "chore(release): ${{ steps.version-update.outputs.version }}"
-          body: "This is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
-          assignees: geode-main,crashbandicoott
+          body: ">Pull request #${{ steps.cpr-dev.outputs.pull-request-number }} should be merged to keep version updated.\n\nThis is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
+          assignees: geode-main
+          reviewers: geode-main
