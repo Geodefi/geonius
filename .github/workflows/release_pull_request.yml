@@ -30,7 +30,6 @@ jobs:
           create-summary: true
           skip-ci: false
           skip-on-empty: false
-          output-file: true
           git-push: false
 
       - name: missing version output
