@@ -5,14 +5,9 @@
 # global CONFIG referance that requires initialization
 __CONFIG = None
 
-# global ENV referance that requires initialization
-__ENV = None
 
 # global SDK referance that requires initialization
 __SDK = None
-
-# global FLAGS referance that requires initialization
-__FLAGS = None
 
 # global referance for Constant variables, which also requires initialization
 __CONSTANTS = None
