@@ -57,6 +57,6 @@ jobs:
           branch: pre-release-${{ steps.version-update.outputs.version }}
           base: main
           title: "chore(release): ${{ steps.version-update.outputs.version }}"
-          body: ">Pull request #${{ steps.cpr-dev.outputs.pull-request-number }} should be merged to keep version updated.\n\nThis is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
+          body: "Merging this PR will release the new version on pypi.\n>Pull request #${{ steps.cpr-dev.outputs.pull-request-number }} should be merged to keep version updated.\n\nThis is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
           assignees: geode-main
           reviewers: geode-main
