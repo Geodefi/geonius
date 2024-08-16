@@ -29,7 +29,7 @@ jobs:
           create-summary: true
           skip-ci: false
           skip-on-empty: false
-          output-file: false
+          output-file: true
           git-push: false
 
       - name: missing version output
@@ -43,5 +43,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: pre-release-${{ steps.version-update.outputs.version }}
+          base: main
           title: "chore(release): ${{ steps.version-update.outputs.version }}"
           body: "This is an automatic PR created by github actions.\nClose and delete branch in case it is not needed."
+ 
