@@ -1,4 +1,4 @@
-# 1.3.0 (2024-08-16)
+# 1.4.0 (2024-08-20)
 
 
 ### Bug Fixes
@@ -6,6 +6,7 @@
 * Add message for dont_notify_geode. ([ee632dc](https://github.com/Geodefi/geonius/commit/ee632dc00204bfd836dc4811f17c1aa328200f7a))
 * add missing equal sign ([bf6b9ea](https://github.com/Geodefi/geonius/commit/bf6b9ea3386b42b82581bba776da8a58061a3a24))
 * all of the imports are fixed. minor issues are fixed on some SQL queries ([b053b0c](https://github.com/Geodefi/geonius/commit/b053b0c3a084a449607bd378af260a4c442afcf6))
+* allow python any version up to 3.13 ([9aa700c](https://github.com/Geodefi/geonius/commit/9aa700c797163afd585167c802a03b6cd45e75ca))
 * check_and_stake. Created can_stake portal helper, used with multithread. Removed unused CannotStakeError ([51afe46](https://github.com/Geodefi/geonius/commit/51afe46e45e7c3b2b6c68899077d51cd90ec074a))
 * config for the latest changes about mail ([ff19580](https://github.com/Geodefi/geonius/commit/ff195808e90689cf3238a5507b4a09e51026bbd4))
 * config.email instead of config. print the error when EmailError ([a6bfab8](https://github.com/Geodefi/geonius/commit/a6bfab8c658635fa5b0697794b9ea341995ba45e))
