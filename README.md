@@ -130,7 +130,7 @@ However, since the validator ops is delegated to ethdo and vouch, it only needs 
 pipx install geonius --python $(which python)
 ```
 
-pipx installation requires python version between **3.8** to **3.12**.
+pipx installation requires python version that are bigger than **3.8**.
 > '--python $(which python)' flag will ensure pipx is installing geonius with pyenv supported default version instead of the old version where pipx was installed initially.
 
 Check out [this document](./docs/installation_guide.md) if you need help or suggestions on this.
