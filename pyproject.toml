@@ -1,5 +1,5 @@
 [tool.poetry]
-version = "1.5.0"
+version = "1.6.0"
 name = "geonius"
 description = "Geonius is a daemonic script that allows Node Operators to automate their operations on geodefi Operator Marketplace"
 authors = ["0xicebear <admin@geode.fi>", "crashbandicoott <bandicoot@geode.fi>"]
@@ -10,7 +10,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.13"
-geodefi = "3.1.0"
+geodefi = "^3.2.0"
 python-dotenv = "^1.0.1"
 click = "^8.1.7"
 
