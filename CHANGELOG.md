@@ -1,4 +1,4 @@
-# 1.4.0 (2024-08-20)
+# 1.5.0 (2024-08-23)
 
 
 ### Bug Fixes
@@ -14,6 +14,7 @@
 * correct file name for ExpectPubkeysTrigger ([c40344d](https://github.com/Geodefi/geonius/commit/c40344dc6a1e7024db0c45a70d745738dbd4f8ef))
 * deposit value for ethdo and fork version ([b8a5a93](https://github.com/Geodefi/geonius/commit/b8a5a93a7fb9f1c1d8b9d89fa2d20c83de12553e))
 * do not use getattr pattern on Loggable, instead utilize logger directly. ([eed1842](https://github.com/Geodefi/geonius/commit/eed1842ce2c48cefd21c7dbe4bfe02e43b09ba7a))
+* dont expect json response from ethdo for other commands. generate_deposit_data returns json though. ([4df6200](https://github.com/Geodefi/geonius/commit/4df620007795a15ebcc7b9ad4a8908b4c4f6108b))
 * dont_notify_geode. Also add message for dont_notify_geode. ([65b2889](https://github.com/Geodefi/geonius/commit/65b2889a0ae259ef2f53e2a8d97bfd8ea2e60e0b))
 * email is working now. ([8bf13f1](https://github.com/Geodefi/geonius/commit/8bf13f19ec88c709c2741d31d08fcf48b0d6149c))
 * faulty import ([31ddf28](https://github.com/Geodefi/geonius/commit/31ddf281b65821f500bf6ce5920a4aecfe8e48fd))

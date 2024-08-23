@@ -131,10 +131,7 @@ def create_wallet(wallet_name: str, passphrase: str) -> dict:
     except Exception as e:
         raise EthdoError(f"Failed to create wallet: {wallet_name}") from e
 
-    try:
-        return json.loads(res)
-    except (json.JSONDecodeError, TypeError, Exception) as e:
-        raise e
+    return res
 
 
 def create_account(account_name: str = None) -> dict:
@@ -169,13 +166,7 @@ def create_account(account_name: str = None) -> dict:
     except Exception as e:
         raise EthdoError(f"Failed to create account {account_name}") from e
 
-    try:
-        return json.loads(res)
-    except (json.JSONDecodeError, TypeError) as e:
-        get_logger().error(f"Failed to interpret the response from ethdo: {res}")
-        raise e
-    except Exception as e:
-        raise e
+    return res
 
 
 def exit_validator(pubkey: str) -> dict:
@@ -209,10 +200,4 @@ def exit_validator(pubkey: str) -> dict:
     except Exception as e:
         raise EthdoError(f"Failed to exit validator {pubkey}") from e
 
-    try:
-        return json.loads(res)
-    except (json.JSONDecodeError, TypeError) as e:
-        get_logger().error(f"Failed to interpret the response from ethdo")
-        raise e
-    except Exception as e:
-        raise e
+    return res
