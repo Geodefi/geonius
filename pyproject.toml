@@ -1,5 +1,5 @@
 [tool.poetry]
-version = "1.4.0"
+version = "1.5.0"
 name = "geonius"
 description = "Geonius is a daemonic script that allows Node Operators to automate their operations on geodefi Operator Marketplace"
 authors = ["0xicebear <admin@geode.fi>", "crashbandicoott <bandicoot@geode.fi>"]
