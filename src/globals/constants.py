@@ -12,5 +12,6 @@ def init_constants():
             "hour_blocks": 3600 // int(config.chains[config.chain_name].interval),
             "one_minute": 60,
             "one_hour": 3600,
+            "one_day": 86400,
         }
     )

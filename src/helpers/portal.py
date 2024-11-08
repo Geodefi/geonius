@@ -5,6 +5,7 @@ from itertools import repeat
 from geodefi.globals import ID_TYPE
 from geodefi.utils import to_bytes32, get_key
 
+from src.database.validators import fetch_pool_id
 from src.globals import get_sdk, get_config, get_logger
 from src.utils.thread import multithread
 
@@ -220,3 +221,24 @@ def get_operator_allowance(pool_id: int) -> int:
         int: Operator allowance for the given pool.
     """
     return get_sdk().portal.functions.operatorAllowance(pool_id, get_config().operator_id).call()
+
+
+def finalize_exit_on_portal(pubkey: str) -> None:
+    """Finalizes the exit of the validator on the portal.
+
+    Args:
+        pubkey (str): public key of the validator to finalize the exit
+    """
+    get_logger().debug(f"Finalizing the exit of the validator on the portal: {pubkey}")
+    # TODO: discuss if try expect is needed here and if so how to handle it
+    get_sdk().portal.functions.finalizeExit(int(fetch_pool_id(pubkey)), pubkey).call()
+
+
+def finalize_exit_on_portal_batch(pubkeys: list[str]) -> None:
+    """Finalizes the exit of the validators on the portal in batch.
+
+    Args:
+        pubkeys (list[str]): list of public keys of the validators to finalize the exit
+    """
+    get_logger().debug(f"Finalizing the exit of the validators on the portal in batch: {pubkeys}")
+    multithread(finalize_exit_on_portal, pubkeys)

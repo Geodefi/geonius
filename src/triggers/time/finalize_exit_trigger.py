@@ -9,6 +9,7 @@ from src.database.validators import save_portal_state, save_local_state, fetch_p
 from src.globals import get_logger, get_sdk
 
 
+# TODO: can delete this trigger
 # TODO: (later) Stop and throw error after x attempts: This should be fault tolerant.
 class FinalizeExitTrigger(Trigger):
     """Trigger for the FINALIZE_EXIT. This time trigger is used to finalize the exit of a validator.
@@ -55,7 +56,7 @@ class FinalizeExitTrigger(Trigger):
             return
 
         pool_id: int = int(fetch_pool_id(self.pubkey))
-        get_sdk().portal.finalizeExit(pool_id, self.pubkey)
+        get_sdk().portal.functions.finalizeExit(pool_id, self.pubkey)
 
         # set db portal and local status to EXITED for validator
         save_portal_state(self.pubkey, VALIDATOR_STATE.EXITED)

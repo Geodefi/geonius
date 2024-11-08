@@ -10,6 +10,12 @@
 go install github.com/wealdtech/ethdo@latest
 ```
 
+if needed execute the following command to arrange path
+
+```bash
+ export PATH=$PATH:$(go env GOPATH)/bin
+```
+
 It is important that `ethdo` is registered as a path. To check it:
 
 ```bash
@@ -33,7 +39,7 @@ ethdo account create --account="__wallet name__/__account name__" --wallet-passp
 ## Vouch
 
 > Prysm must be started with the `--enable-debug-rpc-endpoints` option for Vouch to operate correctly.
->
+
 ### Installation
 
 ```bash
@@ -73,7 +79,8 @@ To start Vouch type:
 ```bash
 vouch
 ```
-<!-- 
+
+<!--
 > Please note that the wallet keymanager does not provide slashing protection. It is recommended that the Dirk keymanager be used for all production installations, due to the additional protections it provides.
 
 ## Dirk

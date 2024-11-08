@@ -4,6 +4,7 @@ from typing import Any
 from threading import Lock
 from datetime import datetime
 from geodefi.globals import DEPOSIT_SIZE, VALIDATOR_STATE, BEACON_DENOMINATOR
+from geodefi.classes import Validator
 from geodefi.utils import to_bytes32
 
 from src.exceptions import DatabaseMismatchError, EthdoError
@@ -205,6 +206,7 @@ def check_and_stake(pks: list[str]):
             )
 
 
+# TODO: delete this function, not used, not needed, check before deleting again
 def run_finalize_exit_triggers():
     """Run finalize exit trigger for all validators which are in EXIT_REQUESTED state"""
 
@@ -293,3 +295,35 @@ def ping_pubkey_status(pubkey: str, expected_status: str) -> bool:
         return expected_status in str(res["status"])
     except Exception:
         return False
+
+
+def fetch_validator_exiting_status(pubkeys: list[str]) -> list[str, int]:
+    """Fetches the status of the validators from the beacon chain.
+
+    Args:
+        pubkeys (list[str]): list of pubkeys to fetch the status and epoch
+
+    Returns:
+        list[str, int]: list of tuples containing the pubkey and the status of the validator
+    """
+    statuses: list[str, int] = []
+    for pubkey in pubkeys:
+        try:
+            val: Validator = get_sdk().portal.validator(pubkey)
+            status: str = val.beacon_status
+            epoch: int = -1
+            if status in [
+                "exited_unslashed",
+                "exited_slashed",
+                "withdrawal_possible",
+                "withdrawal_done",
+            ]:
+                epoch = val.withdrawable_epoch
+            elif status in ["active_exiting", "active_slashed"]:
+                epoch = val.exit_epoch
+            elif status == "active_ongoing":
+                epoch = -1
+
+            statuses.append((status, epoch))
+        except Exception:
+            statuses.append(("unknown", -1))
